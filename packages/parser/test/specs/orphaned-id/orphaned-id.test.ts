@@ -392,9 +392,12 @@ describe('orphaned `$id` keywords', () => {
     });
 
     /** An object definition whose response schema is an external `$id` schema that refs `test.json` twice. */
-    function objectDefinitionWithExternalId(searchSchema: Record<string, unknown> = {}) {
+    function objectDefinitionWithExternalId(
+      searchSchemaFor: (requestsDir: string) => Record<string, unknown> = () => ({}),
+    ) {
       const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orphaned-id-object-'));
       writtenFiles.push(path.join(dir, 'spec.json'));
+      const searchSchema = searchSchemaFor(path.join(dir, 'requests'));
 
       fs.mkdirSync(path.join(dir, 'requests'));
       fs.writeFileSync(
@@ -461,10 +464,10 @@ describe('orphaned `$id` keywords', () => {
 
     it('should leave a repeated ref alone when the external `$id` above it is still needed', async () => {
       const api = await bundle<ValidAPIDefinition>(
-        objectDefinitionWithExternalId({
+        objectDefinitionWithExternalId(() => ({
           $defs: { local: { type: 'integer' } },
           properties: { local: { $ref: '#/$defs/local' } },
-        }),
+        })),
         { resolve: { file: true } },
       );
       const { search } = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties;
@@ -479,28 +482,27 @@ describe('orphaned `$id` keywords', () => {
     });
 
     it('should not accept a repeated ref beneath a `$id` that a later ref has to restore', async () => {
-      const definition = objectDefinitionWithExternalId();
-      const searchFile =
-        definition.paths['/pets'].get.responses['200'].content['application/json'].schema.properties.search.$ref;
-
-      // Absolute `file://` refs resolve to the same file under both `$id`s, so `again` repeats `test1`.
-      const testRef = { $ref: `file://${path.join(path.dirname(searchFile), 'test.json')}` };
-      const search = JSON.parse(fs.readFileSync(searchFile, 'utf8'));
-      search.properties = {
-        test1: testRef,
-        test2: testRef,
-        inner: {
-          $id: 'https://example.com/inner',
-          $defs: { local: { type: 'integer' } },
-          properties: { local: { $ref: '#/$defs/local' }, again: testRef },
-        },
-      };
-      fs.writeFileSync(searchFile, JSON.stringify(search));
+      const definition = objectDefinitionWithExternalId(requestsDir => {
+        // Absolute `file://` refs resolve to the same file under both `$id`s, so `again` repeats `test1`.
+        const testRef = { $ref: `file://${path.join(requestsDir, 'test.json')}` };
+        return {
+          properties: {
+            test1: testRef,
+            test2: testRef,
+            inner: {
+              $id: 'https://example.com/inner',
+              $defs: { local: { type: 'integer' } },
+              properties: { local: { $ref: '#/$defs/local' }, again: testRef },
+            },
+          },
+        };
+      });
 
       const api = await bundle<ValidAPIDefinition>(definition, { resolve: { file: true } });
       const bundled = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties.search;
 
-      // `inner` keeps its `$id`, so the outer one comes back and nothing beneath it can be a bare `#/…`.
+      // `inner` keeps its `$id`, so its whole group stays as the bundler wrote it, key order included.
+      expect(Object.keys(bundled)[0]).toBe('$id');
       expect(bundled.$id).toBe('requests/search.schema.json');
       expect(bundled.properties.test2.$ref).not.toMatch(/^#/);
       expect(bundled.properties.inner.properties.again.$ref).not.toMatch(/^#/);

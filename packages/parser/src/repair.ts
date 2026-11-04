@@ -6,16 +6,27 @@ import { supportedHTTPMethods } from './lib/index.js';
 /** Keywords whose values are literal data, not subschemas — a `$id` inside them is user data. */
 const DATA_KEYWORDS = new Set(['example', 'examples', 'default', 'const', 'enum']);
 
-/** Call `fn` with every object holding a string `$ref`, skipping literal data keywords. */
-function forEachRef(node: unknown, fn: (holder: { $ref: string }) => void): void {
+/** A non-root schema with its own `$id`, which re-scopes the `$ref`s beneath it. */
+type IdScope = Record<string, unknown> & { $id: string };
+
+/** Call `fn` with every object holding a string `$ref` and the `$id` scopes above it, outermost first. */
+function forEachRef(
+  node: unknown,
+  fn: (holder: { $ref: string }, scopes: IdScope[]) => void,
+  scopes: IdScope[] = [],
+  isRoot = true,
+): void {
   if (Array.isArray(node)) {
-    node.forEach(item => forEachRef(item, fn));
+    node.forEach(item => forEachRef(item, fn, scopes, false));
   } else if (node !== null && typeof node === 'object') {
-    for (const [key, value] of Object.entries(node)) {
+    const obj = node as Record<string, unknown>;
+    const innerScopes = !isRoot && typeof obj.$id === 'string' ? [...scopes, obj as IdScope] : scopes;
+
+    for (const [key, value] of Object.entries(obj)) {
       if (key === '$ref' && typeof value === 'string') {
-        fn(node as { $ref: string });
+        fn(obj as { $ref: string }, innerScopes);
       } else if (!DATA_KEYWORDS.has(key)) {
-        forEachRef(value, fn);
+        forEachRef(value, fn, innerScopes, false);
       }
     }
   }
@@ -147,7 +158,34 @@ function scopeDependsOnId(scope: Record<string, unknown>): boolean {
  * preserved). The cost is that a rare construct a string compare can't disambiguate (e.g. the same
  * relative id reused across scopes) is left as-is — unimproved, but never broken.
  */
-export function stripOrphanedIds(schema: unknown, onlyScopes?: Set<object>): void {
+export function stripOrphanedIds(schema: unknown): void {
+  const isOrphanedId = orphanedIdCheck(schema);
+
+  const visit = (node: unknown, isRoot: boolean): void => {
+    if (Array.isArray(node)) {
+      node.forEach(item => visit(item, false));
+    } else if (node !== null && typeof node === 'object') {
+      const obj = node as Record<string, unknown>;
+
+      // Post-order: decide nested `$id`s first, since removing an inner one can free the outer.
+      for (const [key, value] of Object.entries(obj)) {
+        if (!DATA_KEYWORDS.has(key)) {
+          visit(value, false);
+        }
+      }
+
+      if (!isRoot && isOrphanedId(obj)) {
+        delete obj.$id;
+      }
+    }
+  };
+
+  // `isRoot` is `true` here so we never strip the document's own top-level `$id`.
+  visit(schema, true);
+}
+
+/** Build a check for whether a schema's `$id` is unused, given every `$ref` currently in `schema`. */
+function orphanedIdCheck(schema: unknown): (obj: Record<string, unknown>) => boolean {
   const refs = new Set<string>();
   collectRefs(schema, refs);
 
@@ -170,83 +208,35 @@ export function stripOrphanedIds(schema: unknown, onlyScopes?: Set<object>): voi
     return false;
   };
 
-  const visit = (node: unknown, isRoot: boolean): void => {
-    if (Array.isArray(node)) {
-      node.forEach(item => visit(item, false));
-    } else if (node !== null && typeof node === 'object') {
-      const obj = node as Record<string, unknown>;
-
-      // Post-order: decide nested `$id`s first, since removing an inner one can free the outer.
-      for (const [key, value] of Object.entries(obj)) {
-        if (!DATA_KEYWORDS.has(key)) {
-          visit(value, false);
-        }
-      }
-
-      if (
-        !isRoot &&
-        (!onlyScopes || onlyScopes.has(obj)) &&
-        typeof obj.$id === 'string' &&
-        !isReferenced(obj.$id) &&
-        !scopeDependsOnId(obj)
-      ) {
-        delete obj.$id;
-      }
-    }
-  };
-
-  // `isRoot` is `true` here so we never strip the document's own top-level `$id`.
-  visit(schema, true);
+  return obj => typeof obj.$id === 'string' && !isReferenced(obj.$id) && !scopeDependsOnId(obj);
 }
 
-// The bundler qualifies repeat refs beneath an inlined `$id` with the root's local path or cwd,
-// which means nothing once the bundle is uploaded. Turn them back into `#/…` pointers.
+/** The bundler prefixes repeat refs under an inlined `$id` with a local path; turn them into `#/…`. */
 export function relativizeRootRefs(schema: unknown, rootPath: string): void {
-  const rewrites: { holder: { $ref: string }; ref: string; scopes: Record<string, unknown>[] }[] = [];
-
-  const visit = (node: unknown, scopes: Record<string, unknown>[], isRoot: boolean): void => {
-    if (Array.isArray(node)) {
-      node.forEach(item => visit(item, scopes, false));
-    } else if (node !== null && typeof node === 'object') {
-      const obj = node as Record<string, unknown>;
-      const innerScopes = !isRoot && typeof obj.$id === 'string' ? [...scopes, obj] : scopes;
-
-      for (const [key, value] of Object.entries(obj)) {
-        if (key === '$ref' && typeof value === 'string') {
-          // Only the bundler writes these; a hand-written one resolves to the same place as `#/…`.
-          if (value.startsWith(`${rootPath}#`)) {
-            rewrites.push({ holder: obj as { $ref: string }, ref: value, scopes: innerScopes });
-          }
-        } else if (!DATA_KEYWORDS.has(key)) {
-          visit(value, innerScopes, false);
-        }
-      }
+  // Grouped by outermost `$id`, since keeping any `$id` in a subtree re-scopes every pointer in it.
+  const groups = new Map<IdScope, { holder: { $ref: string }; ref: string; scopes: IdScope[] }[]>();
+  forEachRef(schema, (holder, scopes) => {
+    // Only the bundler writes these; a hand-written one resolves to the same place as `#/…`.
+    if (scopes.length && holder.$ref.startsWith(`${rootPath}#`)) {
+      groups.set(scopes[0], [...(groups.get(scopes[0]) ?? []), { holder, ref: holder.$ref, scopes }]);
     }
-  };
+  });
 
-  visit(schema, [], true);
-
-  const ids = new Map<Record<string, unknown>, unknown>();
-  for (const rewrite of rewrites) {
-    rewrite.holder.$ref = rewrite.ref.slice(rootPath.length);
-    rewrite.scopes.forEach(scope => ids.set(scope, scope.$id));
+  for (const group of groups.values()) {
+    group.forEach(rewrite => {
+      rewrite.holder.$ref = rewrite.ref.slice(rootPath.length);
+    });
   }
 
-  stripOrphanedIds(schema, new Set(ids.keys()));
-
-  // A still-needed `$id` would re-scope a `#/…` pointer, so put back that ref and the `$id`s above it.
-  // Repeat until settled, since a restored `$id` can re-scope a pointer that was already accepted.
-  let restored = true;
-  while (restored) {
-    restored = false;
-    for (const rewrite of rewrites) {
-      if (rewrite.holder.$ref !== rewrite.ref && rewrite.scopes.some(scope => '$id' in scope)) {
+  const isOrphanedId = orphanedIdCheck(schema);
+  for (const group of groups.values()) {
+    const scopes = new Set(group.flatMap(rewrite => rewrite.scopes));
+    if ([...scopes].every(isOrphanedId)) {
+      scopes.forEach(scope => delete (scope as Record<string, unknown>).$id);
+    } else {
+      group.forEach(rewrite => {
         rewrite.holder.$ref = rewrite.ref;
-        rewrite.scopes.forEach(scope => {
-          scope.$id = ids.get(scope);
-        });
-        restored = true;
-      }
+      });
     }
   }
 }
