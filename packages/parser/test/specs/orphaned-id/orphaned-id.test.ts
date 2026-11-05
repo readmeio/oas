@@ -7,7 +7,7 @@ import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { bundle, dereference, validate } from '../../../src/index.js';
-import { stripOrphanedIds } from '../../../src/repair.js';
+import { collapseBundledIdScopes, stripOrphanedIds } from '../../../src/repair.js';
 
 /**
  * OpenAPI 3.1 inherits JSON Schema's `$id`, which establishes a new base URI for `$ref` resolution
@@ -338,6 +338,288 @@ describe('orphaned `$id` keywords', () => {
         type: 'object',
         properties: { id: { type: 'integer' } },
       });
+    });
+
+    it('should not emit absolute file paths when an external `$id` schema references the same file twice', async () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orphaned-id-dupe-'));
+      const spec = path.join(dir, 'spec.json');
+      writtenFiles.push(spec);
+
+      fs.mkdirSync(path.join(dir, 'schemas/requests'), { recursive: true });
+      fs.writeFileSync(
+        path.join(dir, 'schemas/requests/test.json'),
+        JSON.stringify({ type: 'object', properties: { name: { type: 'string' } } }),
+      );
+      fs.writeFileSync(
+        path.join(dir, 'schemas/requests/search.schema.json'),
+        JSON.stringify({
+          $id: 'requests/search.schema.json',
+          type: 'object',
+          properties: { test1: { $ref: '../test.json' }, test2: { $ref: '../test.json' } },
+        }),
+      );
+      fs.writeFileSync(
+        spec,
+        JSON.stringify({
+          openapi: '3.1.0',
+          info: { title: 't', version: '1' },
+          paths: {
+            '/pets': {
+              get: {
+                responses: {
+                  '200': {
+                    description: 'ok',
+                    content: { 'application/json': { schema: { $ref: 'schemas/requests/search.schema.json' } } },
+                  },
+                },
+              },
+            },
+          },
+        }),
+      );
+
+      const api = await bundle<ValidAPIDefinition>(spec);
+      const schema = api.paths['/pets'].get.responses['200'].content['application/json'].schema;
+
+      expect(schema).not.toHaveProperty('$id');
+      expect(schema.properties.test2).toStrictEqual({
+        $ref: '#/paths/~1pets/get/responses/200/content/application~1json/schema/properties/test1',
+      });
+
+      // The bundle must stand on its own once it leaves this machine.
+      fs.rmSync(dir, { recursive: true, force: true });
+      await expect(validate(api)).resolves.toMatchObject({ valid: true });
+    });
+
+    /** An object definition whose response schema is an external `$id` schema that refs `test.json` twice. */
+    function objectDefinitionWithExternalId(
+      searchSchemaFor: (requestsDir: string) => Record<string, unknown> = () => ({}),
+    ) {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orphaned-id-object-'));
+      writtenFiles.push(path.join(dir, 'spec.json'));
+      const searchSchema = searchSchemaFor(path.join(dir, 'requests'));
+
+      fs.mkdirSync(path.join(dir, 'requests'));
+      fs.writeFileSync(
+        path.join(dir, 'requests/test.json'),
+        JSON.stringify({ type: 'object', properties: { name: { type: 'string' } } }),
+      );
+      fs.writeFileSync(
+        path.join(dir, 'pet.json'),
+        JSON.stringify({ $id: 'https://example.com/pet', type: 'object', properties: { id: { type: 'integer' } } }),
+      );
+      fs.writeFileSync(
+        path.join(dir, 'requests/search.schema.json'),
+        JSON.stringify({
+          $id: 'requests/search.schema.json',
+          type: 'object',
+          ...searchSchema,
+          properties: {
+            test1: { $ref: '../test.json' },
+            test2: { $ref: '../test.json' },
+            ...(searchSchema.properties as object),
+          },
+        }),
+      );
+
+      return {
+        openapi: '3.1.0',
+        info: { title: 't', version: '1' },
+        paths: {
+          '/pets': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'ok',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          search: { $ref: path.join(dir, 'requests/search.schema.json') },
+                          pet: { $ref: path.join(dir, 'pet.json') },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+
+    it('should not emit the working directory when an object source repeats a ref under an external `$id`', async () => {
+      const api = await bundle<ValidAPIDefinition>(objectDefinitionWithExternalId(), { resolve: { file: true } });
+      const { search, pet } = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties;
+
+      expect(search).not.toHaveProperty('$id');
+      expect(search.properties.test2).toStrictEqual({
+        $ref: '#/paths/~1pets/get/responses/200/content/application~1json/schema/properties/search/properties/test1',
+      });
+      expect(pet.$id).toBe('https://example.com/pet');
+      await expect(validate(api)).resolves.toMatchObject({ valid: true });
+    });
+
+    const searchPointer = '#/paths/~1pets/get/responses/200/content/application~1json/schema/properties/search';
+
+    it('should rewrite local fragment refs from the root when the external `$id` above them scopes them', async () => {
+      const api = await bundle<ValidAPIDefinition>(
+        objectDefinitionWithExternalId(() => ({
+          $defs: { local: { type: 'integer' } },
+          properties: { local: { $ref: '#/$defs/local' } },
+        })),
+        { resolve: { file: true } },
+      );
+      const { search } = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties;
+
+      expect(search).not.toHaveProperty('$id');
+      expect(search.properties.test2).toStrictEqual({ $ref: `${searchPointer}/properties/test1` });
+      expect(search.properties.local).toStrictEqual({ $ref: `${searchPointer}/$defs/local` });
+      await expect(validate(api)).resolves.toMatchObject({ valid: true });
+    });
+
+    it.each([
+      ['an absolute nested `$id` that scopes a local fragment', 'https://example.com/inner', true],
+      ['a relative nested `$id` with no refs of its own', 'inner.json', false],
+    ])('should rewrite repeated refs under %s', async (_, innerId, withLocalRef) => {
+      const definition = objectDefinitionWithExternalId(requestsDir => {
+        // Absolute `file://` refs resolve to the same file under both `$id`s, so `again` repeats `test1`.
+        const testRef = { $ref: `file://${path.join(requestsDir, 'test.json')}` };
+        return {
+          properties: {
+            test1: testRef,
+            test2: testRef,
+            inner: {
+              $id: innerId,
+              ...(withLocalRef && { $defs: { local: { type: 'integer' } } }),
+              properties: { again: testRef, ...(withLocalRef && { local: { $ref: '#/$defs/local' } }) },
+            },
+          },
+        };
+      });
+
+      const api = await bundle<ValidAPIDefinition>(definition, { resolve: { file: true } });
+      const { search } = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties;
+
+      expect(search).not.toHaveProperty('$id');
+      expect(search.properties.inner).not.toHaveProperty('$id');
+      expect(search.properties.test2).toStrictEqual({ $ref: `${searchPointer}/properties/test1` });
+      expect(search.properties.inner.properties).toStrictEqual({
+        again: { $ref: `${searchPointer}/properties/test1` },
+        ...(withLocalRef && { local: { $ref: `${searchPointer}/properties/inner/$defs/local` } }),
+      });
+      await expect(validate(api)).resolves.toMatchObject({ valid: true });
+    });
+
+    it('should leave a group as the bundler wrote it when a URI ref targets a nested `$id` with no refs', async () => {
+      const definition = objectDefinitionWithExternalId();
+      const { properties } = definition.paths['/pets'].get.responses['200'].content['application/json'].schema;
+      const testRef = { $ref: `file://${properties.search.$ref.replace('search.schema.json', 'test.json')}` };
+      Object.assign(properties, {
+        search: {
+          $id: 'https://example.com/search',
+          properties: { test1: testRef, test2: { ...testRef }, inner: { $id: 'inner.json', type: 'boolean' } },
+        },
+        byId: { $ref: 'https://example.com/inner.json' },
+      });
+
+      const api = await bundle<ValidAPIDefinition>(definition, { resolve: { file: true } });
+      const { search } = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties;
+
+      // ref-parser can't resolve `byId` with or without this `$id`, so only check it's kept.
+      expect(search).toHaveProperty('$id', 'https://example.com/search');
+      expect(search.properties.test2.$ref).not.toMatch(/^#/);
+    });
+
+    it('should leave a group as the bundler wrote it when a URI ref targets its `$id`', async () => {
+      const api = await bundle<ValidAPIDefinition>(
+        objectDefinitionWithExternalId(() => ({
+          $defs: { local: { type: 'integer' } },
+          properties: { byId: { $ref: 'search.schema.json#/$defs/local' } },
+        })),
+        { resolve: { file: true } },
+      );
+      const { search } = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties;
+
+      expect(search).toHaveProperty('$id');
+      expect(search.properties.test2.$ref).not.toMatch(/^#/);
+      // readme validates the bundle in the same process it was bundled in.
+      await expect(validate(api)).resolves.toMatchObject({ valid: true });
+    });
+  });
+
+  describe('collapseBundledIdScopes()', () => {
+    const rootPath = '/tmp/spec.json';
+
+    /** A bundled document whose `Search` schema keeps an inlined `$id` and a root-prefixed repeat ref. */
+    function bundled(extraRefs: Record<string, unknown> = {}) {
+      return {
+        components: {
+          schemas: {
+            Search: {
+              $id: 'search.json',
+              properties: {
+                test1: { type: 'string' },
+                test2: { $ref: `${rootPath}#/components/schemas/Search/properties/test1` },
+                ...extraRefs,
+              },
+            },
+          },
+        },
+      };
+    }
+
+    it('should rewrite root-prefixed and local fragment refs from the root and remove the `$id`', () => {
+      const schema = bundled({ local: { $ref: '#/properties/test1' } });
+
+      collapseBundledIdScopes(schema, rootPath);
+      expect(schema.components.schemas.Search).not.toHaveProperty('$id');
+      expect(schema.components.schemas.Search.properties).toMatchObject({
+        test2: { $ref: '#/components/schemas/Search/properties/test1' },
+        local: { $ref: '#/components/schemas/Search/properties/test1' },
+      });
+    });
+
+    it.each([
+      ['an anchor ref', { anchored: { $ref: '#foo' } }],
+      ['a URI ref', { external: { $ref: 'https://example.com/pet' } }],
+    ])('should leave a group as the bundler wrote it when it uses %s', (_, extraRefs) => {
+      const schema = bundled(extraRefs);
+      const before = structuredClone(schema);
+
+      collapseBundledIdScopes(schema, rootPath);
+      expect(schema).toStrictEqual(before);
+    });
+
+    it('should leave a group as the bundler wrote it when a URI ref elsewhere targets its `$id`', () => {
+      const schema = { ...bundled(), paths: { byId: { $ref: 'search.json#/properties/test1' } } };
+      const before = structuredClone(schema);
+
+      collapseBundledIdScopes(schema, rootPath);
+      expect(schema).toStrictEqual(before);
+    });
+
+    it('should leave refs prefixed with a root `$id` instead of the root path as they are', () => {
+      const schema = {
+        $id: 'https://example.com/root',
+        components: {
+          schemas: {
+            Search: {
+              $id: 'search.json',
+              properties: {
+                test1: { type: 'string' },
+                test2: { $ref: 'https://example.com/root#/components/schemas/Search/properties/test1' },
+              },
+            },
+          },
+        },
+      };
+      const before = structuredClone(schema);
+
+      collapseBundledIdScopes(schema, rootPath);
+      expect(schema).toStrictEqual(before);
     });
   });
 

@@ -39,13 +39,28 @@ function decodePointerSegment(segment: string): string {
   return decodeURIRef(segment).replace(/~1/g, '/').replace(/~0/g, '~');
 }
 
+/** Whether `ref` is `#` or `#/…` exactly as written, with no percent-encoding. */
+function isPlainPointer(ref: string): boolean {
+  return ref === '#' || ref.startsWith('#/');
+}
+
 /**
  * Whether `ref` is a same-document JSON Pointer (`#`, `#/…`), including when the leading slash is
  * percent-encoded (`#%2Fcomponents/…`). Those never target a `$id` URI.
  */
 function isDocumentRootPointer(ref: string): boolean {
-  const decoded = decodeURIRef(ref);
-  return decoded === '#' || decoded.startsWith('#/');
+  return isPlainPointer(decodeURIRef(ref));
+}
+
+/**
+ * Whether `ref` may resolve to the schema with `$id: id`. Substring, not exact match: a `$ref`
+ * resolving to a relative `$id` contains it without equalling it (e.g. `$ref: "schemas/inner.json"`
+ * targets `$id: "inner.json"`). Matching broadly errs towards treating a `$id` as live.
+ */
+function refMayTargetId(ref: string, id: string): boolean {
+  // Document-root JSON Pointers (`#/components/…`, `#/paths/…`, `#%2Fcomponents/…`) never target a
+  // `$id` URI, though they can contain one as a substring (`$id: "Pet"` vs `#/components/schemas/Pet`).
+  return !isDocumentRootPointer(ref) && ref.includes(id);
 }
 
 /**
@@ -148,19 +163,7 @@ export function stripOrphanedIds(schema: unknown): void {
 
   const isReferenced = (id: string): boolean => {
     for (const ref of refs) {
-      // Document-root JSON Pointers (`#/components/…`, `#/paths/…`, `#%2Fcomponents/…`) never
-      // target a `$id` URI. Matching them as substrings (`$id: "Pet"` vs `#/components/schemas/Pet`,
-      // or `$id: "schema"` vs `#/…/schema`) prevents stripping orphaned `$id`s that then re-scope
-      // those same pointers and break bundle/dereference/validate.
-      if (isDocumentRootPointer(ref)) {
-        continue;
-      }
-
-      // Substring, not exact match: a `$ref` resolving to a relative `$id` contains it without
-      // equalling it (e.g. `$ref: "schemas/inner.json"` targets `$id: "inner.json"`). Matching
-      // broadly means we never strip a live target; the cost is a safe over-keep when a `$id` value
-      // merely appears in an unrelated non-pointer ref.
-      if (ref.includes(id)) return true;
+      if (refMayTargetId(ref, id)) return true;
     }
     return false;
   };
@@ -186,6 +189,91 @@ export function stripOrphanedIds(schema: unknown): void {
 
   // `isRoot` is `true` here so we never strip the document's own top-level `$id`.
   visit(schema, true);
+}
+
+/**
+ * The bundler prefixes repeat refs under an inlined `$id` with a local path. Rewrite those refs, and
+ * any `#/…` refs they share a `$id` with, as pointers from the document root, then remove those `$id`s.
+ */
+export function collapseBundledIdScopes(schema: unknown, rootPath: string): void {
+  /** A schema with its own `$id`, its pointer from the document root, and the outermost `$id` schema above it. */
+  interface IdScope {
+    id: string;
+    outer: Record<string, unknown>;
+    pointer: string;
+    schema: Record<string, unknown>;
+  }
+
+  /** A `$ref` and the `$id` schemas above it, outermost first. */
+  interface ScopedRef {
+    holder: { $ref: string };
+    scopes: IdScope[];
+  }
+
+  const rootPrefix = `${rootPath}#`;
+  const refs: ScopedRef[] = [];
+  // Every `$id`, including those with no refs beneath them.
+  const idScopes: IdScope[] = [];
+  // A shared object is only visited at its first location, which only a JS object input can have.
+  const seen = new WeakSet<object>();
+
+  const visit = (node: unknown, pointer: string, scopes: IdScope[], isRoot: boolean): void => {
+    if (node === null || typeof node !== 'object' || seen.has(node)) {
+      return;
+    }
+
+    seen.add(node);
+    const obj = node as Record<string, unknown>;
+    let innerScopes = scopes;
+    if (!isRoot && typeof obj.$id === 'string') {
+      const scope = { id: obj.$id, outer: scopes[0]?.schema ?? obj, pointer, schema: obj };
+      idScopes.push(scope);
+      innerScopes = [...scopes, scope];
+    }
+
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === '$ref' && typeof value === 'string') {
+        refs.push({ holder: obj as ScopedRef['holder'], scopes: innerScopes });
+      } else if (!DATA_KEYWORDS.has(key)) {
+        visit(value, `${pointer}/${key.replace(/~/g, '~0').replace(/\//g, '~1')}`, innerScopes, false);
+      }
+    }
+  };
+
+  visit(schema, '#', [], true);
+
+  const isRootPrefixed = ({ holder }: ScopedRef) => holder.$ref.startsWith(rootPrefix);
+  const otherRefs = refs.filter(ref => !isRootPrefixed(ref)).map(({ holder }) => holder.$ref);
+
+  // URI and anchor refs can't be rewritten as root pointers, so a group using one, or a `$id` some
+  // URI ref may target, stays as the bundler wrote it.
+  const canCollapse = (group: ScopedRef[], scopes: IdScope[]) =>
+    group.some(isRootPrefixed) &&
+    group.every(ref => isRootPrefixed(ref) || isPlainPointer(ref.holder.$ref)) &&
+    !otherRefs.some(ref => scopes.some(({ id }) => refMayTargetId(ref, id)));
+
+  // Grouped by outermost `$id`, since dropping one re-scopes every ref beneath it.
+  const groups = Map.groupBy(
+    refs.filter(ref => ref.scopes.length),
+    ref => ref.scopes[0].schema,
+  );
+  const scopesByOuter = Map.groupBy(idScopes, scope => scope.outer);
+
+  for (const [outer, group] of groups) {
+    if (!canCollapse(group, scopesByOuter.get(outer) ?? [])) {
+      continue;
+    }
+
+    // Every ref now points from the document root, so none of the group's `$id`s are needed.
+    const scopesToCollapse = new Set<IdScope['schema']>();
+    for (const { holder, scopes } of group) {
+      holder.$ref = holder.$ref.startsWith(rootPrefix)
+        ? holder.$ref.slice(rootPath.length)
+        : scopes[scopes.length - 1].pointer + holder.$ref.slice(1);
+      scopes.forEach(scope => scopesToCollapse.add(scope.schema));
+    }
+    scopesToCollapse.forEach(scope => delete scope.$id);
+  }
 }
 
 /**
