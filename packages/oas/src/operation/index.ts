@@ -132,7 +132,7 @@ export class Operation {
    *
    * @see {@link https://spec.openapis.org/oas/v3.0.3.html#operationSummary}
    * @see {@link https://spec.openapis.org/oas/v3.1.2.html#operationSummary}
-   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operationSummary}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-summary}
    */
   getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
@@ -1248,7 +1248,9 @@ export class Callback extends Operation {
   /**
    * Retrieve the `summary` for this callback.
    *
-
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#operationSummary}
+   * @see {@link https://spec.openapis.org/oas/v3.1.2.html#operationSummary}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-summary}
    */
   getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
@@ -1318,7 +1320,9 @@ export class Webhook extends Operation {
   /**
    * Retrieve the `summary` for this callback.
    *
-
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationSummary}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationSummary}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-summary}
    */
   getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
