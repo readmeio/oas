@@ -4,16 +4,14 @@ import type {
   OASDocument,
   OperationObject,
   PathItemObject,
-  TagObject,
+  SecurityRequirementObject,
 } from '../../types.js';
-import type { OpenAPIV3_2 } from '@readme/openapi-parser';
-import type { OpenAPIV3_1 } from 'openapi-types';
 
 import jsonPointer from 'jsonpointer';
 
 import { query } from '../../analyzer/util.js';
 import { Operation } from '../../operation/index.js';
-import { isOpenAPI31, isOpenAPI32, isRef } from '../../types.js';
+import { hasWebhooks, isOpenAPI32, isRef } from '../../types.js';
 import { supportedMethods } from '../../utils.js';
 import { findDiscriminatorChildren } from '../build-discriminator-one-of.js';
 import { decodePointer, encodePointer } from '../refs.js';
@@ -215,11 +213,7 @@ export class OpenAPITransformer {
     // Retain any root-level security definitions, regardless if they're used or not on operations
     // that we're retaining.
     if ('security' in this.definition) {
-      Object.values(this.definition.security || {}).forEach(sec => {
-        Object.keys(sec).forEach(scheme => {
-          this.retainSecurityScheme(scheme);
-        });
-      });
+      this.retainSecurityRequirements(this.definition.security);
     }
 
     this.walkPaths();
@@ -243,14 +237,13 @@ export class OpenAPITransformer {
     this.transformWebhooks();
 
     // Require at least one path or one webhook in the result.
-    const hasPaths = Boolean(this.definition.paths && Object.keys(this.definition.paths).length);
-    const hasWebhooks = Boolean(
-      'webhooks' in this.definition && this.definition.webhooks && Object.keys(this.definition.webhooks).length,
-    );
+    const definition = this.definition;
+    const hasPaths = Boolean(definition.paths && Object.keys(definition.paths).length);
+    const webhooksLeft = hasWebhooks(definition) && Object.keys(definition.webhooks).length > 0;
 
     // If we don't have any paths or webhooks left, retain the reducer's no-match error to help catch
     // invalid selections. An empty definition is valid OpenAPI so we allow it when pruning.
-    if (this.mode === 'reduce' && !hasPaths && !hasWebhooks) {
+    if (this.mode === 'reduce' && !hasPaths && !webhooksLeft) {
       throw new Error(
         'All paths and webhooks in the API definition were removed. Did you supply the right path, operation, or webhook to reduce by?',
       );
@@ -275,7 +268,10 @@ export class OpenAPITransformer {
             });
 
           if (!refIsUsed) {
-            delete this.definition.components?.[componentType as keyof ComponentsObject]?.[component];
+            const group = this.definition.components?.[componentType as keyof ComponentsObject];
+            if (group && typeof group === 'object') {
+              delete (group as Record<string, unknown>)[component];
+            }
           }
         });
 
@@ -293,9 +289,7 @@ export class OpenAPITransformer {
 
     // Remove any unused tags.
     if ('tags' in this.definition) {
-      this.definition.tags = (this.definition.tags ?? []).filter((tag): tag is TagObject => {
-        return Boolean(tag) && this.usedTags.has(tag.name);
-      });
+      this.definition.tags = (this.definition.tags ?? []).filter(tag => this.usedTags.has(tag.name));
 
       if (!this.definition.tags?.length) {
         delete this.definition.tags;
@@ -481,6 +475,15 @@ export class OpenAPITransformer {
     this.$refs.add(`#/components/securitySchemes/${encodePointer(scheme)}`);
   }
 
+  /** Keep every security scheme named by a security requirement list. */
+  private retainSecurityRequirements(security: SecurityRequirementObject[] | undefined): void {
+    security?.forEach(requirement => {
+      Object.keys(requirement).forEach(scheme => {
+        this.retainSecurityScheme(scheme);
+      });
+    });
+  }
+
   /** Record a `#/paths` `$ref` so the target Path Item or operation is not dropped. */
   private recordPathRef($ref: string): void {
     const parsed = this.parsePathRef($ref);
@@ -533,13 +536,14 @@ export class OpenAPITransformer {
 
   /** Look up a webhook Path Item by name, ignoring key casing. */
   private findWebhook(name: string): PathItemObject | undefined {
-    if (!(isOpenAPI31(this.definition) || isOpenAPI32(this.definition)) || !this.definition.webhooks) {
+    const definition = this.definition;
+    if (!hasWebhooks(definition)) {
       return undefined;
     }
 
     const nameLC = name.toLowerCase();
-    const key = Object.keys(this.definition.webhooks).find(candidate => candidate.toLowerCase() === nameLC);
-    return key ? (this.definition.webhooks[key] as PathItemObject | undefined) : undefined;
+    const key = Object.keys(definition.webhooks).find(candidate => candidate.toLowerCase() === nameLC);
+    return key ? (definition.webhooks[key] as PathItemObject | undefined) : undefined;
   }
 
   /**
@@ -712,7 +716,8 @@ export class OpenAPITransformer {
       return operations;
     }
 
-    const { additionalOperations } = pathItem as OpenAPIV3_2.PathItemObject;
+    const additionalOperations =
+      'additionalOperations' in pathItem && pathItem.additionalOperations ? pathItem.additionalOperations : undefined;
     if (!additionalOperations || typeof additionalOperations !== 'object') {
       return operations;
     }
@@ -732,7 +737,7 @@ export class OpenAPITransformer {
           // Once the last custom operation is gone the map is just noise, and leaving it behind
           // would make the Path Item look like it still has operations.
           if (!Object.keys(additionalOperations).length) {
-            delete (pathItem as OpenAPIV3_2.PathItemObject).additionalOperations;
+            delete (pathItem as { additionalOperations?: unknown }).additionalOperations;
           }
         },
       });
@@ -833,11 +838,7 @@ export class OpenAPITransformer {
           this.accumulateUsedRefs(this.definition, this.$refs, refStr);
         });
 
-        Object.values(operation.security || {}).forEach(sec => {
-          Object.keys(sec).forEach(scheme => {
-            this.retainSecurityScheme(scheme);
-          });
-        });
+        this.retainSecurityRequirements(operation.security);
       });
     });
   }
@@ -849,13 +850,10 @@ export class OpenAPITransformer {
    *
    */
   private walkWebhooks() {
-    if (!(isOpenAPI31(this.definition) || isOpenAPI32(this.definition))) {
-      return;
-    } else if (!('webhooks' in this.definition) || !this.definition.webhooks) {
+    const definition = this.definition;
+    if (!hasWebhooks(definition)) {
       return;
     }
-
-    const definition = this.definition satisfies OpenAPIV3_1.Document | OpenAPIV3_2.Document;
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
       if (this.hasWebhookSelection && this.isContainerExcluded(this.webhookSelection, webhookName)) {
@@ -911,11 +909,7 @@ export class OpenAPITransformer {
           this.accumulateUsedRefs(definition, this.$refs, refStr);
         });
 
-        Object.values(operation.security || {}).forEach(sec => {
-          Object.keys(sec).forEach(scheme => {
-            this.retainSecurityScheme(scheme);
-          });
-        });
+        this.retainSecurityRequirements(operation.security);
       });
     });
   }
@@ -989,11 +983,7 @@ export class OpenAPITransformer {
 
         // Accumulate any used operation-level security schemas that we need to retain.
         if ('security' in operation) {
-          Object.values(operation.security || {}).forEach(sec => {
-            Object.keys(sec).forEach(scheme => {
-              this.retainSecurityScheme(scheme);
-            });
-          });
+          this.retainSecurityRequirements(operation.security);
         }
       });
 
@@ -1011,13 +1001,14 @@ export class OpenAPITransformer {
     // If we don't have any paths left then retain the reducer's no-match error. An empty Paths
     // Object is valid OpenAPI so we allow it when pruning.
     if (!Object.keys(this.definition.paths || {}).length) {
-      if (this.mode === 'reduce' && !(this.definition.webhooks && Object.keys(this.definition.webhooks).length)) {
+      const webhooks = 'webhooks' in this.definition ? this.definition.webhooks : undefined;
+      if (this.mode === 'reduce' && !(webhooks && Object.keys(webhooks).length)) {
         throw new Error(
           'All paths in the API definition were removed. Did you supply the right path name to reduce by?',
         );
       }
 
-      if (this.definition.webhooks && Object.keys(this.definition.webhooks).length) {
+      if (webhooks && Object.keys(webhooks).length) {
         delete this.definition.paths;
       }
     }
@@ -1027,13 +1018,10 @@ export class OpenAPITransformer {
    * Transform our `webhooks` object according to the webhooks and operations that we've selected.
    */
   private transformWebhooks(): void {
-    if (!(isOpenAPI31(this.definition) || isOpenAPI32(this.definition))) {
-      return;
-    } else if (!('webhooks' in this.definition) || !this.definition.webhooks) {
+    const definition = this.definition;
+    if (!hasWebhooks(definition)) {
       return;
     }
-
-    const definition = this.definition satisfies OpenAPIV3_1.Document | OpenAPIV3_2.Document;
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
       const nameLC = webhookName.toLowerCase();
@@ -1091,11 +1079,7 @@ export class OpenAPITransformer {
           this.usedTags.add(tag);
         });
 
-        Object.values(operation.security || {}).forEach(sec => {
-          Object.keys(sec).forEach(scheme => {
-            this.retainSecurityScheme(scheme);
-          });
-        });
+        this.retainSecurityRequirements(operation.security);
       });
 
       if (
@@ -1107,8 +1091,8 @@ export class OpenAPITransformer {
       }
     });
 
-    if (definition.webhooks && !Object.keys(definition.webhooks).length) {
-      delete definition.webhooks;
+    if (!Object.keys(definition.webhooks).length) {
+      delete (definition as { webhooks?: unknown }).webhooks;
     }
   }
 }

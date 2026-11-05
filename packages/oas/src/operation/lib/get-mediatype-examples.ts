@@ -1,17 +1,17 @@
 import type { MediaTypeObject, OASDocument } from '../../types.js';
-import type { OpenAPIV3_2 } from '@readme/openapi-parser';
+import type { ExampleObject as OpenAPI32ExampleObject } from '@scalar/openapi-types/3.2';
 
 import matchesMimeType from '../../lib/matches-mimetype.js';
 import { collectRefsInSchema, dereferenceRef, dereferenceRefDeep } from '../../lib/refs.js';
 import sampleFromSchema from '../../samples/index.js';
-import { isRef } from '../../types.js';
+import { isRef, schemaObject } from '../../types.js';
 
 /**
  * Narrow an Example Object to the OpenAPI 3.2 shape, which declares `value`, `dataValue`, and
  * `serializedValue`. 3.0 and 3.1 examples are the same object with the 3.2 fields absent.
  *
  */
-function isExampleObject(example: object): example is OpenAPIV3_2.ExampleObject {
+function isExampleObject(example: object): example is OpenAPI32ExampleObject {
   return 'value' in example || 'dataValue' in example || 'serializedValue' in example;
 }
 
@@ -32,10 +32,10 @@ export interface MediaTypeExample {
  * takes precedence over `serializedValue`. `serializedValue` is returned as the string that it
  * was defined as.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#media-type-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#example-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#example-object}
  * @param mediaType The media type that we're looking for examples for.
  * @param mediaTypeObject The media type object that we're looking for examples for.
  */
@@ -146,7 +146,7 @@ export function getMediaTypeExamples(
     if (!matchesMimeType.xml(mediaType)) {
       return [
         {
-          value: sampleFromSchema(structuredClone(schema), {
+          value: sampleFromSchema(typeof schema === 'object' ? schemaObject(schema) : {}, {
             ...opts,
             definition,
           }),

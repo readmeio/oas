@@ -78,7 +78,7 @@
   },
   "scripts": {
     "attw": "attw --pack --format ascii --profile node16",
-    "build": "tsup",
+    "build": "tsdown",
     "lint": "npm run lint:types",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
@@ -88,11 +88,11 @@
   },
   "dependencies": {
     "@readme/openapi-parser": "^10.0.0",
+    "@scalar/openapi-types": "^0.9.8",
     "@types/json-schema": "^7.0.11",
     "json-schema-merge-allof": "^0.8.1",
     "jsonpath-plus": "^10.4.0",
     "jsonpointer": "^5.0.0",
-    "openapi-types": "^12.1.1",
     "path-to-regexp": "^8.4.2",
     "remove-undefined-objects": "^9.0.2"
   },
@@ -103,7 +103,7 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "jest-expect-jsonschema": "file:../jest-expect-jsonschema",
     "jest-expect-openapi": "file:../jest-expect-openapi",
-    "tsup": "^9.0.0",
+    "tsdown": "^0.23.5",
     "vitest": "^5.0.0"
   }
 }

@@ -1,11 +1,16 @@
-import type * as OpenAPIV3_2 from './openapi-v3_2.js';
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type {
+  OpenAPI30Document,
+  OpenAPI31Document,
+  OpenAPI32Document,
+  OpenAPIDocument,
+  SwaggerDocument,
+} from '../types.js';
 
 /**
  * Is a given object a Swagger API definition?
  *
  */
-export function isSwagger(schema: any): schema is OpenAPIV2.Document {
+export function isSwagger(schema: any): schema is SwaggerDocument {
   return 'swagger' in schema && schema.swagger !== undefined;
 }
 
@@ -13,7 +18,7 @@ export function isSwagger(schema: any): schema is OpenAPIV2.Document {
  * Is a given object an OpenAPI API definition?
  *
  */
-export function isOpenAPI(schema: any): schema is OpenAPIV3_2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document {
+export function isOpenAPI(schema: any): schema is OpenAPIDocument {
   return 'openapi' in schema && schema.openapi !== undefined;
 }
 
@@ -21,7 +26,7 @@ export function isOpenAPI(schema: any): schema is OpenAPIV3_2.Document | OpenAPI
  * Is a given object an OpenAPI 3.0 API definition?
  *
  */
-export function isOpenAPI30(schema: any): schema is OpenAPIV3.Document {
+export function isOpenAPI30(schema: any): schema is OpenAPI30Document {
   return 'openapi' in schema && schema.openapi !== undefined && schema.openapi.startsWith('3.0');
 }
 
@@ -29,7 +34,7 @@ export function isOpenAPI30(schema: any): schema is OpenAPIV3.Document {
  * Is a given object an OpenAPI 3.1 API definition?
  *
  */
-export function isOpenAPI31(schema: any): schema is OpenAPIV3_1.Document {
+export function isOpenAPI31(schema: any): schema is OpenAPI31Document {
   return 'openapi' in schema && schema.openapi !== undefined && schema.openapi.startsWith('3.1');
 }
 
@@ -37,6 +42,6 @@ export function isOpenAPI31(schema: any): schema is OpenAPIV3_1.Document {
  * Is a given object an OpenAPI 3.2 API definition?
  *
  */
-export function isOpenAPI32(schema: any): schema is OpenAPIV3_2.Document {
+export function isOpenAPI32(schema: any): schema is OpenAPI32Document {
   return 'openapi' in schema && schema.openapi !== undefined && schema.openapi.startsWith('3.2');
 }

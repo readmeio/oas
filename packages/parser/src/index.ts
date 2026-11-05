@@ -1,11 +1,4 @@
-import type {
-  APIDocument,
-  ErrorDetails,
-  OpenAPIV3_2,
-  ParserOptions,
-  ValidationResult,
-  WarningDetails,
-} from './types.js';
+import type { APIDocument, ErrorDetails, ParserOptions, ValidationResult, WarningDetails } from './types.js';
 
 import { $RefParser, dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
 
@@ -17,7 +10,8 @@ import { validateSpec, validateSpecPreSchema } from './validators/spec.js';
 
 export { MissingPointerError };
 export { ResolverError } from '@apidevtools/json-schema-ref-parser';
-export type { OpenAPIV3_2, ParserOptions, ValidationResult, ErrorDetails, WarningDetails };
+export type { ErrorDetails, ParserOptions, ValidationResult, WarningDetails };
+export type { APIDocument, OpenAPIDocument, SwaggerDocument } from './types.js';
 
 function isFilesystemPathSource(api: unknown): boolean {
   return typeof api === 'string' && !/^https?:\/\//i.test(api);

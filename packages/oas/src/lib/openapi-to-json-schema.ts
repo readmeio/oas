@@ -1,11 +1,4 @@
-import type {
-  ExampleObject,
-  JSONSchema,
-  OASDocument,
-  ReferenceObject,
-  RequestBodyObject,
-  SchemaObject,
-} from '../types.js';
+import type { ExampleObject, JSONSchema, OASDocument, ReferenceObject, SchemaObject } from '../types.js';
 import type { JSONSchema4, JSONSchema7TypeName } from 'json-schema';
 import type { Options as JSONSchemaMergeAllOfOptions } from 'json-schema-merge-allof';
 
@@ -345,15 +338,15 @@ function inlinePropertyRefsForMerge(
         // - OAS 3.0: it becomes a Reference Object (the Schema Object section says "a Reference
         //   Object can be used in its place"), and Reference Objects forbid siblings. So 3.0
         //   strips everything.
-        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#schema-object
-        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#reference-object
+        //   https://spec.openapis.org/oas/v3.0.3.html#schema-object
+        //   https://spec.openapis.org/oas/v3.0.0.html#reference-object
         //
         // - OAS 3.1: it stays a Schema Object with `$ref` as a JSON Schema 2020-12 keyword. Per
         //   JSON Schema 2020-12 §8.2.3.1, "$ref" is an applicator whose "results are the results
         //   of the referenced schema", and the spec explicitly notes that "other keywords can
         //   appear alongside of '$ref' in the same schema object". Those siblings are part of
         //   the same schema; the spec doesn't say a `$ref` causes them to be dropped.
-        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.1.md#schema-object
+        //   https://spec.openapis.org/oas/v3.1.1.html#schema-object
         //   https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-8.2.3.1
         //
         // Since we flatten via spread instead of evaluating siblings alongside the resolved
@@ -639,8 +632,8 @@ function resolveAndCacheRefSchema({
   }
 }
 
-function isRequestBodySchema(schema: unknown): schema is RequestBodyObject {
-  return 'content' in (schema as RequestBodyObject);
+function isRequestBodySchema(schema: object): boolean {
+  return 'content' in schema;
 }
 
 /**
@@ -699,26 +692,30 @@ function searchForValueByPropAndPointer(
   const rev = [...schemas].toReversed();
 
   for (let ii = 0; ii < rev.length; ii += 1) {
-    let schema = rev[ii];
+    let value: unknown = rev[ii];
 
     if (property === 'example') {
-      if ('example' in schema) {
-        schema = schema.example;
-      } else {
-        if (!Array.isArray(schema.examples) || !schema.examples.length) {
-          continue;
-        }
-
-        // Prevent us from crashing if `examples` is a completely empty object.
-        schema = [...schema.examples].shift();
+      if (!isObject(value)) {
+        continue;
       }
+
+      if ('example' in value) {
+        value = value.example;
+      } else if (Array.isArray(value.examples) && value.examples.length) {
+        // Prevent us from crashing if `examples` is a completely empty object.
+        value = value.examples[0];
+      } else {
+        continue;
+      }
+    } else if (isObject(value)) {
+      value = 'default' in value ? value.default : undefined;
     } else {
-      schema = schema.default;
+      continue;
     }
 
     for (let i = pointers.length - 1; i >= 0; i -= 1) {
       try {
-        foundValue = jsonpointer.get(schema, pointers[i]);
+        foundValue = jsonpointer.get(value as object, pointers[i]);
       } catch {
         // If the schema we're looking at is `{obj: null}` and our pointer is `/obj/propertyName`
         // `jsonpointer` will throw an error. If that happens, we should silently catch and toss it
@@ -771,12 +768,13 @@ function searchForValueByPropAndPointer(
  * @todo add support for `schema: false` and `not` cases.
  * @todo tighten up `data` to allow for `SchemaObject | ReferenceObject`
  * @see {@link https://json-schema.org/draft/2019-09/json-schema-validation.html}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#schema-object}
  * @param data OpenAPI Schema Object to convert to pure JSON Schema.
  */
 export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOptions): SchemaObject {
-  let schema = data === true ? {} : { ...data };
+  let schema: SchemaObject = typeof data === 'object' && data !== null ? { ...data } : {};
   const schemaAdditionalProperties = isSchema(schema) ? schema.additionalProperties : null;
 
   const {
@@ -844,13 +842,23 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         const examples: unknown[] = [];
 
         Object.entries(obj.examples as Record<string, unknown>).forEach(([name, example]) => {
-          let currentExample = example as ExampleObject | ReferenceObject;
+          let currentExample: ExampleObject | ReferenceObject;
           if (name === '$ref') {
-            currentExample = dereferenceRef({ $ref: currentExample } as ReferenceObject, definition, seenRefs);
-            if (!currentExample || isRef(currentExample)) {
-              refLogger(currentExample.$ref, 'ref');
+            if (typeof example !== 'string') {
               return;
             }
+
+            const resolved: ExampleObject | ReferenceObject = dereferenceRef({ $ref: example }, definition, seenRefs);
+            if (!resolved || isRef(resolved)) {
+              refLogger(isRef(resolved) ? resolved.$ref : example, 'ref');
+              return;
+            }
+
+            currentExample = resolved;
+          } else if (example && typeof example === 'object') {
+            currentExample = example as ExampleObject | ReferenceObject;
+          } else {
+            return;
           }
 
           if ('value' in currentExample) {
@@ -1094,7 +1102,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
         // Reinstate the schema's own sibling `description` so it always wins over any `description`
         // merged in from json-schema-merge-allof.
-        if (siblingDescription !== undefined && isObject(schema) && !isRef(schema)) {
+        if (siblingDescription !== undefined && !isRef(schema)) {
           schema.description = siblingDescription;
         }
       } catch {

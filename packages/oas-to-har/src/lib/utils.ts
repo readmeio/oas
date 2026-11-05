@@ -266,7 +266,7 @@ export function getTypedFormatsInSchema(
  * @returns The content type, or `null` if no content is present
  */
 export function getParameterContentType(param: ParameterObject): string | null {
-  if (!('content' in param) || typeof param.content !== 'object' || !param.content) {
+  if (!param.content) {
     return null;
   }
 
@@ -290,7 +290,7 @@ export function getParameterContentSchema(
   contentType: string,
   api?: OASDocument,
 ): SchemaObject | null {
-  if (!('content' in param) || typeof param.content !== 'object' || !param.content) {
+  if (!param.content) {
     return null;
   }
 
@@ -601,7 +601,6 @@ export function parseJSONStringsInBodyWithSchema(
   }
 
   if (Array.isArray(obj)) {
-    // @ts-expect-error -- `items` exists in schema objects, just the typing on `SchemaObject` is very messy.
     let items = resolved.items as SchemaObject | undefined;
     if (items && typeof items === 'object' && isRef(items)) {
       // If we've already processed this `$ref` before then we should stop all schema-guided

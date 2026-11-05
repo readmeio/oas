@@ -31,8 +31,9 @@ export type ExampleGroups = Record<
      * 3. The request body example object's `summary` field
      * 4. The response example object's `summary` field
      *
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#example-object}
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#example-object}
+     * @see {@link https://spec.openapis.org/oas/v3.0.0.html#example-object}
+     * @see {@link https://spec.openapis.org/oas/v3.1.0.html#example-object}
+     * @see {@link https://spec.openapis.org/oas/v3.2.0.html#example-object}
      */
     name: string;
 
@@ -59,8 +60,9 @@ export type ExampleGroups = Record<
        * The entire response example object. The example value itself is contained
        * within `value`.
        *
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#example-object}
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#example-object}
+       * @see {@link https://spec.openapis.org/oas/v3.0.0.html#example-object}
+       * @see {@link https://spec.openapis.org/oas/v3.1.0.html#example-object}
+       * @see {@link https://spec.openapis.org/oas/v3.2.0.html#example-object}
        */
       mediaTypeExample: MediaTypeExample;
 
@@ -179,14 +181,15 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
   operation.getParameters().forEach(param => {
     // OpenAPI 3.2 `querystring` parameters must use `content` so their examples live within media
     // types, not here, and they have no `DataForHAR` slot to be placed into.
-    if (param.in === 'querystring') return;
+    if (param.in === 'querystring' || !param.examples) return;
     const location = param.in;
 
-    Object.entries(param.examples || {}).forEach(([exampleKey, paramExample]) => {
+    Object.entries(param.examples).forEach(([exampleKey, paramExample]) => {
       let example = paramExample;
       if (isRef(example)) {
-        example = dereferenceRef(example, operation.api);
-        if (!example || isRef(example)) return;
+        const resolved = dereferenceRef(example, operation.api);
+        if (!resolved || isRef(resolved)) return;
+        example = resolved;
       }
 
       groups[exampleKey] = {

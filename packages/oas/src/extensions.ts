@@ -413,9 +413,9 @@ export function getExtension(extension: string | keyof Extensions, api: OASDocum
   }
 
   if (hasRootExtension(`x-${extension}`, api)) {
-    return api?.[`x-${extension}`];
+    return api[`x-${extension}`];
   } else if (hasRootExtension(extension, api)) {
-    return api?.[extension];
+    return (api as Record<string, unknown>)[extension];
   }
 
   // If this is otherwise an extension of our own then we should return the default value for it.

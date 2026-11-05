@@ -400,8 +400,9 @@ function safeMatch(matcher: PathMatcher, pathName: string): PathMatch['match'] {
 /**
  * Generate path matches for a given path and origin on a set of OpenAPI path objects.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paths-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#paths-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#paths-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#paths-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#paths-object}
  * @param paths The OpenAPI Paths Object to process.
  * @param pathName Path to look for a match.
  * @param origin The origin that we're matching against.
