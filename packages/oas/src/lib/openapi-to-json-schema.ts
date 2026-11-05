@@ -338,15 +338,15 @@ function inlinePropertyRefsForMerge(
         // - OAS 3.0: it becomes a Reference Object (the Schema Object section says "a Reference
         //   Object can be used in its place"), and Reference Objects forbid siblings. So 3.0
         //   strips everything.
-        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#schema-object
-        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#reference-object
+        //   https://spec.openapis.org/oas/v3.0.3.html#schema-object
+        //   https://spec.openapis.org/oas/v3.0.0.html#reference-object
         //
         // - OAS 3.1: it stays a Schema Object with `$ref` as a JSON Schema 2020-12 keyword. Per
         //   JSON Schema 2020-12 §8.2.3.1, "$ref" is an applicator whose "results are the results
         //   of the referenced schema", and the spec explicitly notes that "other keywords can
         //   appear alongside of '$ref' in the same schema object". Those siblings are part of
         //   the same schema; the spec doesn't say a `$ref` causes them to be dropped.
-        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.1.md#schema-object
+        //   https://spec.openapis.org/oas/v3.1.1.html#schema-object
         //   https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-8.2.3.1
         //
         // Since we flatten via spread instead of evaluating siblings alongside the resolved
@@ -768,8 +768,9 @@ function searchForValueByPropAndPointer(
  * @todo add support for `schema: false` and `not` cases.
  * @todo tighten up `data` to allow for `SchemaObject | ReferenceObject`
  * @see {@link https://json-schema.org/draft/2019-09/json-schema-validation.html}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#schema-object}
  * @param data OpenAPI Schema Object to convert to pure JSON Schema.
  */
 export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOptions): SchemaObject {

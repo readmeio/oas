@@ -192,8 +192,9 @@ export function stripOrphanedIds(schema: unknown): void {
  * This function takes in a `ServerObject`, checks if it has relative path and then fixes it as per
  * the path URL.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#server-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#server-object}
  *
  * @param server - The server object to be fixed.
  * @param path - The path (an HTTP(S) url) from where the file was downloaded.
@@ -228,8 +229,9 @@ function fixServers(server: { url?: string }, path: string) {
  * in `OperationObject`. However interpretation of the spec says that relative paths for servers
  * should take into account the hostname that serves the OpenAPI file.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#server-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#server-object}
  */
 export function fixOasRelativeServers(schema: APIDocument, filePath?: string): void {
   if (!schema || !isOpenAPI(schema) || !filePath || (!filePath.startsWith('http:') && !filePath.startsWith('https:'))) {
@@ -261,8 +263,9 @@ function fixServersInPathItems(schemaElement: object | undefined, filePath: stri
       /**
        * Servers are at the `PathItemObject` level.
        *
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#path-item-object}
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
+       * @see {@link https://spec.openapis.org/oas/v3.0.0.html#path-item-object}
+       * @see {@link https://spec.openapis.org/oas/v3.1.0.html#path-item-object}
+       * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
        */
       if (opItem === 'servers' && Array.isArray(pathItemElement)) {
         pathItemElement.forEach(server => {
@@ -274,8 +277,9 @@ function fixServersInPathItems(schemaElement: object | undefined, filePath: stri
       /**
        * Servers are at the `OperationObject` level.
        *
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#operation-object}
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
+       * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operation-object}
+       * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operation-object}
+       * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-object}
        */
       if (
         supportedHTTPMethods.includes(opItem as (typeof supportedHTTPMethods)[number]) &&

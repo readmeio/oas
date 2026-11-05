@@ -119,8 +119,8 @@ export type OpenAPI31Document = OAS31.Document;
 export type OpenAPI32Document = OAS32.Document;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#openapi-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.3.html#openapi-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#openapi-object}
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
  */
 export type OpenAPIDocument = OpenAPI30Document | OpenAPI31Document | OpenAPI32Document;
@@ -134,23 +134,25 @@ export type OAS31Document = OpenAPI31Document;
 /**
  * OpenAPI 3.1 or 3.2 document with a `webhooks` map. 3.0 documents do not have webhooks.
  */
-export type DocumentWithWebhooks = (OpenAPI31Document | OpenAPI32Document) & {
+export type OpenAPIDocumentWithWebhooks = (OpenAPI31Document | OpenAPI32Document) & {
   webhooks: NonNullable<OpenAPI31Document['webhooks'] | OpenAPI32Document['webhooks']>;
 };
 
-export function hasWebhooks(document: OASDocument): document is DocumentWithWebhooks {
+export function hasWebhooks(document: OASDocument): document is OpenAPIDocumentWithWebhooks {
   return 'webhooks' in document && document.webhooks !== undefined;
 }
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#server-object}
  */
 export type ServerObject = OAS30.ServerObject | OAS31.ServerObject | OAS32.ServerObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-variable-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#server-variable-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#server-variable-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#server-variable-object}
  */
 export type ServerVariableObject = OAS30.ServerVariableObject | OAS31.ServerVariableObject | OAS32.ServerVariableObject;
 export type ServerVariablesObject = Record<string, ServerVariableObject>;
@@ -165,26 +167,30 @@ export interface Servers {
 }
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#components-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#components-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#components-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#components-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#components-object}
  */
 export type ComponentsObject = OAS30.ComponentsObject | OAS31.ComponentsObject | OAS32.ComponentsObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#reference-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#reference-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#reference-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#reference-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#reference-object}
  */
 export type ReferenceObject = OAS30.ReferenceObject | OAS31.ReferenceObject | OAS32.ReferenceObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paths-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#paths-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#paths-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#paths-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#paths-object}
  */
 export type PathsObject = OAS30.PathsObject | OAS31.PathsObject | OAS32.PathsObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-item-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#path-item-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#path-item-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
  */
 export type PathItemObject = (OAS30.PathItemObject | OAS31.PathItemObject | OAS32.PathItemObject) & {
   /**
@@ -196,8 +202,9 @@ export type PathItemObject = (OAS30.PathItemObject | OAS31.PathItemObject | OAS3
 };
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operation-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operation-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-object}
  */
 export type OperationObject = OAS30.OperationObject | OAS31.OperationObject | OAS32.OperationObject;
 
@@ -205,8 +212,8 @@ export type OperationObject = OAS30.OperationObject | OAS31.OperationObject | OA
  * Parameter as this library reads it. 3.1 and 3.2 encode `schema` and `content` as mutually
  * exclusive variants; callers see both as optional fields.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#parameter-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#parameter-object}
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#parameter-object}
  */
 export interface ParameterObject {
@@ -231,38 +238,44 @@ export function parameterObject(value: object): ParameterObject {
 }
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#request-body-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#request-body-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#request-body-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#request-body-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#request-body-object}
  */
 export type RequestBodyObject = OAS30.RequestBodyObject | OAS31.RequestBodyObject | OAS32.RequestBodyObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#media-type-object}
  */
 export type MediaTypeObject = OAS30.MediaTypeObject | OAS31.MediaTypeObject | OAS32.MediaTypeObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#response-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#response-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#response-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#response-object}
  */
 export type ResponseObject = OAS30.ResponseObject | OAS31.ResponseObject | OAS32.ResponseObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#callback-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#callback-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#callback-object}
  */
 export type CallbackObject = OAS30.CallbackObject | OAS31.CallbacksObject | OAS32.CallbacksObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#example-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#example-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#example-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#example-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#example-object}
  */
 export type ExampleObject = OAS30.ExampleObject | OAS31.ExampleObject | OAS32.ExampleObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#tag-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#tag-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#tag-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#tag-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#tag-object}
  */
 export type TagObject = OAS30.TagObject | OAS31.TagObject | OAS32.TagObject;
 
@@ -270,8 +283,9 @@ export type TagObject = OAS30.TagObject | OAS31.TagObject | OAS32.TagObject;
  * Header as this library reads it. The header name is the map key. `schema` and `content` are
  * optional, including when the spec encodes them as mutually exclusive variants.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#header-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#header-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#header-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#header-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#header-object}
  */
 export interface HeaderObject {
   allowEmptyValue?: boolean;
@@ -300,8 +314,9 @@ export function headerObject(value: object): HeaderObject {
  * while dereferencing and converting to JSON Schema. Boolean schemas stay at
  * `SchemaObject | boolean` call sites.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#schema-object}
  */
 export interface SchemaObject {
   $anchor?: string;
@@ -399,8 +414,9 @@ export function isSchema(check: unknown, isPolymorphicAllOfChild = false): check
 }
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#security-scheme-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#security-scheme-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-scheme-object}
  */
 export type SecuritySchemeObject = OAS30.SecuritySchemeObject | OAS31.SecuritySchemeObject | OAS32.SecuritySchemeObject;
 
@@ -424,8 +440,9 @@ export type KeyedSecuritySchemeObject = SecuritySchemeObject & {
 };
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-requirement-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#security-requirement-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#security-requirement-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-requirement-object}
  */
 export type SecurityRequirementObject =
   | OAS30.SecurityRequirementObject
@@ -433,8 +450,9 @@ export type SecurityRequirementObject =
   | OAS32.SecurityRequirementObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminator-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminator-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#discriminator-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#discriminator-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#discriminator-object}
  */
 export type DiscriminatorObject = OAS30.DiscriminatorObject;
 

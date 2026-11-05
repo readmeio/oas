@@ -39,21 +39,21 @@ export interface ParserRulesOpenAPI extends Record<string, 'error' | 'warning'> 
    * Schemas that are defined as `type: array` must also have an `items` schema. The default
    * is `error`.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#json-schema-keywords}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#json-schema-keywords}
    */
   'array-without-items': 'error' | 'warning';
 
   /**
    * Parameters must be unique. The default is `error`.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-operationparameters}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-parameters}
    */
   'duplicate-non-request-body-parameters': 'error' | 'warning';
 
   /**
    * The `operationId` definition in a path object must be unique. The default is `error`.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-operationid}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-id}
    */
   'duplicate-operation-id': 'error' | 'warning';
 
@@ -62,7 +62,7 @@ export interface ParserRulesOpenAPI extends Record<string, 'error' | 'warning'> 
    * common mistakes like an `http` scheme having a `name` (which belongs to `apiKey`) before
    * AJV has a chance to surface confusing `oneOf` noise. The default is `error`.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-scheme-object}
    */
   'invalid-security-scheme-properties': 'error' | 'warning';
 
@@ -70,7 +70,7 @@ export interface ParserRulesOpenAPI extends Record<string, 'error' | 'warning'> 
    * Parameters that are defined within the path URI must be specified as being `required`. The
    * default is `error`.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-operationparameters}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-parameters}
    */
   'non-optional-path-parameters': 'error' | 'warning';
 
@@ -78,7 +78,7 @@ export interface ParserRulesOpenAPI extends Record<string, 'error' | 'warning'> 
    * Path parameters defined in a path URI path template must also be specified as part of that
    * paths `parameters`. The default is `error`.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-templating}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-templating}
    */
   'path-parameters-not-in-parameters': 'error' | 'warning';
 
@@ -86,7 +86,7 @@ export interface ParserRulesOpenAPI extends Record<string, 'error' | 'warning'> 
    * Path parameters defined in `parameters` must also be specified in the path URI with
    * path templating. The default is `error`.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-parametername}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#parameter-name}
    */
   'path-parameters-not-in-path': 'error' | 'warning';
 }

@@ -35,8 +35,10 @@ const isJSON = matches.json;
  *
  * Note: This does not support OpenAPI 3.1's header format.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#header-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#header-object}
+ *
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#header-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#header-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#header-object}
  * @param response Response object to build a JSON Schema object for its headers for.
  * @param schemaOptions Optional options to pass to toJSONSchema (e.g. for ref resolution).
  */

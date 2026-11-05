@@ -31,8 +31,9 @@ export type ExampleGroups = Record<
      * 3. The request body example object's `summary` field
      * 4. The response example object's `summary` field
      *
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#example-object}
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#example-object}
+     * @see {@link https://spec.openapis.org/oas/v3.0.0.html#example-object}
+     * @see {@link https://spec.openapis.org/oas/v3.1.0.html#example-object}
+     * @see {@link https://spec.openapis.org/oas/v3.2.0.html#example-object}
      */
     name: string;
 
@@ -59,8 +60,9 @@ export type ExampleGroups = Record<
        * The entire response example object. The example value itself is contained
        * within `value`.
        *
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#example-object}
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#example-object}
+       * @see {@link https://spec.openapis.org/oas/v3.0.0.html#example-object}
+       * @see {@link https://spec.openapis.org/oas/v3.1.0.html#example-object}
+       * @see {@link https://spec.openapis.org/oas/v3.2.0.html#example-object}
        */
       mediaTypeExample: MediaTypeExample;
 

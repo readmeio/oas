@@ -1,6 +1,7 @@
 import type { StylizerConfig } from './style-serializer.js';
+import type { ParameterObject } from 'oas/types';
 
-import { type ParameterObject, isRef } from 'oas/types';
+import { isRef } from 'oas/types';
 import { matchesMimeType } from 'oas/utils';
 import qs from 'qs';
 
@@ -110,8 +111,9 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
    * All parameter types have a default `style` format so if they don't have one prescribed we
    * should still conform to what the spec defines.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-parameterstyle}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-parameterstyle}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#parameterStyle}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#parameterStyle}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#parameter-style}
    */
   let style = parameter.style;
   if (!style) {
@@ -131,8 +133,9 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
     /**
      * Per the spec if no `explode` is present but `style` is `form` then `explode` should default to `true`.
      *
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-parameterexplode}
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-parameterexplode}
+     * @see {@link https://spec.openapis.org/oas/v3.0.0.html#parameterExplode}
+     * @see {@link https://spec.openapis.org/oas/v3.1.0.html#parameterExplode}
+     * @see {@link https://spec.openapis.org/oas/v3.2.0.html#parameter-explode}
      */
     explode = true;
   }

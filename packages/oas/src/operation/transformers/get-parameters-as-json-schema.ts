@@ -41,8 +41,9 @@ function isReservedHeaderParameter(param: ParameterObject, hasSecurity: boolean)
  * The order of this object determines how they will be sorted in the compiled JSON Schema
  * representation.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#parameter-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#parameter-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#parameter-object}
  */
 export const types: Record<string, string> = {
   path: 'Path Params',

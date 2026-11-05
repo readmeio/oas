@@ -1,4 +1,4 @@
-import type { DocumentWithWebhooks, OASDocument, PathItemObject } from '../types.js';
+import type { OpenAPIDocumentWithWebhooks, OASDocument, PathItemObject } from '../types.js';
 
 import jsonPointer from 'jsonpointer';
 
@@ -268,7 +268,7 @@ export function computeOperationScope(definition: OASDocument, path: string, met
  *
  */
 export function computeWebhookScope(
-  definition: DocumentWithWebhooks,
+  definition: OpenAPIDocumentWithWebhooks,
   webhookName: string,
   method: string,
 ): OperationScope {

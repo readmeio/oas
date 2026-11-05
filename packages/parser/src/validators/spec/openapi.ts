@@ -3,7 +3,7 @@ import type * as OAS30 from '@scalar/openapi-types/3.0';
 import type * as OAS31 from '@scalar/openapi-types/3.1';
 import type * as OAS32 from '@scalar/openapi-types/3.2';
 
-import { isOpenAPI30, isOpenAPI31 } from '../../lib/assertions.js';
+import { isOpenAPI30, isOpenAPI31, isOpenAPI32 } from '../../lib/assertions.js';
 import { pathParameterTemplateRegExp, supportedHTTPMethods } from '../../lib/index.js';
 import { normalizeURL, substituteServerVariables } from '../../lib/urls.js';
 
@@ -33,8 +33,9 @@ function parameterList(params: readonly ParameterObject[] | undefined): Paramete
  * Validates parts of the OpenAPI 3.0 and 3.1 specification that aren't covered by their JSON
  * Schema definitions.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html}
  */
 export class OpenAPISpecificationValidator extends SpecificationValidator {
   api: OpenAPIDocument;
@@ -101,9 +102,10 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
      * specification now requires that either `components`, `webhooks`, or `paths` be present and
      * not empty. Unfortunately the JSON Schema for the specification is unable to specify this.
      *
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-document}
+     * @see {@link https://spec.openapis.org/oas/v3.1.0.html#oasWebhooks}
+     * @see {@link https://spec.openapis.org/oas/v3.2.0.html#oas-webhooks}
      */
-    if (isOpenAPI31(this.api)) {
+    if (isOpenAPI31(this.api) || isOpenAPI32(this.api)) {
       if (
         !Object.keys(this.api.paths || {}).length &&
         !Object.keys(this.api.webhooks || {}).length &&
@@ -280,8 +282,9 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
       const parameterId = `${operationId}/parameters/${param.name}`;
 
       /**
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#fixed-fields-10}
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-10}
+       * @see {@link https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-9}
+       * @see {@link https://spec.openapis.org/oas/v3.1.0.html#fixed-fields-9}
+       * @see {@link https://spec.openapis.org/oas/v3.2.0.html#fixed-fields-9}
        */
       const schema = 'schema' in param ? param.schema : undefined;
       const content = 'content' in param ? param.content : undefined;
@@ -382,7 +385,9 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * fails every branch and produces overwhelming, unhelpful errors. This pre-AJV pass surfaces
    * a single targeted error per problem.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-scheme-object}
    */
   private checkSecuritySchemes() {
     const securitySchemes = this.api.components?.securitySchemes;
