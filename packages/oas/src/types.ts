@@ -7,6 +7,7 @@ import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
 import {
   isOpenAPI30 as assertOpenAPI30,
   isOpenAPI31 as assertOpenAPI31,
+  isOpenAPI32 as assertOpenAPI32,
   isSwagger as assertSwagger,
 } from '@readme/openapi-parser/lib/assertions';
 
@@ -42,6 +43,14 @@ export function isOpenAPI30(schema: OpenAPIDocument): schema is OpenAPI30Documen
  */
 export function isOpenAPI31(schema: OpenAPIDocument): schema is OpenAPI31Document {
   return assertOpenAPI31(schema);
+}
+
+/**
+ * Is a given object an OpenAPI 3.2 API definition?
+ *
+ */
+export function isOpenAPI32(schema: OpenAPIDocument): schema is OpenAPI31Document {
+  return assertOpenAPI32(schema);
 }
 
 /**
