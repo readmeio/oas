@@ -661,6 +661,7 @@ export default class Oas {
    *
    * @see {@link https://spec.openapis.org/oas/v3.0.0.html#openapi-object}
    * @see {@link https://spec.openapis.org/oas/v3.1.0.html#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
    */
   getPaths(): Record<string, Record<HttpMethods, Operation | Webhook>> {
     const paths: Record<string, Record<HttpMethods, Operation | Webhook>> = {};
@@ -714,6 +715,7 @@ export default class Oas {
    *
    * @see {@link https://spec.openapis.org/oas/v3.0.0.html#openapi-object}
    * @see {@link https://spec.openapis.org/oas/v3.1.0.html#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
    */
   getWebhooks(): Record<string, Record<HttpMethods, Webhook>> {
     const webhooks: Record<string, Record<HttpMethods, Webhook>> = {};
