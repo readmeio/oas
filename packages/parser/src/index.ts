@@ -11,7 +11,7 @@ import { validateSpec, validateSpecPreSchema } from './validators/spec.js';
 export { MissingPointerError };
 export { ResolverError } from '@apidevtools/json-schema-ref-parser';
 export type { ErrorDetails, ParserOptions, ValidationResult, WarningDetails };
-export type { APIDocument, OpenAPIDocument } from './types.js';
+export type { APIDocument, OpenAPIDocument, SwaggerDocument } from './types.js';
 
 function isFilesystemPathSource(api: unknown): boolean {
   return typeof api === 'string' && !/^https?:\/\//i.test(api);
