@@ -3,7 +3,7 @@ import type { APIDocument, ErrorDetails, ParserOptions, ValidationResult, Warnin
 import { $RefParser, dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
 
 import { isOpenAPI, isSwagger } from './lib/assertions.js';
-import { relativizeRootRefs, stripOrphanedIds } from './repair.js';
+import { collapseBundledIdScopes, stripOrphanedIds } from './repair.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
 import { validateSchema } from './validators/schema.js';
 import { validateSpec, validateSpecPreSchema } from './validators/spec.js';
@@ -94,9 +94,10 @@ export async function bundle<S extends APIDocument = APIDocument>(
   // Our API definitions are always objects, never bare JSON Schema booleans.
   const schema = parser.schema as S;
 
-  // `$refs.paths()` is decoded, but the bundler writes the encoded root path into refs.
+  // `$refs.paths()` is decoded, but the bundler writes the encoded root path into refs. A root with
+  // its own `$id` gets a different prefix, so those refs are left as the bundler wrote them.
   const rootPath = parser.$refs._root$Ref.path; // oxlint-disable-line no-underscore-dangle
-  relativizeRootRefs(schema, rootPath);
+  collapseBundledIdScopes(schema, rootPath);
 
   // If necessary, repair the schema of any anomalies and quirks.
   repairSchema(schema, path);
