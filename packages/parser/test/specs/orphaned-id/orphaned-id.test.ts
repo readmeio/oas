@@ -7,7 +7,7 @@ import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { bundle, dereference, validate } from '../../../src/index.js';
-import { stripOrphanedIds } from '../../../src/repair.js';
+import { collapseBundledIdScopes, stripOrphanedIds } from '../../../src/repair.js';
 
 /**
  * OpenAPI 3.1 inherits JSON Schema's `$id`, which establishes a new base URI for `$ref` resolution
@@ -530,6 +530,7 @@ describe('orphaned `$id` keywords', () => {
 
       // ref-parser can't resolve `byId` with or without this `$id`, so only check it's kept.
       expect(search).toHaveProperty('$id', 'https://example.com/search');
+      expect(search.properties.test2.$ref).not.toMatch(/^#/);
     });
 
     it('should leave a group as the bundler wrote it when a URI ref targets its `$id`', async () => {
@@ -546,6 +547,79 @@ describe('orphaned `$id` keywords', () => {
       expect(search.properties.test2.$ref).not.toMatch(/^#/);
       // readme validates the bundle in the same process it was bundled in.
       await expect(validate(api)).resolves.toMatchObject({ valid: true });
+    });
+  });
+
+  describe('collapseBundledIdScopes()', () => {
+    const rootPath = '/tmp/spec.json';
+
+    /** A bundled document whose `Search` schema keeps an inlined `$id` and a root-prefixed repeat ref. */
+    function bundled(extraRefs: Record<string, unknown> = {}) {
+      return {
+        components: {
+          schemas: {
+            Search: {
+              $id: 'search.json',
+              properties: {
+                test1: { type: 'string' },
+                test2: { $ref: `${rootPath}#/components/schemas/Search/properties/test1` },
+                ...extraRefs,
+              },
+            },
+          },
+        },
+      };
+    }
+
+    it('should rewrite root-prefixed and local fragment refs from the root and remove the `$id`', () => {
+      const schema = bundled({ local: { $ref: '#/properties/test1' } });
+
+      collapseBundledIdScopes(schema, rootPath);
+      expect(schema.components.schemas.Search).not.toHaveProperty('$id');
+      expect(schema.components.schemas.Search.properties).toMatchObject({
+        test2: { $ref: '#/components/schemas/Search/properties/test1' },
+        local: { $ref: '#/components/schemas/Search/properties/test1' },
+      });
+    });
+
+    it.each([
+      ['an anchor ref', { anchored: { $ref: '#foo' } }],
+      ['a URI ref', { external: { $ref: 'https://example.com/pet' } }],
+    ])('should leave a group as the bundler wrote it when it uses %s', (_, extraRefs) => {
+      const schema = bundled(extraRefs);
+      const before = structuredClone(schema);
+
+      collapseBundledIdScopes(schema, rootPath);
+      expect(schema).toStrictEqual(before);
+    });
+
+    it('should leave a group as the bundler wrote it when a URI ref elsewhere targets its `$id`', () => {
+      const schema = { ...bundled(), paths: { byId: { $ref: 'search.json#/properties/test1' } } };
+      const before = structuredClone(schema);
+
+      collapseBundledIdScopes(schema, rootPath);
+      expect(schema).toStrictEqual(before);
+    });
+
+    it('should leave refs prefixed with a root `$id` instead of the root path as they are', () => {
+      const schema = {
+        $id: 'https://example.com/root',
+        components: {
+          schemas: {
+            Search: {
+              $id: 'search.json',
+              properties: {
+                test1: { type: 'string' },
+                test2: { $ref: 'https://example.com/root#/components/schemas/Search/properties/test1' },
+              },
+            },
+          },
+        },
+      };
+      const before = structuredClone(schema);
+
+      collapseBundledIdScopes(schema, rootPath);
+      expect(schema).toStrictEqual(before);
     });
   });
 

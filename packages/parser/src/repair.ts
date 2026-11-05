@@ -161,7 +161,12 @@ export function stripOrphanedIds(schema: unknown): void {
   const refs = new Set<string>();
   collectRefs(schema, refs);
 
-  const isReferenced = (id: string): boolean => [...refs].some(ref => refMayTargetId(ref, id));
+  const isReferenced = (id: string): boolean => {
+    for (const ref of refs) {
+      if (refMayTargetId(ref, id)) return true;
+    }
+    return false;
+  };
 
   const visit = (node: unknown, isRoot: boolean): void => {
     if (Array.isArray(node)) {
@@ -191,8 +196,10 @@ export function stripOrphanedIds(schema: unknown): void {
  * any `#/…` refs they share a `$id` with, as pointers from the document root, then remove those `$id`s.
  */
 export function collapseBundledIdScopes(schema: unknown, rootPath: string): void {
-  /** A schema with its own `$id`, and its pointer from the document root. */
+  /** A schema with its own `$id`, its pointer from the document root, and the outermost `$id` schema above it. */
   interface IdScope {
+    id: string;
+    outer: Record<string, unknown>;
     pointer: string;
     schema: Record<string, unknown>;
   }
@@ -205,8 +212,8 @@ export function collapseBundledIdScopes(schema: unknown, rootPath: string): void
 
   const rootPrefix = `${rootPath}#`;
   const refs: ScopedRef[] = [];
-  // Every `$id` under each outermost one, including those with no refs beneath them.
-  const nestedIds = new Map<IdScope['schema'], string[]>();
+  // Every `$id`, including those with no refs beneath them.
+  const idScopes: IdScope[] = [];
   // A shared object is only visited at its first location, which only a JS object input can have.
   const seen = new WeakSet<object>();
 
@@ -219,9 +226,9 @@ export function collapseBundledIdScopes(schema: unknown, rootPath: string): void
     const obj = node as Record<string, unknown>;
     let innerScopes = scopes;
     if (!isRoot && typeof obj.$id === 'string') {
-      innerScopes = [...scopes, { pointer, schema: obj }];
-      const outer = innerScopes[0].schema;
-      nestedIds.set(outer, [...(nestedIds.get(outer) ?? []), obj.$id]);
+      const scope = { id: obj.$id, outer: scopes[0]?.schema ?? obj, pointer, schema: obj };
+      idScopes.push(scope);
+      innerScopes = [...scopes, scope];
     }
 
     for (const [key, value] of Object.entries(obj)) {
@@ -235,27 +242,25 @@ export function collapseBundledIdScopes(schema: unknown, rootPath: string): void
 
   visit(schema, '#', [], true);
 
+  const isRootPrefixed = ({ holder }: ScopedRef) => holder.$ref.startsWith(rootPrefix);
+  const otherRefs = refs.filter(ref => !isRootPrefixed(ref)).map(({ holder }) => holder.$ref);
+
+  // URI and anchor refs can't be rewritten as root pointers, so a group using one, or a `$id` some
+  // URI ref may target, stays as the bundler wrote it.
+  const canCollapse = (group: ScopedRef[], scopes: IdScope[]) =>
+    group.some(isRootPrefixed) &&
+    group.every(ref => isRootPrefixed(ref) || isPlainPointer(ref.holder.$ref)) &&
+    !otherRefs.some(ref => scopes.some(({ id }) => refMayTargetId(ref, id)));
+
   // Grouped by outermost `$id`, since dropping one re-scopes every ref beneath it.
-  const groups = new Map<IdScope['schema'], ScopedRef[]>();
-  for (const scopedRef of refs) {
-    if (scopedRef.scopes.length) {
-      const outer = scopedRef.scopes[0].schema;
-      groups.set(outer, [...(groups.get(outer) ?? []), scopedRef]);
-    }
-  }
+  const groups = Map.groupBy(
+    refs.filter(ref => ref.scopes.length),
+    ref => ref.scopes[0].schema,
+  );
+  const scopesByOuter = Map.groupBy(idScopes, scope => scope.outer);
 
   for (const [outer, group] of groups) {
-    if (!group.some(({ holder }) => holder.$ref.startsWith(rootPrefix))) {
-      continue;
-    }
-
-    // URI and anchor refs can't be rewritten as root pointers, so a group using one, or a `$id` some
-    // URI ref may target, stays as the bundler wrote it.
-    const ids = nestedIds.get(outer) ?? [];
-    const targeted = refs.some(({ holder: { $ref } }) => {
-      return !$ref.startsWith(rootPrefix) && ids.some(id => refMayTargetId($ref, id));
-    });
-    if (targeted || !group.every(({ holder }) => holder.$ref.startsWith(rootPrefix) || isPlainPointer(holder.$ref))) {
+    if (!canCollapse(group, scopesByOuter.get(outer) ?? [])) {
       continue;
     }
 

@@ -94,10 +94,13 @@ export async function bundle<S extends APIDocument = APIDocument>(
   // Our API definitions are always objects, never bare JSON Schema booleans.
   const schema = parser.schema as S;
 
-  // `$refs.paths()` is decoded, but the bundler writes the encoded root path into refs. A root with
-  // its own `$id` gets a different prefix, so those refs are left as the bundler wrote them.
-  const rootPath = parser.$refs._root$Ref.path; // oxlint-disable-line no-underscore-dangle
-  collapseBundledIdScopes(schema, rootPath);
+  // ref-parser's `qualifyPathFromRoot` prefixes repeat refs under a nested `$id` with the root path, which
+  // breaks once the bundle is uploaded. A root with its own `$id` gets a different prefix and is left alone.
+  const rootPath = parser.$refs._root$Ref?.path; // oxlint-disable-line no-underscore-dangle
+  // `$refs.paths()` is decoded but those refs use the encoded path. Skip if this private field goes away.
+  if (rootPath) {
+    collapseBundledIdScopes(schema, rootPath);
+  }
 
   // If necessary, repair the schema of any anomalies and quirks.
   repairSchema(schema, path);
