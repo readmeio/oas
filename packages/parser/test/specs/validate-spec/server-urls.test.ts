@@ -1,11 +1,11 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { Document, ServerObject } from '@scalar/openapi-types/3.0';
 
 import { describe, expect, it } from 'vitest';
 
 import { validate } from '../../../src/index.js';
 import { substituteServerVariables } from '../../../src/lib/urls.js';
 
-function definition(servers: OpenAPIV3.ServerObject[]): OpenAPIV3.Document {
+function definition(servers: ServerObject[]): Document {
   return {
     openapi: '3.0.3',
     info: { title: 'Server URL validation', version: '1.0.0' },
@@ -134,7 +134,7 @@ describe('OpenAPI server URLs', () => {
   });
 
   it('resolves server variable defaults without changing the templates', async () => {
-    const servers: OpenAPIV3.ServerObject[] = [
+    const servers: ServerObject[] = [
       {
         url: '{protocol}://{hostname}:{port}/{version}',
         variables: {

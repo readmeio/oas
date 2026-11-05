@@ -733,7 +733,6 @@ describe('.getResponseAsJSONSchema()', () => {
   });
 
   describe('`headers` support', () => {
-    // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object
     it('should include headers if they exist', async () => {
       const oas = createOasForOperation({
         responses: {

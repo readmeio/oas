@@ -14,7 +14,6 @@ import type {
   ServerVariablesObject,
   User,
 } from './types.js';
-import type { OpenAPIV3_1 } from 'openapi-types';
 
 import {
   normalizeURL,
@@ -49,7 +48,7 @@ import {
   variablesFromServers,
 } from './lib/urls.js';
 import { Operation, Webhook } from './operation/index.js';
-import { isOpenAPI31, isRef } from './types.js';
+import { hasWebhooks, isRef } from './types.js';
 import { supportedMethods } from './utils.js';
 
 // Re-exported so `Operation.getParametersAsJSONSchema()`'s parameter type is publicly nameable.
@@ -243,15 +242,12 @@ export default class Oas {
       parameters: [],
     };
 
-    if (opts.isWebhook) {
-      if (isOpenAPI31(this.api)) {
-        const webhookPath = dereferenceRef(this.api?.webhooks?.[path] as PathItemObject | undefined, this.api);
-        if (webhookPath && !isRef(webhookPath)) {
-          if (webhookPath?.[method]) {
-            operation = dereferenceRef(webhookPath[method], this.api);
-            return new Webhook(this, path, method, operation);
-          }
-        }
+    const api = this.api;
+    if (opts.isWebhook && hasWebhooks(api)) {
+      const webhookPath = dereferenceRef(api.webhooks[path] as PathItemObject | undefined, api);
+      if (webhookPath && !isRef(webhookPath) && webhookPath[method]) {
+        operation = dereferenceRef(webhookPath[method], api);
+        return new Webhook(this, path, method, operation);
       }
     }
 
@@ -623,8 +619,9 @@ export default class Oas {
   /**
    * Determine if a security scheme exists within the API definition.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#security-scheme-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-scheme-object}
    * @param name The name of the security scheme to check for.
    */
   hasSecurityScheme(name: string): boolean {
@@ -638,8 +635,9 @@ export default class Oas {
    * cannot be resolved after that process (eg. it's circular or is an invalid `$ref`) then
    * `undefined` will be returned.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#security-scheme-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-scheme-object}
    * @param name The name of the security scheme to retrieve.
    */
   getSecurityScheme(name: string): SecuritySchemeObject | undefined {
@@ -661,8 +659,9 @@ export default class Oas {
    * Returns the `paths` object that exists in this API definition but with every `method` mapped
    * to an instance of the `Operation` class.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
    */
   getPaths(): Record<string, Record<HttpMethods, Operation | Webhook>> {
     const paths: Record<string, Record<HttpMethods, Operation | Webhook>> = {};
@@ -695,8 +694,9 @@ export default class Oas {
          * Because a path doesn't need to contain a keyed-object of HTTP methods, we should exclude
          * anything from within the paths object that isn't a known HTTP method.
          *
-         * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#fixed-fields-7}
-         * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-7}
+         * @see {@link https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-7}
+         * @see {@link https://spec.openapis.org/oas/v3.1.0.html#fixed-fields-7}
+         * @see {@link https://spec.openapis.org/oas/v3.2.0.html#fixed-fields-7}
          */
         if (!supportedMethods.includes(method as HttpMethods)) {
           return;
@@ -713,19 +713,23 @@ export default class Oas {
    * Returns the `webhooks` object that exists in this API definition but with every `method`
    * mapped to an instance of the `Webhook` class.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
    */
   getWebhooks(): Record<string, Record<HttpMethods, Webhook>> {
     const webhooks: Record<string, Record<HttpMethods, Webhook>> = {};
-    if (!isOpenAPI31(this.api) || !this.api.webhooks) {
+    const api = this.api;
+    if (!hasWebhooks(api)) {
       return webhooks;
     }
 
-    Object.keys(this.api.webhooks).forEach(id => {
+    const webhookMap = api.webhooks;
+
+    Object.keys(webhookMap).forEach(id => {
       webhooks[id] = {} as Record<HttpMethods, Webhook>;
 
-      const webhookPath = dereferenceRef((this.api as OpenAPIV3_1.Document).webhooks?.[id], this.api);
+      const webhookPath = dereferenceRef(webhookMap[id], api);
       if (webhookPath) {
         Object.keys(webhookPath).forEach(method => {
           if (!supportedMethods.includes(method as HttpMethods)) {
@@ -748,8 +752,9 @@ export default class Oas {
    * If the API definition uses the `x-disable-tag-sorting` extension then tags will be returned in
    * the order they're defined.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#oasTags}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#oasTags}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-tags}
    * @param setIfMissing If a tag is not present on an operation that operations path will be added
    *    into the list of tags returned.
    */
@@ -820,8 +825,9 @@ export default class Oas {
   /**
    * Determine if a given a custom specification extension exists within the API definition.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#specification-extensions}
    * @param extension Specification extension to lookup.
    */
   hasExtension(extension: string): boolean {
@@ -831,8 +837,9 @@ export default class Oas {
   /**
    * Retrieve a custom specification extension off of the API definition.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#specification-extensions}
    * @param extension Specification extension to lookup.
    */
   getExtension(extension: string | keyof Extensions, operation?: Operation): any {
@@ -843,8 +850,9 @@ export default class Oas {
    * Determine if a given OpenAPI custom extension is valid or not.
    *
    * @see {@link https://docs.readme.com/docs/openapi-extensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#specification-extensions}
    * @param extension Specification extension to validate.
    * @throws
    */
@@ -909,8 +917,9 @@ export default class Oas {
    * Validate all of our custom or known OpenAPI extensions, throwing exceptions when necessary.
    *
    * @see {@link https://docs.readme.com/docs/openapi-extensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#specification-extensions}
    */
   validateExtensions(): void {
     Object.keys(extensionDefaults).forEach(extension => {

@@ -1,6 +1,11 @@
 import type { Options } from './lib/types.js';
-import type { ParserOptions, ValidationResult } from '@readme/openapi-parser';
-import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
+import type {
+  APIDocument,
+  OpenAPIDocument,
+  ParserOptions,
+  SwaggerDocument,
+  ValidationResult,
+} from '@readme/openapi-parser';
 
 import fs from 'node:fs';
 
@@ -21,9 +26,9 @@ import {
 
 export default class OASNormalize {
   cache: {
-    bundle?: OpenAPI.Document | false;
-    convert?: OpenAPI.Document | false;
-    deref?: OpenAPI.Document | false;
+    bundle?: APIDocument | false;
+    convert?: APIDocument | false;
+    deref?: APIDocument | false;
     load?: Record<string, unknown> | false;
   };
 
@@ -170,7 +175,7 @@ export default class OASNormalize {
    * Bundle up the given API definition, resolving any external `$ref` pointers in the process.
    *
    */
-  async bundle(): Promise<OpenAPI.Document> {
+  async bundle(): Promise<APIDocument> {
     if (this.cache.bundle) return this.cache.bundle;
     const parserOptions = this.getParserOptions();
 
@@ -196,7 +201,7 @@ export default class OASNormalize {
    * Dereference the given API definition.
    *
    */
-  async dereference(): Promise<OpenAPI.Document> {
+  async dereference(): Promise<APIDocument> {
     if (this.cache.deref) return this.cache.deref;
     const parserOptions = this.getParserOptions();
 
@@ -225,7 +230,7 @@ export default class OASNormalize {
    *
    * @deprecated
    */
-  async deref(): Promise<OpenAPI.Document> {
+  async deref(): Promise<APIDocument> {
     return this.dereference();
   }
 
@@ -233,7 +238,7 @@ export default class OASNormalize {
    * Convert a given API definition to OpenAPI if it is not already.
    *
    */
-  async convert(): Promise<OpenAPI.Document> {
+  async convert(): Promise<APIDocument> {
     if (this.cache.convert) return this.cache.convert;
 
     return this.load()
@@ -253,9 +258,10 @@ export default class OASNormalize {
           throw new Error('Swagger v1.2 is unsupported.');
         }
 
-        return converter
-          .convertObj(schema, { anchors: true })
-          .then((options: { openapi: OpenAPI.Document }) => options.openapi);
+        return converter.convertObj(schema, { anchors: true }).then(options => {
+          // `swagger2openapi` is still typed against `openapi-types`.
+          return options.openapi as APIDocument;
+        });
       });
   }
 
@@ -367,7 +373,7 @@ export default class OASNormalize {
         case 'openapi':
           return {
             specification: 'openapi',
-            version: (schema as unknown as OpenAPIV3.Document).openapi,
+            version: (schema as unknown as OpenAPIDocument).openapi,
           };
 
         case 'postman': {
@@ -395,7 +401,7 @@ export default class OASNormalize {
         case 'swagger':
           return {
             specification: 'swagger',
-            version: (schema as unknown as OpenAPIV2.Document).swagger,
+            version: (schema as unknown as SwaggerDocument).swagger,
           };
 
         default:

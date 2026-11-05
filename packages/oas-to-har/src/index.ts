@@ -72,16 +72,16 @@ function formatter(
     return formatStyle(value, param);
   }
 
-  let value: string | number | boolean | undefined;
+  let value: unknown;
 
   // Handle missing values
   if (typeof getParamValue(values, param, type) !== 'undefined') {
     value = getParamValue(values, param, type);
   } else if (onlyIfExists && !param.required) {
     value = undefined;
-  } else if (param.required && param.schema) {
+  } else if (param.required && param.schema && typeof param.schema === 'object') {
     const schema = isRef(param.schema) ? dereferenceRef(param.schema, api) : param.schema;
-    if (schema && !isRef(schema) && schema.default) {
+    if (schema && typeof schema === 'object' && !isRef(schema) && schema.default) {
       value = schema.default;
     } else if (param.content) {
       const contentType = getParameterContentType(param);
@@ -105,9 +105,12 @@ function formatter(
   // specifically.
   if (
     param.schema &&
+    typeof param.schema === 'object' &&
     !isRef(param.schema) &&
     param.schema.type === 'array' &&
     param.schema.items &&
+    typeof param.schema.items === 'object' &&
+    !Array.isArray(param.schema.items) &&
     !isRef(param.schema.items) &&
     param.schema.items.format === 'binary'
   ) {
@@ -202,7 +205,7 @@ function getResponseContentType(content: MediaTypeObject) {
   return 'application/json';
 }
 
-function isPrimitive(val: unknown) {
+function isPrimitive(val: unknown): val is boolean | number | string {
   return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean';
 }
 
@@ -373,7 +376,7 @@ export default function oasToHar(
 
     // The library that handles our style processing already encodes uri elements. For everything
     // else we need to handle it here.
-    if (!('style' in parameter) || !parameter.style) {
+    if (!parameter.style) {
       return encodeURIComponent(formatter(formData, parameter, 'path', false, oas.api));
     }
 

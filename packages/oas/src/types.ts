@@ -1,9 +1,13 @@
+import type { Document as SwaggerDocument } from '@scalar/openapi-types/2.0';
+import type * as OAS30 from '@scalar/openapi-types/3.0';
+import type * as OAS31 from '@scalar/openapi-types/3.1';
+import type * as OAS32 from '@scalar/openapi-types/3.2';
 import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import {
   isOpenAPI30 as assertOpenAPI30,
   isOpenAPI31 as assertOpenAPI31,
+  isOpenAPI32 as assertOpenAPI32,
   isSwagger as assertSwagger,
 } from '@readme/openapi-parser/lib/assertions';
 
@@ -13,27 +17,41 @@ export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
  * @param check Data to determine if it contains a ReferenceObject (`$ref` pointer`).
  * @returns If the supplied data has a `$ref` pointer.
  */
-export function isRef(check: unknown): check is OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject {
-  return typeof (check as OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject)?.$ref === 'string';
+export function isRef(check: unknown): check is ReferenceObject {
+  return typeof (check as { $ref?: unknown })?.$ref === 'string';
 }
 
 /**
  * Is a given object a Swagger API definition?
  *
  */
-export const isSwagger: (schema: any) => schema is OpenAPIV2.Document = assertSwagger;
+export function isSwagger(schema: unknown): schema is SwaggerDocument {
+  return assertSwagger(schema);
+}
 
 /**
  * Is a given object an OpenAPI 3.0 API definition?
  *
  */
-export const isOpenAPI30: (schema: any) => schema is OpenAPIV3.Document = assertOpenAPI30;
+export function isOpenAPI30(schema: OpenAPIDocument): schema is OpenAPI30Document {
+  return assertOpenAPI30(schema);
+}
 
 /**
  * Is a given object an OpenAPI 3.1 API definition?
  *
  */
-export const isOpenAPI31: (schema: any) => schema is OpenAPIV3_1.Document = assertOpenAPI31;
+export function isOpenAPI31(schema: OpenAPIDocument): schema is OpenAPI31Document {
+  return assertOpenAPI31(schema);
+}
+
+/**
+ * Is a given object an OpenAPI 3.2 API definition?
+ *
+ */
+export function isOpenAPI32(schema: OpenAPIDocument): schema is OpenAPI32Document {
+  return assertOpenAPI32(schema);
+}
 
 /**
  * Data shape for taking OpenAPI operation data and converting it into HAR.
@@ -89,47 +107,54 @@ export interface User {
  */
 export type SecurityType = 'apiKey' | 'Basic' | 'Bearer' | 'Cookie' | 'Header' | 'http' | 'OAuth2' | 'Query';
 
-export type HttpMethods =
-  | OpenAPIV3_1.HttpMethods
-  | OpenAPIV3.HttpMethods
-  | 'delete'
-  | 'get'
-  | 'head'
-  | 'options'
-  | 'patch'
-  | 'post'
-  | 'put'
-  | 'query'
-  | 'trace';
+export type HttpMethods = 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put' | 'query' | 'trace';
 
 // The following are custom OpenAPI types that we use throughout this library, sans
 // `ReferenceObject` because we assume that the API definition has been dereferenced.
 //
 // These are organized by how they're defined in the OpenAPI Specification.
 
-/**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#openapi-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
- */
-export type OASDocument = (OpenAPIV3_1.Document | OpenAPIV3.Document) &
-  // `x-*` extensions
-  Record<string, unknown>;
-
-export type OAS31Document = OpenAPIV3_1.Document &
-  // `x-*` extensions
-  Record<string, unknown>;
+export type OpenAPI30Document = OAS30.Document;
+export type OpenAPI31Document = OAS31.Document;
+export type OpenAPI32Document = OAS32.Document;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.3.html#openapi-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#openapi-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
  */
-export type ServerObject = OpenAPIV3_1.ServerObject | OpenAPIV3.ServerObject;
+export type OpenAPIDocument = OpenAPI30Document | OpenAPI31Document | OpenAPI32Document;
+
+/** @deprecated Use {@link OpenAPIDocument} instead. This will be removed in a future release. */
+export type OASDocument = OpenAPIDocument;
+
+/** @deprecated Use {@link OpenAPI31Document} instead. This will be removed in a future release. */
+export type OAS31Document = OpenAPI31Document;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-variable-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object}
+ * OpenAPI 3.1 or 3.2 document with a `webhooks` map. 3.0 documents do not have webhooks.
  */
-export type ServerVariableObject = OpenAPIV3_1.ServerVariableObject | OpenAPIV3.ServerVariableObject;
+export type OpenAPIDocumentWithWebhooks = (OpenAPI31Document | OpenAPI32Document) & {
+  webhooks: NonNullable<OpenAPI31Document['webhooks'] | OpenAPI32Document['webhooks']>;
+};
+
+export function hasWebhooks(document: OASDocument): document is OpenAPIDocumentWithWebhooks {
+  return 'webhooks' in document && document.webhooks !== undefined;
+}
+
+/**
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#server-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#server-object}
+ */
+export type ServerObject = OAS30.ServerObject | OAS31.ServerObject | OAS32.ServerObject;
+
+/**
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#server-variable-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#server-variable-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#server-variable-object}
+ */
+export type ServerVariableObject = OAS30.ServerVariableObject | OAS31.ServerVariableObject | OAS32.ServerVariableObject;
 export type ServerVariablesObject = Record<string, ServerVariableObject>;
 export type ServerVariable = Record<
   string,
@@ -142,30 +167,34 @@ export interface Servers {
 }
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#components-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#components-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#components-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#components-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#components-object}
  */
-export type ComponentsObject = OpenAPIV3_1.ComponentsObject | OpenAPIV3.ComponentsObject;
+export type ComponentsObject = OAS30.ComponentsObject | OAS31.ComponentsObject | OAS32.ComponentsObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#reference-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#reference-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#reference-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#reference-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#reference-object}
  */
-export type ReferenceObject = OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject;
+export type ReferenceObject = OAS30.ReferenceObject | OAS31.ReferenceObject | OAS32.ReferenceObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paths-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#paths-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#paths-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#paths-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#paths-object}
  */
-export type PathsObject = OpenAPIV3_1.PathsObject | OpenAPIV3.PathsObject;
+export type PathsObject = OAS30.PathsObject | OAS31.PathsObject | OAS32.PathsObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-item-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#path-item-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#path-item-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
  */
-export type PathItemObject = (OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObject) & {
+export type PathItemObject = (OAS30.PathItemObject | OAS31.PathItemObject | OAS32.PathItemObject) & {
   /**
-   * OpenAPI 3.2 operation for the HTTP QUERY method, which `openapi-types` does not describe yet.
+   * OpenAPI 3.2 operation for the HTTP QUERY method. 3.0 and 3.1 path items do not include it.
    *
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    */
@@ -173,99 +202,190 @@ export type PathItemObject = (OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObj
 };
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operation-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operation-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-object}
  */
-export type OperationObject = (OpenAPIV3_1.OperationObject | OpenAPIV3.OperationObject) &
-  // `x-*` extensions
-  Record<string, unknown>;
+export type OperationObject = OAS30.OperationObject | OAS31.OperationObject | OAS32.OperationObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
+ * Parameter as this library reads it. 3.1 and 3.2 encode `schema` and `content` as mutually
+ * exclusive variants; callers see both as optional fields.
+ *
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#parameter-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#parameter-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#parameter-object}
  */
-export type ParameterObject = {
-  in: 'cookie' | 'header' | 'path' | 'query';
-} & (OpenAPIV3_1.ParameterObject | OpenAPIV3.ParameterObject);
+export interface ParameterObject {
+  allowEmptyValue?: boolean;
+  allowReserved?: boolean;
+  content?: Record<string, MediaTypeObject>;
+  deprecated?: boolean;
+  description?: string;
+  example?: unknown;
+  examples?: Record<string, ExampleObject | ReferenceObject>;
+  explode?: boolean;
+  in: 'cookie' | 'header' | 'path' | 'query' | 'querystring';
+  name: string;
+  required?: boolean;
+  schema?: SchemaObject | boolean;
+  style?: string;
+}
+
+/** Copy a spec parameter into the flat shape {@link ParameterObject} describes. */
+export function parameterObject(value: object): ParameterObject {
+  return value as ParameterObject;
+}
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#request-body-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#request-body-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#request-body-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#request-body-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#request-body-object}
  */
-export type RequestBodyObject = OpenAPIV3_1.RequestBodyObject | OpenAPIV3.RequestBodyObject;
+export type RequestBodyObject = OAS30.RequestBodyObject | OAS31.RequestBodyObject | OAS32.RequestBodyObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#media-type-object}
  */
-export type MediaTypeObject = OpenAPIV3_1.MediaTypeObject | OpenAPIV3.MediaTypeObject;
+export type MediaTypeObject = OAS30.MediaTypeObject | OAS31.MediaTypeObject | OAS32.MediaTypeObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#response-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#response-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#response-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#response-object}
  */
-export type ResponseObject = OpenAPIV3_1.ResponseObject | OpenAPIV3.ResponseObject;
+export type ResponseObject = OAS30.ResponseObject | OAS31.ResponseObject | OAS32.ResponseObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#callback-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#callback-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#callback-object}
  */
-export type CallbackObject = OpenAPIV3_1.CallbackObject | OpenAPIV3.CallbackObject;
+export type CallbackObject = OAS30.CallbackObject | OAS31.CallbacksObject | OAS32.CallbacksObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#example-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#example-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#example-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#example-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#example-object}
  */
-export type ExampleObject = OpenAPIV3_1.ExampleObject | OpenAPIV3.ExampleObject;
+export type ExampleObject = OAS30.ExampleObject | OAS31.ExampleObject | OAS32.ExampleObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#tag-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#tag-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#tag-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#tag-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#tag-object}
  */
-export type TagObject = OpenAPIV3_1.TagObject | OpenAPIV3.TagObject;
+export type TagObject = OAS30.TagObject | OAS31.TagObject | OAS32.TagObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#header-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#header-object}
+ * Header as this library reads it. The header name is the map key. `schema` and `content` are
+ * optional, including when the spec encodes them as mutually exclusive variants.
+ *
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#header-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#header-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#header-object}
  */
-export type HeaderObject = OpenAPIV3_1.HeaderObject | OpenAPIV3.HeaderObject;
+export interface HeaderObject {
+  allowEmptyValue?: boolean;
+  content?: Record<string, MediaTypeObject>;
+  deprecated?: boolean;
+  description?: string;
+  example?: unknown;
+  examples?: Record<string, ExampleObject | ReferenceObject>;
+  explode?: boolean;
+  required?: boolean;
+  schema?: SchemaObject | boolean;
+  style?: string;
+}
+
+/** Copy a spec header into the flat shape {@link HeaderObject} describes. */
+export function headerObject(value: object): HeaderObject {
+  return value as HeaderObject;
+}
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
+ * Writable JSON Schema object this library normalizes OpenAPI schemas into.
+ *
+ * OpenAPI 3.0 and 3.1 keywords are optional so `type`, `properties`, `items`, and `allOf` can be
+ * read and updated on one shape. `exclusiveMinimum` and `exclusiveMaximum` accept the 3.0 boolean
+ * form and the 3.1 numeric form. `nullable`, `components`, and `x-readme-ref-name` are retained
+ * while dereferencing and converting to JSON Schema. Boolean schemas stay at
+ * `SchemaObject | boolean` call sites.
+ *
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#schema-object}
  */
-export type SchemaObject = {
-  // OpenAPI-specific properties
-  externalDocs?: unknown;
-  xml?: unknown;
-} & {
-  // TODO: We should split this into one type for v3 and one type for v3.1 to ensure type accuracy.
+export interface SchemaObject {
+  $anchor?: string;
+  $comment?: string;
+  $defs?: Record<string, SchemaObject | boolean>;
+  $id?: string;
+  $ref?: string;
   $schema?: string;
 
-  // We add this to the schema to help out with circular refs
-  components?: OpenAPIV3_1.ComponentsObject;
-
+  additionalItems?: SchemaObject | boolean;
+  additionalProperties?: SchemaObject | boolean;
+  allOf?: (SchemaObject | boolean)[];
+  anyOf?: (SchemaObject | boolean)[];
+  components?: ComponentsObject;
+  const?: unknown;
+  contains?: SchemaObject | boolean;
+  default?: unknown;
+  dependencies?: Record<string, SchemaObject | boolean | string[]>;
   deprecated?: boolean;
-  example?: unknown;
-  examples?: unknown[];
-  nullable?: boolean;
-  readOnly?: boolean;
-  writeOnly?: boolean;
-
-  // `discriminator` comes through in `OpenAPIV3.SchemaObject` but because we also union this type
-  // to `JSONSchema` TS gets confused when we narrow types everywhere and doens't pick up valid
-  // `discriminator` types when we need them.
+  description?: string;
   discriminator?: DiscriminatorObject;
+  else?: SchemaObject | boolean;
+  enum?: unknown[];
 
-  // We add this extension within our dereferencing work to preserve the origin dereferenced
-  // schemas.
+  example?: unknown;
+  examples?: unknown;
+  exclusiveMaximum?: boolean | number;
+  exclusiveMinimum?: boolean | number;
+  format?: string;
+  if?: SchemaObject | boolean;
+  items?: SchemaObject | SchemaObject[] | boolean;
+  maxContains?: number;
+  maximum?: number;
+  maxItems?: number;
+  maxLength?: number;
+  maxProperties?: number;
+  minContains?: number;
+
+  minimum?: number;
+  minItems?: number;
+  minLength?: number;
+  minProperties?: number;
+  multipleOf?: number;
+  not?: SchemaObject | boolean;
+
+  nullable?: boolean;
+  oneOf?: (SchemaObject | boolean)[];
+  pattern?: string;
+  patternProperties?: Record<string, SchemaObject | boolean>;
+  prefixItems?: (SchemaObject | boolean)[];
+  properties?: Record<string, SchemaObject | boolean>;
+
+  propertyNames?: SchemaObject | boolean;
+  readOnly?: boolean;
+  required?: string[];
+  then?: SchemaObject | boolean;
+  title?: string;
+  type?: string | string[] | null;
+  unevaluatedProperties?: SchemaObject | boolean;
+
+  uniqueItems?: boolean;
+  writeOnly?: boolean;
   'x-readme-ref-name'?: string;
-} & (
-    | OpenAPIV3.SchemaObject
-    | OpenAPIV3_1.SchemaObject
-    // Adding `JSONSchema` to this because `json-schema-merge-allof` expects those.
-    | JSONSchema
-  );
+}
+
+/** Copy a spec schema into the writable {@link SchemaObject} this library edits. */
+export function schemaObject(value: object): SchemaObject {
+  return { ...(value as SchemaObject) };
+}
 
 export interface SchemaWrapper {
   $schema?: string;
@@ -294,10 +414,11 @@ export function isSchema(check: unknown, isPolymorphicAllOfChild = false): check
 }
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#security-scheme-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#security-scheme-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-scheme-object}
  */
-export type SecuritySchemeObject = OpenAPIV3_1.SecuritySchemeObject | OpenAPIV3.SecuritySchemeObject;
+export type SecuritySchemeObject = OAS30.SecuritySchemeObject | OAS31.SecuritySchemeObject | OAS32.SecuritySchemeObject;
 
 export type SecuritySchemesObject = Record<string, SecuritySchemeObject>;
 
@@ -319,16 +440,21 @@ export type KeyedSecuritySchemeObject = SecuritySchemeObject & {
 };
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-requirement-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#security-requirement-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#security-requirement-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-requirement-object}
  */
-export type SecurityRequirementObject = OpenAPIV3_1.SecurityRequirementObject | OpenAPIV3.SecurityRequirementObject;
+export type SecurityRequirementObject =
+  | OAS30.SecurityRequirementObject
+  | OAS31.SecurityRequirementObject
+  | OAS32.SecurityRequirementObject;
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminator-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminator-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#discriminator-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#discriminator-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#discriminator-object}
  */
-export type DiscriminatorObject = OpenAPIV3.DiscriminatorObject | OpenAPIV3_1.DiscriminatorObject;
+export type DiscriminatorObject = OAS30.DiscriminatorObject;
 
 /**
  * Mapping of discriminator schema names to their child schema names.
