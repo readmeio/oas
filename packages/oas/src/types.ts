@@ -49,7 +49,7 @@ export function isOpenAPI31(schema: OpenAPIDocument): schema is OpenAPI31Documen
  * Is a given object an OpenAPI 3.2 API definition?
  *
  */
-export function isOpenAPI32(schema: OpenAPIDocument): schema is OpenAPI31Document {
+export function isOpenAPI32(schema: OpenAPIDocument): schema is OpenAPI32Document {
   return assertOpenAPI32(schema);
 }
 

@@ -212,7 +212,7 @@ export function getParametersAsJSONSchema(
         const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: ParameterObject) => {
           let schema: SchemaObject = {};
           if (current.schema && typeof current.schema === 'object') {
-            const currentSchema = schemaObject(current.schema);
+            const currentSchema = schemaObject(cloneObject(current.schema));
 
             if (current.example !== undefined) {
               // `example` can be present outside of the `schema` block so if it's there we should
@@ -240,7 +240,7 @@ export function getParametersAsJSONSchema(
               const contentType = getParameterContentType(contentKeys);
               const mediaType = contentType ? current.content[contentType] : undefined;
               if (mediaType && 'schema' in mediaType && mediaType.schema && typeof mediaType.schema === 'object') {
-                const currentSchema = schemaObject(mediaType.schema);
+                const currentSchema = schemaObject(cloneObject(mediaType.schema));
 
                 if (current.example !== undefined) {
                   // `example` can be present outside of the `schema` block so if it's there we
