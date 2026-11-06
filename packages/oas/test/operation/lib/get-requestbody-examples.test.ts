@@ -26,6 +26,67 @@ describe('.getRequestBodyExamples()', () => {
     expect(operation.getRequestBodyExamples()).toStrictEqual([]);
   });
 
+  it('should generate an example from an OpenAPI 3.2 request body content `$ref`', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'media types', version: '1.0.0' },
+      paths: {
+        '/files': {
+          post: {
+            requestBody: {
+              content: {
+                'application/json': { $ref: '#/components/mediaTypes/File' },
+              },
+            },
+            responses: { '201': { description: 'Created' } },
+          },
+        },
+      },
+      components: {
+        mediaTypes: {
+          File: { schema: { $ref: '#/components/schemas/File' } },
+        },
+        schemas: {
+          File: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              size: { type: 'integer' },
+            },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/files', 'post').getRequestBodyExamples()).toStrictEqual([
+      {
+        mediaType: 'application/json',
+        examples: [{ value: { id: 'string', size: 0 } }],
+      },
+    ]);
+  });
+
+  it('should return no examples when a request body content `$ref` does not resolve', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'media types', version: '1.0.0' },
+      paths: {
+        '/files': {
+          post: {
+            requestBody: {
+              content: {
+                'application/json': { $ref: '#/components/mediaTypes/Missing' },
+              },
+            },
+            responses: { '201': { description: 'Created' } },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/files', 'post').getRequestBodyExamples()).toStrictEqual([]);
+  });
+
   it('should support regenerating examples after the oas is dereferenced', () => {
     const webhookOperation = webhooksOas.operation('newPet', 'post', { isWebhook: true });
 
