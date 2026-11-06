@@ -147,6 +147,27 @@ describe('Invalid APIs (specification validation)', () => {
         await expect(relativePath('specs/validate-spec/valid/3.2/additional-operations.yaml')).toValidate();
       });
 
+      it('should catch mixed-case methods that already have a fixed field on the path item', async () => {
+        const result = await validate({
+          openapi: '3.2.0',
+          info: { title: 'mixed case additionalOperations', version: '1.0.0' },
+          paths: {
+            '/pets': {
+              additionalOperations: {
+                Post: { responses: { '200': { description: 'ok' } } },
+                get: { responses: { '200': { description: 'ok' } } },
+              },
+            },
+          },
+        });
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.map(error => error.message)).toStrictEqual([
+          '`/paths/pets/additionalOperations` must not contain `Post` because it already has a fixed field on the path item. Define this operation within `post` instead.',
+          '`/paths/pets/additionalOperations` must not contain `get` because it already has a fixed field on the path item. Define this operation within `get` instead.',
+        ]);
+      });
+
       it('should catch methods that already have a fixed field on the path item', async () => {
         await expect(
           relativePath('specs/validate-spec/invalid/3.2/additional-operations-fixed-method.yaml'),

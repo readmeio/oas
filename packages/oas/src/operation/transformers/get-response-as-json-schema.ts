@@ -1,11 +1,12 @@
 import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
-import type { MediaTypeObject, OASDocument, ResponseObject, SchemaObject } from '../../types.js';
+import type { MediaTypeObject, OASDocument, ReferenceObject, ResponseObject, SchemaObject } from '../../types.js';
 import type { Operation } from '../index.js';
 
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
 import { cloneObject } from '../../lib/clone-object.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
+import { resolveMediaType } from '../../lib/media-type.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
 import {
   collectRefsInSchema,
@@ -157,7 +158,10 @@ export function getResponseAsJSONSchema(
    *    prefer JSON media types.
    * @param preferredContentType Optional content-type to use. If specified and not found, returns null.
    */
-  function getPreferredSchema(content: Record<string, MediaTypeObject> | undefined, preferredContentType?: string) {
+  function getPreferredSchema(
+    content: Record<string, MediaTypeObject | ReferenceObject> | undefined,
+    preferredContentType?: string,
+  ) {
     if (!content) {
       return null;
     }
@@ -167,10 +171,12 @@ export function getResponseAsJSONSchema(
       return null;
     }
 
+    const schemaFor = (contentType: string) => schemaInput(resolveMediaType(content[contentType], api)?.schema);
+
     // If a specific content-type is requested, use it if it exists
     if (preferredContentType) {
       if (contentTypes.includes(preferredContentType)) {
-        const schema = schemaInput(content[preferredContentType]?.schema);
+        const schema = schemaFor(preferredContentType);
         if (!schema) {
           return null;
         }
@@ -185,7 +191,7 @@ export function getResponseAsJSONSchema(
     // Default behavior: prefer JSON media types
     for (let i = 0; i < contentTypes.length; i++) {
       if (isJSON(contentTypes[i])) {
-        const schema = schemaInput(content[contentTypes[i]]?.schema);
+        const schema = schemaFor(contentTypes[i]);
         if (!schema) {
           return {};
         }
@@ -201,7 +207,7 @@ export function getResponseAsJSONSchema(
       return {};
     }
 
-    const schema = schemaInput(content[contentType]?.schema);
+    const schema = schemaFor(contentType);
     if (!schema) {
       return {};
     }

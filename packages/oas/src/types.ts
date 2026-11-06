@@ -231,7 +231,7 @@ export type OperationObject = OAS30.OperationObject | OAS31.OperationObject | OA
 export interface ParameterObject {
   allowEmptyValue?: boolean;
   allowReserved?: boolean;
-  content?: Record<string, MediaTypeObject>;
+  content?: Record<string, MediaTypeObject | ReferenceObject>;
   deprecated?: boolean;
   description?: string;
   example?: unknown;
@@ -301,7 +301,7 @@ export type TagObject = OAS30.TagObject | OAS31.TagObject | OAS32.TagObject;
  */
 export interface HeaderObject {
   allowEmptyValue?: boolean;
-  content?: Record<string, MediaTypeObject>;
+  content?: Record<string, MediaTypeObject | ReferenceObject>;
   deprecated?: boolean;
   description?: string;
   example?: unknown;

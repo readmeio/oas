@@ -781,7 +781,9 @@ export default class Oas {
       return {};
     }
 
-    return this.collectAdditionalOperations(this.api.paths, (path, method) => this.operation(path, method));
+    return this.collectAdditionalOperations(this.api.paths, (path, method) => this.operation(path, method), {
+      skipExtensions: true,
+    });
   }
 
   /**
@@ -815,6 +817,7 @@ export default class Oas {
   private collectAdditionalOperations<T extends Operation>(
     container: NonNullable<OpenAPI32Document['paths'] | OpenAPI32Document['webhooks']>,
     retrieve: (key: string, method: string) => T,
+    { skipExtensions = false }: { skipExtensions?: boolean } = {},
   ): Record<string, Record<string, T>> {
     // Keys and methods come straight out of a user-supplied document so they're collected into
     // `Map`s first and only converted into plain objects at the end. Assigning a key like
@@ -822,8 +825,9 @@ export default class Oas {
     const additionalOperations = new Map<string, Map<string, T>>();
 
     Object.keys(container).forEach(key => {
-      // If this is a specification extension then we should ignore it.
-      if (key.startsWith('x-')) {
+      // Path maps use `x-` keys for specification extensions. Webhook names are free-form and may
+      // start with `x-`, so that skip only applies when walking `paths`.
+      if (skipExtensions && key.startsWith('x-')) {
         return;
       }
 

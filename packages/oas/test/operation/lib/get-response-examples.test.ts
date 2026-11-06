@@ -28,6 +28,51 @@ describe('.getResponseExamples()', () => {
     responseExamples = Oas.init(structuredClone(responseExamplesSpec));
   });
 
+  it('should generate an example from an OpenAPI 3.2 response content `$ref`', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'media types', version: '1.0.0' },
+      paths: {
+        '/files/{id}': {
+          get: {
+            operationId: 'getFile',
+            responses: {
+              '200': {
+                description: 'OK',
+                content: {
+                  'application/json': { $ref: '#/components/mediaTypes/File' },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        mediaTypes: {
+          File: { schema: { $ref: '#/components/schemas/File' } },
+        },
+        schemas: {
+          File: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              size: { type: 'integer' },
+            },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/files/{id}', 'get').getResponseExamples()).toStrictEqual([
+      {
+        status: '200',
+        mediaTypes: {
+          'application/json': [{ value: { id: 'string', size: 0 } }],
+        },
+      },
+    ]);
+  });
+
   it('should handle if there are no responses', () => {
     const operation = operationExamples.operation('/nothing', 'get');
 

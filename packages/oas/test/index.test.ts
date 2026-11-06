@@ -3105,6 +3105,35 @@ describe('Oas', () => {
       expect(additionalWebhooks.fileCopied.NOTIFY.getOperationId()).toBe('fileCopiedNotification');
     });
 
+    it('should keep webhook names that start with `x-` and skip path extensions', () => {
+      const oas = Oas.init({
+        openapi: '3.2.0',
+        info: { version: '1.0.0', title: 'x- names' },
+        paths: {
+          'x-internal': {
+            additionalOperations: {
+              COPY: { operationId: 'copyInternal', responses: { 201: { description: 'Created' } } },
+            },
+          },
+        },
+        webhooks: {
+          'x-fileCopied': {
+            additionalOperations: {
+              NOTIFY: { operationId: 'fileCopiedNotification', responses: { 200: { description: 'OK' } } },
+            },
+          },
+        },
+      });
+
+      expect(oas.getAdditionalOperations()).toStrictEqual({});
+      expect(oas.getAdditionalWebhooks()).toStrictEqual({
+        'x-fileCopied': {
+          NOTIFY: expect.any(Webhook),
+        },
+      });
+      expect(oas.getAdditionalWebhooks()['x-fileCopied'].NOTIFY.getOperationId()).toBe('fileCopiedNotification');
+    });
+
     it('should not include `additionalOperations` within `getWebhooks()`', () => {
       expect(additionalOps.getWebhooks()).toStrictEqual({
         fileCopied: {},

@@ -1535,6 +1535,19 @@ describe('toJSONSchema()', () => {
         };
       }
 
+      it('should use `dataValue` and `serializedValue` when `value` is absent', () => {
+        const schema: SchemaObject = toJSONSchema({
+          type: 'string',
+          examples: {
+            typed: { dataValue: 'dog' },
+            encoded: { serializedValue: 'cat' },
+            preferred: { value: 'bird', dataValue: 'ignored' },
+          },
+        });
+
+        expect(schema.examples).toStrictEqual(['dog', 'cat', 'bird']);
+      });
+
       it('should pick up an example alongside a property', () => {
         const schema: SchemaObject = toJSONSchema({
           type: 'string',

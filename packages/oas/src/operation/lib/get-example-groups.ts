@@ -4,6 +4,7 @@ import type { Operation } from '../index.js';
 import type { MediaTypeExample } from './get-mediatype-examples.js';
 
 import { getExtension } from '../../extensions.js';
+import { exampleValue } from '../../lib/example-value.js';
 import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
@@ -199,7 +200,7 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
           ...groups[exampleKey]?.request,
           [location]: {
             ...groups[exampleKey]?.request?.[location],
-            [param.name]: example.value,
+            [param.name]: exampleValue(example),
           },
         },
       };

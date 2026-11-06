@@ -748,7 +748,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     const fixedFieldMethods: string[] = supportedHTTPMethods.map(method => method.toUpperCase());
 
     Object.keys(pathItem.additionalOperations).forEach(method => {
-      if (fixedFieldMethods.includes(method)) {
+      if (fixedFieldMethods.includes(method.toUpperCase())) {
         this.flagInstancePath(`${pointer}/additionalOperations`);
         this.reportError(
           `\`${id}/additionalOperations\` must not contain \`${method}\` because it already has a fixed field on the path item. Define this operation within \`${method.toLowerCase()}\` instead.`,

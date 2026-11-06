@@ -35,9 +35,10 @@ import type { ResponseSchemaObject } from './transformers/get-response-as-json-s
 import { normalizeURL } from '@readme/openapi-parser/lib/urls';
 
 import matchesMimeType from '../lib/matches-mimetype.js';
+import { resolveMediaType } from '../lib/media-type.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef } from '../lib/refs.js';
 import { defaultVariablesFromServers, splitUrlFromServers, variablesFromServers } from '../lib/urls.js';
-import { isRef, parameterObject } from '../types.js';
+import { isOpenAPI32, isRef, parameterObject } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
@@ -948,9 +949,14 @@ export class Operation {
         return false;
       }
 
+      const mediaTypeObject = resolveMediaType(content[mediaType], this.api);
+      if (!mediaTypeObject) {
+        return false;
+      }
+
       return {
         mediaType,
-        mediaTypeObject: content[mediaType],
+        mediaTypeObject,
         description: requestBody.description,
       };
     }
@@ -974,9 +980,14 @@ export class Operation {
     }
 
     if (availableMediaType) {
+      const mediaTypeObject = resolveMediaType(content[availableMediaType], this.api);
+      if (!mediaTypeObject) {
+        return false;
+      }
+
       return {
         mediaType: availableMediaType,
-        mediaTypeObject: content[availableMediaType],
+        mediaTypeObject,
         description: requestBody.description,
       };
     }
@@ -1065,7 +1076,7 @@ export class Operation {
    * @param expression Callback expression to look for.
    * @param method HTTP Method on the callback to look for.
    */
-  getCallback(identifier: string, expression: string, method: HttpMethods): Callback | false {
+  getCallback(identifier: string, expression: string, method: OperationMethod): Callback | false {
     if (!this.schema.callbacks) return false;
 
     let callbackObj = this.schema.callbacks[identifier];
@@ -1088,14 +1099,27 @@ export class Operation {
       }
     }
 
-    // `PathItemObject` also describes the OpenAPI 3.2 `query` operation.
+    // Fixed methods live on the Path Item. OpenAPI 3.2 custom methods live in `additionalOperations`.
     const callbackPathItem: PathItemObject = callback;
-    if (!callbackPathItem[method]) {
+    const fixedMethod = supportedMethods.find(candidate => candidate === method.toLowerCase());
+    let callbackOperation: OperationObject | ReferenceObject | undefined = fixedMethod
+      ? callbackPathItem[fixedMethod]
+      : undefined;
+    if (!callbackOperation && 'additionalOperations' in callbackPathItem && callbackPathItem.additionalOperations) {
+      const { additionalOperations } = callbackPathItem;
+      callbackOperation = additionalOperations[method] ?? additionalOperations[method.toUpperCase()];
+    }
+
+    if (!callbackOperation) {
       return false;
     }
 
-    const callbackOperation = dereferenceRef(callbackPathItem[method], this.api);
-    return new Callback(this.oas, expression, method, callbackOperation, identifier, callback);
+    const resolvedOperation = dereferenceRef(callbackOperation, this.api);
+    if (!resolvedOperation || isRef(resolvedOperation)) {
+      return false;
+    }
+
+    return new Callback(this.oas, expression, method, resolvedOperation, identifier, callback);
   }
 
   /**
@@ -1139,6 +1163,22 @@ export class Operation {
             callbacks.push(found);
           }
         });
+
+        if (
+          isOpenAPI32(this.api) &&
+          'additionalOperations' in callbackPath &&
+          callbackPath.additionalOperations &&
+          typeof callbackPath.additionalOperations === 'object'
+        ) {
+          Object.keys(callbackPath.additionalOperations).forEach(method => {
+            if (supportedMethods.includes(method.toLowerCase() as HttpMethods)) return;
+
+            const found = this.getCallback(callback, expression, method);
+            if (found) {
+              callbacks.push(found);
+            }
+          });
+        }
       });
     });
 

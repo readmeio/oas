@@ -1,6 +1,7 @@
 import type { MediaTypeObject, OASDocument } from '../../types.js';
 import type { ExampleObject as OpenAPI32ExampleObject } from '@scalar/openapi-types/3.2';
 
+import { exampleValue } from '../../lib/example-value.js';
 import matchesMimeType from '../../lib/matches-mimetype.js';
 import { collectRefsInSchema, dereferenceRef, dereferenceRefDeep } from '../../lib/refs.js';
 import sampleFromSchema from '../../samples/index.js';
@@ -100,13 +101,11 @@ export function getMediaTypeExamples(
           if (isExampleObject(example)) {
             if ('value' in example) {
               example.value = dereferenceRefDeep(example.value, definition);
-              value = example.value;
             } else if ('dataValue' in example) {
               example.dataValue = dereferenceRefDeep(example.dataValue, definition);
-              value = example.dataValue;
-            } else if ('serializedValue' in example) {
-              value = example.serializedValue;
             }
+
+            value = exampleValue(example);
 
             // If there is no example value or if it contains any `$ref` pointers that we couldn't
             // resolve then we shouldn't return anything because to the user it'll look like we

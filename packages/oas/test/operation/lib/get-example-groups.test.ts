@@ -16,6 +16,55 @@ describe('.getExampleGroups()', () => {
     trainTravel = Oas.init(structuredClone(trainTravelSpec));
   });
 
+  it('uses `dataValue` and `serializedValue` when a parameter example has no `value`', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'example values', version: '1.0.0' },
+      paths: {
+        '/pets': {
+          get: {
+            parameters: [
+              {
+                name: 'limit',
+                in: 'query',
+                schema: { type: 'integer' },
+                examples: {
+                  small: { dataValue: 5 },
+                  encoded: { serializedValue: '10' },
+                  preferred: { value: 1, dataValue: 2 },
+                  empty: { value: null, dataValue: 9 },
+                },
+              },
+            ],
+            responses: {
+              '200': {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: { type: 'object' },
+                    examples: {
+                      small: { value: { ok: true } },
+                      encoded: { value: { ok: true } },
+                      preferred: { value: { ok: true } },
+                      empty: { value: { ok: true } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const groups = oas.operation('/pets', 'get').getExampleGroups();
+
+    expect(groups.small.request?.query).toStrictEqual({ limit: 5 });
+    expect(groups.encoded.request?.query).toStrictEqual({ limit: '10' });
+    expect(groups.preferred.request?.query).toStrictEqual({ limit: 1 });
+    expect(groups.empty.request?.query).toStrictEqual({ limit: null });
+  });
+
   it('body/header/path/query param examples with matching response examples', () => {
     const operation = requestExamples.operation('/parameterExamples/{param1}/{param2}', 'patch');
     const groups = operation.getExampleGroups();
