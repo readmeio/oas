@@ -22,6 +22,39 @@ function schemaInput(schema: object | boolean | null | undefined): SchemaObject 
   return schemaObject(cloneObject(schema));
 }
 
+/**
+ * A schema counts as present when it is a boolean JSON Schema or a non-empty schema object.
+ * `true` and `false` stay as they are. An empty object is not a present schema.
+ *
+ */
+function isPresentSchema(schema: unknown): schema is boolean | object {
+  if (typeof schema === 'boolean') return true;
+  return !!schema && typeof schema === 'object' && Object.keys(schema).length > 0;
+}
+
+/**
+ * Schema to convert for a resolved media type. A present `schema` wins. When `schema` is missing
+ * or empty, OpenAPI 3.2 sequential media types (JSON Lines, Server-Sent Events, and similar)
+ * contribute `itemSchema` as the schema of one item — not wrapped in an array.
+ *
+ */
+function schemaFromMediaType(mediaType: MediaTypeObject | undefined): object | boolean | null | undefined {
+  if (!mediaType) {
+    return undefined;
+  }
+
+  const { schema } = mediaType;
+  if (isPresentSchema(schema)) {
+    return schema;
+  }
+
+  if ('itemSchema' in mediaType && mediaType.itemSchema != null) {
+    return mediaType.itemSchema;
+  }
+
+  return schema;
+}
+
 export interface ResponseSchemaObject {
   description?: string;
   label: string;
@@ -171,7 +204,8 @@ export function getResponseAsJSONSchema(
       return null;
     }
 
-    const schemaFor = (contentType: string) => schemaInput(resolveMediaType(content[contentType], api)?.schema);
+    const schemaFor = (contentType: string) =>
+      schemaInput(schemaFromMediaType(resolveMediaType(content[contentType], api)));
 
     // If a specific content-type is requested, use it if it exists
     if (preferredContentType) {

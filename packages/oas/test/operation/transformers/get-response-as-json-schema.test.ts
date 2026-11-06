@@ -74,6 +74,273 @@ describe('.getResponseAsJSONSchema()', () => {
     ]);
   });
 
+  it('should use `itemSchema` when an OpenAPI 3.2 response has no `schema`', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'events', version: '1.0.0' },
+      paths: {
+        '/events': {
+          get: {
+            responses: {
+              '200': {
+                description: 'A stream of events, one per line.',
+                content: {
+                  'application/jsonl': {
+                    itemSchema: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const itemSchema = {
+      description: 'A stream of events, one per line.',
+      label: 'Response body',
+      type: 'object',
+      schema: {
+        $schema: 'https://json-schema.org/draft/2020-12/schema#',
+        type: 'object',
+        properties: { id: { type: 'string' } },
+      },
+    };
+
+    const operation = oas.operation('/events', 'get');
+    expect(operation.getResponseAsJSONSchema('200')).toMatchObject([itemSchema]);
+    expect(operation.getResponseAsJSONSchema('200', { contentType: 'application/jsonl' })).toMatchObject([itemSchema]);
+  });
+
+  it('should prefer `schema` over `itemSchema` when both are present', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'events', version: '1.0.0' },
+      paths: {
+        '/events': {
+          get: {
+            responses: {
+              '200': {
+                description: 'OK',
+                content: {
+                  'application/jsonl': {
+                    schema: { type: 'string' },
+                    itemSchema: {
+                      type: 'object',
+                      properties: { id: { type: 'string' } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/events', 'get').getResponseAsJSONSchema('200')).toMatchObject([
+      {
+        description: 'OK',
+        label: 'Response body',
+        type: 'string',
+        schema: {
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+          type: 'string',
+        },
+      },
+    ]);
+  });
+
+  it('should use `itemSchema` when `schema` is empty', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'events', version: '1.0.0' },
+      paths: {
+        '/events': {
+          get: {
+            responses: {
+              '200': {
+                description: 'A stream of events.',
+                content: {
+                  'text/event-stream': {
+                    schema: {},
+                    itemSchema: {
+                      type: 'object',
+                      properties: { event: { type: 'string' } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/events', 'get').getResponseAsJSONSchema('200')).toMatchObject([
+      {
+        description: 'A stream of events.',
+        label: 'Response body',
+        type: 'object',
+        schema: {
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+          type: 'object',
+          properties: { event: { type: 'string' } },
+        },
+      },
+    ]);
+  });
+
+  it('should keep a boolean `schema` instead of using `itemSchema`', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'events', version: '1.0.0' },
+      paths: {
+        '/events': {
+          get: {
+            responses: {
+              '200': {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: false,
+                    itemSchema: {
+                      type: 'object',
+                      properties: { id: { type: 'string' } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/events', 'get').getResponseAsJSONSchema('200')).toMatchObject([
+      {
+        description: 'OK',
+        label: 'Response body',
+        type: 'string',
+        schema: {
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+        },
+      },
+    ]);
+  });
+
+  it('should resolve an OpenAPI 3.2 `itemSchema` `$ref`', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'events', version: '1.0.0' },
+      paths: {
+        '/events': {
+          get: {
+            responses: {
+              '200': {
+                description: 'A stream of events, one per line.',
+                content: {
+                  'application/jsonl': {
+                    itemSchema: { $ref: '#/components/schemas/Event' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Event: {
+            type: 'object',
+            properties: { id: { type: 'string' } },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/events', 'get').getResponseAsJSONSchema('200')).toMatchObject([
+      {
+        description: 'A stream of events, one per line.',
+        label: 'Response body',
+        type: 'object',
+        schema: {
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+          $ref: '#/components/schemas/Event',
+          components: {
+            schemas: {
+              Event: {
+                type: 'object',
+                properties: { id: { type: 'string' } },
+                'x-readme-ref-name': 'Event',
+              },
+            },
+          },
+        },
+      },
+    ]);
+  });
+
+  it('should resolve an `itemSchema` `$ref` on a media type reached through a content `$ref`', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'events', version: '1.0.0' },
+      paths: {
+        '/events': {
+          get: {
+            responses: {
+              '200': {
+                description: 'A stream of events, one per line.',
+                content: {
+                  'application/jsonl': { $ref: '#/components/mediaTypes/EventStream' },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        mediaTypes: {
+          EventStream: {
+            itemSchema: { $ref: '#/components/schemas/Event' },
+          },
+        },
+        schemas: {
+          Event: {
+            type: 'object',
+            properties: { id: { type: 'string' } },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/events', 'get').getResponseAsJSONSchema('200')).toMatchObject([
+      {
+        description: 'A stream of events, one per line.',
+        label: 'Response body',
+        type: 'object',
+        schema: {
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+          $ref: '#/components/schemas/Event',
+          components: {
+            schemas: {
+              Event: {
+                type: 'object',
+                properties: { id: { type: 'string' } },
+                'x-readme-ref-name': 'Event',
+              },
+            },
+          },
+        },
+      },
+    ]);
+  });
+
   it('should return with null if there is empty content', () => {
     const oas = createOasForOperation({
       responses: {
