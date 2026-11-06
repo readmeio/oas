@@ -2,7 +2,6 @@ import type { Extensions } from '../extensions.js';
 import type Oas from '../index.js';
 import type { SplitUrlResult } from '../lib/urls.js';
 import type {
-  HttpMethods,
   KeyedSecuritySchemeObject,
   MediaTypeObject,
   OAS31Document,
@@ -36,10 +35,10 @@ import { normalizeURL } from '@readme/openapi-parser/lib/urls';
 
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { resolveMediaType } from '../lib/media-type.js';
+import { findPathItemOperation, listPathItemOperations } from '../lib/path-item-operations.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef } from '../lib/refs.js';
 import { defaultVariablesFromServers, splitUrlFromServers, variablesFromServers } from '../lib/urls.js';
-import { isOpenAPI32, isRef, parameterObject } from '../types.js';
-import { supportedMethods } from '../utils.js';
+import { isRef, parameterObject } from '../types.js';
 
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
 import { getCallbackExamples } from './lib/get-callback-examples.js';
@@ -1099,22 +1098,12 @@ export class Operation {
       }
     }
 
-    // Fixed methods live on the Path Item. OpenAPI 3.2 custom methods live in `additionalOperations`.
-    const callbackPathItem: PathItemObject = callback;
-    const fixedMethod = supportedMethods.find(candidate => candidate === method.toLowerCase());
-    let callbackOperation: OperationObject | ReferenceObject | undefined = fixedMethod
-      ? callbackPathItem[fixedMethod]
-      : undefined;
-    if (!callbackOperation && 'additionalOperations' in callbackPathItem && callbackPathItem.additionalOperations) {
-      const { additionalOperations } = callbackPathItem;
-      callbackOperation = additionalOperations[method] ?? additionalOperations[method.toUpperCase()];
-    }
-
-    if (!callbackOperation) {
+    const found = findPathItemOperation(callback, this.api, method);
+    if (!found) {
       return false;
     }
 
-    const resolvedOperation = dereferenceRef(callbackOperation, this.api);
+    const resolvedOperation = dereferenceRef(found.operation, this.api);
     if (!resolvedOperation || isRef(resolvedOperation)) {
       return false;
     }
@@ -1155,30 +1144,12 @@ export class Operation {
           }
         }
 
-        Object.keys(callbackPath).forEach(method => {
-          if (!supportedMethods.includes(method as HttpMethods)) return;
-
-          const found = this.getCallback(callback, expression, method as HttpMethods);
+        listPathItemOperations(callbackPath, this.api).forEach(({ method }) => {
+          const found = this.getCallback(callback, expression, method);
           if (found) {
             callbacks.push(found);
           }
         });
-
-        if (
-          isOpenAPI32(this.api) &&
-          'additionalOperations' in callbackPath &&
-          callbackPath.additionalOperations &&
-          typeof callbackPath.additionalOperations === 'object'
-        ) {
-          Object.keys(callbackPath.additionalOperations).forEach(method => {
-            if (supportedMethods.includes(method.toLowerCase() as HttpMethods)) return;
-
-            const found = this.getCallback(callback, expression, method);
-            if (found) {
-              callbacks.push(found);
-            }
-          });
-        }
       });
     });
 

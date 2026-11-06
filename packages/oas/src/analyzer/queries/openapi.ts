@@ -1,8 +1,10 @@
-import type { OASDocument } from '../../types.js';
+import type { OASDocument, PathItemObject } from '../../types.js';
 import type { OperationScope } from '../scope.js';
 import type { JSONPathResult } from '../util.js';
 
-import { toPointer } from '../../lib/refs.js';
+import { listPathItemOperations } from '../../lib/path-item-operations.js';
+import { dereferenceRef, toPointer } from '../../lib/refs.js';
+import { isRef } from '../../types.js';
 import { dereferenceOas } from '../dereference.js';
 import { queryCached } from '../query-cache.js';
 import { isAncestorOfScope, isPointerInScope } from '../scope.js';
@@ -230,21 +232,19 @@ export function serverVariables(definition: OASDocument): string[] {
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-object}
  */
 export function totalOperations(definition: OASDocument): number {
-  return queryCached(['$..paths[*]'], definition).flatMap(res => {
-    const pathItem = res.value;
-    if (!pathItem || typeof pathItem !== 'object') {
-      return Object.keys(pathItem as object);
+  return queryCached(['$..paths[*]'], definition).reduce((count, res) => {
+    const value = res.value;
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return count;
     }
 
-    return Object.entries(pathItem).flatMap(([key, value]) => {
-      // An OpenAPI 3.2 `additionalOperations` map contributes one key per method inside it.
-      if (key === 'additionalOperations' && value && typeof value === 'object' && !Array.isArray(value)) {
-        return Object.keys(value);
-      }
+    const pathItem = isRef(value) ? dereferenceRef(value, definition) : value;
+    if (!pathItem || typeof pathItem !== 'object' || Array.isArray(pathItem) || isRef(pathItem)) {
+      return count;
+    }
 
-      return key;
-    });
-  }).length;
+    return count + listPathItemOperations(pathItem as PathItemObject, definition).length;
+  }, 0);
 }
 
 /**

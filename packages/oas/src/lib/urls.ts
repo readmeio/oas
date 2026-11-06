@@ -1,16 +1,25 @@
-import type { HttpMethods, PathsObject, ServerObject, ServerVariable, ServerVariablesObject, User } from '../types';
+import type {
+  OASDocument,
+  PathItemObject,
+  PathsObject,
+  ServerObject,
+  ServerVariable,
+  ServerVariablesObject,
+  User,
+} from '../types';
 import type { Match, ParamData } from 'path-to-regexp';
 
 import { normalizeURL, stripTrailingSlash, substituteServerVariables } from '@readme/openapi-parser/lib/urls';
-import { match, pathToRegexp } from 'path-to-regexp';
+import { match } from 'path-to-regexp';
 
 import getUserVariable from './get-user-variable';
+import { findPathItemOperation } from './path-item-operations';
 
 export interface PathMatch {
   match?: Match<ParamData>;
   operation: PathsObject;
   url: {
-    method?: HttpMethods;
+    method?: string;
     nonNormalizedPath: string;
     origin: string;
     path: string;
@@ -445,26 +454,30 @@ export function generatePathMatches(paths: PathsObject, pathName: string, origin
 
 /**
  * @param pathMatches Array of path matches to filter down.
- * @param targetMethod HTTP method to look for.
+ * @param targetMethod HTTP method to look for. Fixed methods and OpenAPI 3.2 custom methods are
+ *    both matched case-insensitively.
+ * @param definition API definition the path items were read from. Required so custom methods are
+ *    only read from OpenAPI 3.2 documents.
  * @returns Filtered down path matches.
  */
-export function filterPathMethods(pathMatches: PathMatches, targetMethod: HttpMethods): PathMatch[] {
-  const regExp = pathToRegexp(targetMethod);
+export function filterPathMethods(
+  pathMatches: PathMatches,
+  targetMethod: string,
+  definition: OASDocument,
+): PathMatch[] {
   return pathMatches
     .map(p => {
-      const captures = Object.keys(p.operation).filter(r => regExp.regexp.exec(r));
-
-      if (captures.length) {
-        const method = captures[0];
-        p.url.method = method.toUpperCase() as HttpMethods;
-
-        return {
-          url: p.url,
-          operation: p.operation[method],
-        };
+      const found = findPathItemOperation(p.operation as PathItemObject, definition, targetMethod);
+      if (!found) {
+        return false;
       }
 
-      return false;
+      p.url.method = found.method.toUpperCase();
+
+      return {
+        url: p.url,
+        operation: found.operation as PathsObject,
+      };
     })
     .filter((item): item is PathMatch => Boolean(item));
 }

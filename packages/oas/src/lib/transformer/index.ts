@@ -1,6 +1,5 @@
 import type {
   ComponentsObject,
-  HttpMethods,
   OASDocument,
   OperationObject,
   PathItemObject,
@@ -11,9 +10,9 @@ import jsonPointer from 'jsonpointer';
 
 import { query } from '../../analyzer/util.js';
 import { Operation } from '../../operation/index.js';
-import { hasWebhooks, isOpenAPI32, isRef } from '../../types.js';
-import { supportedMethods } from '../../utils.js';
+import { hasWebhooks, isRef } from '../../types.js';
 import { findDiscriminatorChildren } from '../build-discriminator-one-of.js';
+import { isHttpMethod, listPathItemOperations, removePathItemOperation } from '../path-item-operations.js';
 import { decodePointer, encodePointer } from '../refs.js';
 
 import { OperationSelection } from './operation-selection.js';
@@ -415,7 +414,7 @@ export class OpenAPITransformer {
       return { retention: 'all' };
     }
 
-    if (supportedMethods.includes(segment.toLowerCase() as HttpMethods)) {
+    if (isHttpMethod(segment)) {
       return { method: segment, retention: 'operation' };
     }
 
@@ -562,11 +561,7 @@ export class OpenAPITransformer {
     }
 
     Object.entries(pathItem).forEach(([key, value]) => {
-      if (
-        supportedMethods.includes(key.toLowerCase() as HttpMethods) ||
-        key === 'additionalOperations' ||
-        value === undefined
-      ) {
+      if (isHttpMethod(key) || key === 'additionalOperations' || value === undefined) {
         return;
       }
 
@@ -692,58 +687,13 @@ export class OpenAPITransformer {
       return [];
     }
 
-    const operations: PathItemOperation[] = [];
-    Object.keys(pathItem).forEach(method => {
-      if (!supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
-        return;
-      }
-
-      const operation = pathItem[method as HttpMethods];
-      if (!operation) {
-        return;
-      }
-
-      operations.push({
-        method,
-        operation,
-        remove: () => {
-          delete pathItem[method as HttpMethods];
-        },
-      });
-    });
-
-    if (!isOpenAPI32(this.definition)) {
-      return operations;
-    }
-
-    const additionalOperations =
-      'additionalOperations' in pathItem && pathItem.additionalOperations ? pathItem.additionalOperations : undefined;
-    if (!additionalOperations || typeof additionalOperations !== 'object') {
-      return operations;
-    }
-
-    Object.keys(additionalOperations).forEach(method => {
-      const operation = additionalOperations[method] as OperationObject | undefined;
-      if (!operation) {
-        return;
-      }
-
-      operations.push({
-        method,
-        operation,
-        remove: () => {
-          delete additionalOperations[method];
-
-          // Once the last custom operation is gone the map is just noise, and leaving it behind
-          // would make the Path Item look like it still has operations.
-          if (!Object.keys(additionalOperations).length) {
-            delete (pathItem as { additionalOperations?: unknown }).additionalOperations;
-          }
-        },
-      });
-    });
-
-    return operations;
+    return listPathItemOperations(pathItem, this.definition).map(entry => ({
+      method: entry.method,
+      operation: entry.operation,
+      remove: () => {
+        removePathItemOperation(pathItem, entry);
+      },
+    }));
   }
 
   /**

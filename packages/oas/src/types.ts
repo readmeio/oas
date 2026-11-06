@@ -110,13 +110,15 @@ export type SecurityType = 'apiKey' | 'Basic' | 'Bearer' | 'Cookie' | 'Header' |
 export type HttpMethods = 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put' | 'query' | 'trace';
 
 /**
- * An HTTP method that an operation may be defined under. Alongside the fixed HTTP methods that the
- * OpenAPI specification describes, OpenAPI 3.2 allows arbitrary methods (eg. `COPY`) to be
- * defined within a path item's `additionalOperations` map.
+ * An HTTP method that an operation may be defined under. Fixed methods (`get`, `post`, `query`, …)
+ * stay members of the union so callers get autocomplete. OpenAPI 3.2 also allows arbitrary
+ * methods (`COPY`) inside `additionalOperations`, so any other string is accepted.
+ *
+ * `string & {}` keeps that autocomplete from collapsing into plain `string`.
  *
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
  */
-export type OperationMethod = HttpMethods | (string & NonNullable<unknown>);
+export type OperationMethod = HttpMethods | (string & {});
 
 // The following are custom OpenAPI types that we use throughout this library, sans
 // `ReferenceObject` because we assume that the API definition has been dereferenced.

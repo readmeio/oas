@@ -821,6 +821,8 @@ describe('Oas', () => {
 
       it('should be lenient with the casing of the method', () => {
         expect(openapi32Features.operation('/anything/files/{id}', 'copy').getOperationId()).toBe('copyFile');
+        expect(openapi32Features.operation('/anything/files/{id}', 'Copy').getOperationId()).toBe('copyFile');
+        expect(petstore.operation('/pet', 'PUT').getOperationId()).toBe('updatePet');
       });
 
       it('should return a default when the method is not defined within `additionalOperations`', () => {
@@ -886,6 +888,40 @@ describe('Oas', () => {
   });
 
   describe('.findOperation()', () => {
+    it('should match OpenAPI 3.2 `additionalOperations`, including operation servers', () => {
+      const oas = new Oas({
+        openapi: '3.2.0',
+        info: { title: 'custom methods', version: '1.0.0' },
+        servers: [{ url: 'https://root.example.com' }],
+        paths: {
+          '/files/{id}': {
+            get: { operationId: 'getFile', responses: { 200: { description: 'OK' } } },
+            additionalOperations: {
+              COPY: { operationId: 'copyFile', responses: { 201: { description: 'Created' } } },
+              LOCK: {
+                operationId: 'lockFile',
+                servers: [{ url: 'https://locks.example.com' }],
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        },
+      } as OASDocument);
+
+      expect(oas.findOperation('https://root.example.com/files/1', 'copy')).toMatchObject({
+        url: { path: '/files/:id', method: 'COPY' },
+        operation: { operationId: 'copyFile' },
+      });
+      expect(oas.getOperation('https://root.example.com/files/1', 'COPY')?.getOperationId()).toBe('copyFile');
+
+      // LOCK declares its own server, so the root server must not serve it.
+      expect(oas.findOperation('https://root.example.com/files/1', 'LOCK')).toBeUndefined();
+      expect(oas.findOperation('https://locks.example.com/files/1', 'lock')).toMatchObject({
+        url: { method: 'LOCK' },
+        operation: { operationId: 'lockFile' },
+      });
+    });
+
     it('should return undefined if no server found', () => {
       const uri = 'http://localhost:3000/pet/1';
       const method = 'delete';

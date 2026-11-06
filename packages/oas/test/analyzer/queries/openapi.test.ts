@@ -372,9 +372,7 @@ describe('analyzer queries (OpenAPI)', () => {
         },
       } as OASDocument;
 
-      // `parameters` and `get` stay one entry each. `COPY` and `LOCK` are counted on their own,
-      // rather than the `additionalOperations` map counting as a single entry.
-      expect(analyzeTotalOperations(definition)).toBe(4);
+      expect(analyzeTotalOperations(definition)).toBe(3);
     });
   });
 
