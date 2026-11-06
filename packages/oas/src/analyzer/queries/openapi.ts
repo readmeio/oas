@@ -1,8 +1,10 @@
-import type { OASDocument } from '../../types.js';
+import type { OASDocument, PathItemObject } from '../../types.js';
 import type { OperationScope } from '../scope.js';
 import type { JSONPathResult } from '../util.js';
 
-import { toPointer } from '../../lib/refs.js';
+import { listPathItemOperations } from '../../lib/path-item-operations.js';
+import { dereferenceRef, toPointer } from '../../lib/refs.js';
+import { isRef } from '../../types.js';
 import { dereferenceOas } from '../dereference.js';
 import { queryCached } from '../query-cache.js';
 import { isAncestorOfScope, isPointerInScope } from '../scope.js';
@@ -38,13 +40,26 @@ export function additionalProperties(definition: OASDocument, scope?: OperationS
 /**
  * Determine if a given API definition utilizes `callbacks`.
  *
+ * Callbacks hang off operations. Fixed HTTP methods are direct fields of a Path Item, while
+ * OpenAPI 3.2 custom methods live one level deeper inside `additionalOperations`. The same shape
+ * appears under both `paths` and `webhooks`.
+ *
  * @see {@link https://spec.openapis.org/oas/v3.0.0.html#callback-object}
  * @see {@link https://spec.openapis.org/oas/v3.1.0.html#callback-object}
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#callback-object}
  */
 export function callbacks(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(
-    queryCached(['$.components.callbacks', '$.paths.*[?(@.callbacks)].callbacks'], definition),
+    queryCached(
+      [
+        '$.components.callbacks',
+        '$.paths.*[?(@.callbacks)].callbacks',
+        '$.paths.*.additionalOperations[?(@.callbacks)].callbacks',
+        '$.webhooks.*[?(@.callbacks)].callbacks',
+        '$.webhooks.*.additionalOperations[?(@.callbacks)].callbacks',
+      ],
+      definition,
+    ),
     scope,
   ).map(res => refizePointer(res.pointer));
 }
@@ -217,7 +232,19 @@ export function serverVariables(definition: OASDocument): string[] {
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-object}
  */
 export function totalOperations(definition: OASDocument): number {
-  return queryCached(['$..paths[*]'], definition).flatMap(res => Object.keys(res.value)).length;
+  return queryCached(['$..paths[*]'], definition).reduce((count, res) => {
+    const value = res.value;
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return count;
+    }
+
+    const pathItem = isRef(value) ? dereferenceRef(value, definition) : value;
+    if (!pathItem || typeof pathItem !== 'object' || Array.isArray(pathItem) || isRef(pathItem)) {
+      return count;
+    }
+
+    return count + listPathItemOperations(pathItem as PathItemObject, definition).length;
+  }, 0);
 }
 
 /**

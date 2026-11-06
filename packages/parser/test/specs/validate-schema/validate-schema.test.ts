@@ -110,7 +110,7 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
 });
 
 describe('OpenAPI 3.2 schema validation', () => {
-  it.each(['3.2.0', '3.2.1'])('should refuse to validate an OpenAPI %s definition', async openapi => {
+  it.each(['3.2.0', '3.2.1'])('should validate an OpenAPI %s definition', async openapi => {
     const spec = {
       openapi,
       info: { title: 'OpenAPI 3.2 fixture', version: '1.0.0' },
@@ -125,6 +125,23 @@ describe('OpenAPI 3.2 schema validation', () => {
       },
     };
 
-    await expect(validate(spec)).rejects.toThrow('OpenAPI 3.2 is currently unsupported.');
+    await expect(validate(spec)).resolves.toStrictEqual({
+      valid: true,
+      warnings: [],
+      specification: 'OpenAPI',
+    });
+  });
+
+  it.each([
+    {
+      name: 'invalid `itemSchema`',
+      file: 'invalid-item-schema.yaml',
+    },
+    {
+      name: 'invalid parameter location',
+      file: 'invalid-parameter-location.yaml',
+    },
+  ])('$name', async ({ file }) => {
+    await expect(validate(relativePath(`specs/validate-schema/invalid/3.2/${file}`))).resolves.toMatchSnapshot();
   });
 });

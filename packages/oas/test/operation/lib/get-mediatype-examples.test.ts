@@ -204,4 +204,100 @@ describe('getMediaTypeExamples()', () => {
       ]);
     });
   });
+
+  describe('OpenAPI 3.2', () => {
+    const definition = {
+      openapi: '3.2.0',
+      components: {
+        examples: {
+          Part: { value: { n: 2 } },
+        },
+      },
+    } as unknown as OASDocument;
+
+    it('should support `dataValue` on Example Objects', () => {
+      const media: MediaTypeObject = {
+        examples: {
+          data: {
+            summary: 'Data',
+            dataValue: { part: { $ref: '#/components/examples/Part/value' } },
+          },
+        },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([
+        {
+          summary: 'Data',
+          title: 'data',
+          value: { part: { n: 2 } },
+        },
+      ]);
+    });
+
+    it('should support `serializedValue` on Example Objects', () => {
+      const media: MediaTypeObject = {
+        examples: {
+          serialized: {
+            serializedValue: '{"n":2}',
+          },
+        },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([
+        {
+          summary: 'serialized',
+          title: 'serialized',
+          value: '{"n":2}',
+        },
+      ]);
+    });
+
+    it('should prefer `dataValue` over `serializedValue`', () => {
+      const media: MediaTypeObject = {
+        examples: {
+          both: {
+            dataValue: { n: 2 },
+            serializedValue: '{"n":2}',
+          },
+        },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([
+        {
+          summary: 'both',
+          title: 'both',
+          value: { n: 2 },
+        },
+      ]);
+    });
+
+    it('should return no examples when `dataValue` stays a `$ref` after dereferencing fails', () => {
+      const media: MediaTypeObject = {
+        examples: {
+          broken: {
+            dataValue: { $ref: '#/components/examples/Missing/value' },
+          },
+        },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([]);
+    });
+
+    it('should generate an example from `itemSchema` when there is no `schema`', () => {
+      const media: MediaTypeObject = {
+        itemSchema: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', examples: ['evt_1'] },
+          },
+        },
+      };
+
+      expect(getMediaTypeExamples('application/jsonl', media, definition)).toStrictEqual([
+        {
+          value: { id: 'evt_1' },
+        },
+      ]);
+    });
+  });
 });

@@ -1,0 +1,27 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Invalid API
+paths:
+  /search:
+    parameters:
+      - null # <---- not a parameter object
+    get:
+      parameters:
+        - bad # <---- not a parameter object
+        - name: q
+          in: querystring
+          content:
+            application/json:
+              schema:
+                type: object
+      responses:
+        '200':
+          description: OK
+    additionalOperations:
+      COPY:
+        parameters:
+          - 42 # <---- not a parameter object
+        responses:
+          '200':
+            description: OK

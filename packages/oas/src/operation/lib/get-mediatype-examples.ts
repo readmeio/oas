@@ -1,9 +1,20 @@
 import type { MediaTypeObject, OASDocument } from '../../types.js';
+import type { ExampleObject as OpenAPI32ExampleObject } from '@scalar/openapi-types/3.2';
 
+import { exampleValue } from '../../lib/example-value.js';
 import matchesMimeType from '../../lib/matches-mimetype.js';
 import { collectRefsInSchema, dereferenceRef, dereferenceRefDeep } from '../../lib/refs.js';
 import sampleFromSchema from '../../samples/index.js';
 import { isRef, schemaObject } from '../../types.js';
+
+/**
+ * Narrow an Example Object to the OpenAPI 3.2 shape, which declares `value`, `dataValue`, and
+ * `serializedValue`. 3.0 and 3.1 examples are the same object with the 3.2 fields absent.
+ *
+ */
+function isExampleObject(example: object): example is OpenAPI32ExampleObject {
+  return 'value' in example || 'dataValue' in example || 'serializedValue' in example;
+}
 
 export interface MediaTypeExample {
   description?: string;
@@ -17,9 +28,15 @@ export interface MediaTypeExample {
  * come from the `example` property, the first item in an `examples` array, or if none of those are
  * present it will generate an example based off its schema.
  *
+ * Within an `examples` entry the OpenAPI 3.2 `dataValue` and `serializedValue` fields are
+ * supported alongside `value`, with `value` taking precedence over `dataValue`, which in turn
+ * takes precedence over `serializedValue`. `serializedValue` is returned as the string that it
+ * was defined as.
+ *
  * @see {@link https://spec.openapis.org/oas/v3.0.0.html#media-type-object}
  * @see {@link https://spec.openapis.org/oas/v3.1.0.html#media-type-object}
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#example-object}
  * @param mediaType The media type that we're looking for examples for.
  * @param mediaTypeObject The media type object that we're looking for examples for.
  */
@@ -69,6 +86,8 @@ export function getMediaTypeExamples(
             if (!example || isRef(example)) {
               return false;
             }
+
+            value = example;
           }
 
           if ('summary' in example) {
@@ -79,19 +98,25 @@ export function getMediaTypeExamples(
             description = example.description;
           }
 
-          if ('value' in example) {
-            example.value = dereferenceRefDeep(example.value, definition);
+          if (isExampleObject(example)) {
+            if ('value' in example) {
+              example.value = dereferenceRefDeep(example.value, definition);
+            } else if ('dataValue' in example) {
+              example.dataValue = dereferenceRefDeep(example.dataValue, definition);
+            }
+
+            value = exampleValue(example);
 
             // If there is no example value or if it contains any `$ref` pointers that we couldn't
             // resolve then we shouldn't return anything because to the user it'll look like we
-            // generated an invalid example.
-            if (example.value === undefined || collectRefsInSchema(example.value).size > 0) {
+            // generated an invalid example. `serializedValue` is already a string, so this only
+            // applies to `value` and `dataValue`.
+            if (
+              ('value' in example || 'dataValue' in example) &&
+              (value === undefined || collectRefsInSchema(value).size > 0)
+            ) {
               return false;
             }
-
-            value = example.value;
-          } else {
-            value = example;
           }
         }
 
@@ -111,10 +136,13 @@ export function getMediaTypeExamples(
     }
   }
 
-  if ('schema' in mediaTypeObject && mediaTypeObject.schema) {
+  // OpenAPI 3.2 sequential media types (eg. JSON Lines or Server-Sent Events) describe each item
+  // in their stream with `itemSchema` instead of `schema`, so when there's no `schema` we generate
+  // an example of a single item.
+  const schema = mediaTypeObject.schema || ('itemSchema' in mediaTypeObject ? mediaTypeObject.itemSchema : undefined);
+  if (schema) {
     // We do not fully support XML so we shouldn't generate XML samples for XML schemas.
     if (!matchesMimeType.xml(mediaType)) {
-      const schema = mediaTypeObject.schema;
       return [
         {
           value: sampleFromSchema(typeof schema === 'object' ? schemaObject(schema) : {}, {

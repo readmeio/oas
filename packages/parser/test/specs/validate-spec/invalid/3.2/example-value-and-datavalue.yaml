@@ -1,0 +1,18 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Invalid API
+paths:
+  /pets:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              examples:
+                pet:
+                  value: # <---- `value` and `dataValue` are mutually exclusive
+                    name: Fido
+                  dataValue:
+                    name: Fido

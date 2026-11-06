@@ -1,0 +1,22 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Invalid API
+paths:
+  /pets:
+    get:
+      operationId: getPets
+      responses:
+        '200':
+          description: OK
+    additionalOperations:
+      POST: # <---- `post` already has a fixed field on the path item
+        operationId: createPet
+        responses:
+          '201':
+            description: Created
+      COPY:
+        operationId: copyPets
+        responses:
+          '200':
+            description: OK
