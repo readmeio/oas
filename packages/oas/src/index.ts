@@ -1,5 +1,5 @@
 import type { Extensions } from './extensions.js';
-import type { PathMatch, PathMatches, SplitUrlResult } from './lib/urls.js';
+import type { OperationMatch, PathItemMatch, SplitUrlResult } from './lib/urls.js';
 import type {
   AuthForHAR,
   HttpMethods,
@@ -39,6 +39,7 @@ import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import {
   assignPathItemOperation,
+  clonePathItem,
   findPathItemOperation,
   listPathItemOperations,
   removePathItemOperation,
@@ -288,7 +289,7 @@ export default class Oas {
     return new Operation(this, path, method, operation);
   }
 
-  findOperationMatches(url: string): PathMatches | undefined {
+  findOperationMatches(url: string): PathItemMatch[] | undefined {
     // Root server matches are collected first so that when `findTargetPath()` breaks a tie
     // between equally-specific matches, the last one -- the server defined closest to the
     // operation -- wins.
@@ -304,7 +305,7 @@ export default class Oas {
   /**
    * Find matches for a URL against paths as they are served by the root-level `servers`.
    */
-  private findRootServerOperationMatches(url: string): PathMatches | undefined {
+  private findRootServerOperationMatches(url: string): PathItemMatch[] | undefined {
     let origin: string;
     let hostname: string;
     try {
@@ -387,9 +388,9 @@ export default class Oas {
    *
    * @see {@link https://spec.openapis.org/oas/v3.1.0#path-item-object}
    */
-  private findOverriddenServerOperationMatches(url: string): PathMatches {
+  private findOverriddenServerOperationMatches(url: string): PathItemMatch[] {
     const { paths } = this.api;
-    const matches: PathMatches = [];
+    const matches: PathItemMatch[] = [];
     if (!paths) return matches;
 
     Object.keys(paths).forEach(path => {
@@ -467,14 +468,7 @@ export default class Oas {
    */
   private pathItemForRootServerMatching(pathItem: PathItemObject): PathItemObject {
     const hasPathItemServers = Boolean(pathItem.servers?.length);
-    const filtered: PathItemObject = { ...pathItem };
-    if (
-      'additionalOperations' in pathItem &&
-      pathItem.additionalOperations &&
-      typeof pathItem.additionalOperations === 'object'
-    ) {
-      (filtered as { additionalOperations?: object }).additionalOperations = { ...pathItem.additionalOperations };
-    }
+    const filtered = clonePathItem(pathItem);
 
     listPathItemOperations(filtered, this.api).forEach(entry => {
       const operation = dereferenceRef(entry.operation, this.api);
@@ -554,7 +548,7 @@ export default class Oas {
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
    */
-  findOperation(url: string, method: OperationMethod): PathMatch | undefined {
+  findOperation(url: string, method: OperationMethod): OperationMatch | undefined {
     const annotatedPaths = this.findOperationMatches(url);
     if (!annotatedPaths) {
       return undefined;
@@ -571,7 +565,7 @@ export default class Oas {
    *
    * @param url A full URL to look up.
    */
-  findOperationWithoutMethod(url: string): PathMatch | undefined {
+  findOperationWithoutMethod(url: string): PathItemMatch | undefined {
     const annotatedPaths = this.findOperationMatches(url);
     if (!annotatedPaths) {
       return undefined;
@@ -720,12 +714,7 @@ export default class Oas {
         }
       }
 
-      listPathItemOperations(pathItem, this.api).forEach(entry => {
-        // Custom methods are retrieved with `getAdditionalOperations()`.
-        if (entry.segments[0] === 'additionalOperations') {
-          return;
-        }
-
+      listPathItemOperations(pathItem, this.api, 'fixed').forEach(entry => {
         const resolved = dereferenceRef(entry.operation, this.api);
         if (!resolved) {
           return;
@@ -810,11 +799,7 @@ export default class Oas {
         return;
       }
 
-      listPathItemOperations(pathItem, this.api).forEach(entry => {
-        if (entry.segments[0] !== 'additionalOperations') {
-          return;
-        }
-
+      listPathItemOperations(pathItem, this.api, 'additional').forEach(entry => {
         const operation = dereferenceRef(entry.operation, this.api);
         if (!operation) {
           return;
@@ -857,11 +842,7 @@ export default class Oas {
 
       const webhookPath = dereferenceRef(webhookMap[id], api);
       if (webhookPath && !isRef(webhookPath)) {
-        listPathItemOperations(webhookPath, this.api).forEach(entry => {
-          if (entry.segments[0] === 'additionalOperations') {
-            return;
-          }
-
+        listPathItemOperations(webhookPath, this.api, 'fixed').forEach(entry => {
           const operation = dereferenceRef(entry.operation, this.api);
           if (!operation) {
             return;

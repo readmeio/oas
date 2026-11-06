@@ -1,5 +1,6 @@
 import type {
   OASDocument,
+  OperationObject,
   PathItemObject,
   PathsObject,
   ServerObject,
@@ -15,9 +16,8 @@ import { match } from 'path-to-regexp';
 import getUserVariable from './get-user-variable';
 import { findPathItemOperation } from './path-item-operations';
 
-export interface PathMatch {
+interface MatchedPath {
   match?: Match<ParamData>;
-  operation: PathsObject;
   url: {
     method?: string;
     nonNormalizedPath: string;
@@ -27,7 +27,21 @@ export interface PathMatch {
   };
 }
 
-export type PathMatches = PathMatch[];
+/**
+ * A URL match whose `operation` is still the Path Item. Method filtering has not run.
+ *
+ */
+export interface PathItemMatch extends MatchedPath {
+  operation: PathItemObject;
+}
+
+/**
+ * A URL match narrowed to one operation.
+ *
+ */
+export interface OperationMatch extends MatchedPath {
+  operation: OperationObject;
+}
 
 export type SplitUrlResult = (
   | {
@@ -395,7 +409,7 @@ function compilePathMatcher(path: string): {
   return compiled;
 }
 
-function safeMatch(matcher: PathMatcher, pathName: string): PathMatch['match'] {
+function safeMatch(matcher: PathMatcher, pathName: string): MatchedPath['match'] {
   try {
     return matcher(pathName);
   } catch {
@@ -416,40 +430,39 @@ function safeMatch(matcher: PathMatcher, pathName: string): PathMatch['match'] {
  * @param pathName Path to look for a match.
  * @param origin The origin that we're matching against.
  */
-export function generatePathMatches(paths: PathsObject, pathName: string, origin: string): PathMatches {
+export function generatePathMatches(paths: PathsObject, pathName: string, origin: string): PathItemMatch[] {
   const rawPathName = pathName.split('?')[0];
-  const matches: PathMatches = Object.keys(paths)
-    .map(path => {
-      const { cleanedPath, matcher, normalized } = compilePathMatcher(path);
-      if (!matcher) return false;
+  return Object.keys(paths).flatMap(path => {
+    const { cleanedPath, matcher, normalized } = compilePathMatcher(path);
+    if (!matcher) return [];
 
-      // Decode static segments only so `/foo bar/{id}` matches `/foo%20bar/a%2Fb` while the
-      // `{id}` capture is still `decodeURIComponent`'d once (`a/b`, not `a%2Fb` or a
-      // double-decoded `%252F`).
-      const matchResult = safeMatch(matcher, alignIncomingPath(rawPathName, normalized));
+    // Decode static segments only so `/foo bar/{id}` matches `/foo%20bar/a%2Fb` while the
+    // `{id}` capture is still `decodeURIComponent`'d once (`a/b`, not `a%2Fb` or a
+    // double-decoded `%252F`).
+    const matchResult = safeMatch(matcher, alignIncomingPath(rawPathName, normalized));
+    if (!matchResult) return [];
 
-      const slugs: Record<string, string> = {};
+    const slugs: Record<string, string> = {};
+    Object.keys(matchResult.params).forEach(param => {
+      slugs[`:${param}`] = (matchResult.params as Record<string, string>)[param];
+    });
 
-      if (matchResult && Object.keys(matchResult.params).length) {
-        Object.keys(matchResult.params).forEach(param => {
-          slugs[`:${param}`] = (matchResult.params as Record<string, string>)[param];
-        });
-      }
+    const operation = paths[path];
+    if (!operation) return [];
 
-      return {
+    return [
+      {
         url: {
           origin,
           path: cleanedPath.replace(/\\:/g, ':'),
           nonNormalizedPath: path,
           slugs,
         },
-        operation: paths[path] as PathsObject,
+        operation,
         match: matchResult,
-      } satisfies PathMatch;
-    })
-    .filter(item => item !== false);
-
-  return matches.filter(p => p.match);
+      },
+    ];
+  });
 }
 
 /**
@@ -461,25 +474,25 @@ export function generatePathMatches(paths: PathsObject, pathName: string, origin
  * @returns Filtered down path matches.
  */
 export function filterPathMethods(
-  pathMatches: PathMatches,
+  pathMatches: PathItemMatch[],
   targetMethod: string,
   definition: OASDocument,
-): PathMatch[] {
-  return pathMatches
-    .map(p => {
-      const found = findPathItemOperation(p.operation as PathItemObject, definition, targetMethod);
-      if (!found) {
-        return false;
-      }
+): OperationMatch[] {
+  return pathMatches.flatMap(pathMatch => {
+    const found = findPathItemOperation(pathMatch.operation, definition, targetMethod);
+    if (!found) {
+      return [];
+    }
 
-      p.url.method = found.method.toUpperCase();
+    pathMatch.url.method = found.method.toUpperCase();
 
-      return {
-        url: p.url,
-        operation: found.operation as PathsObject,
-      };
-    })
-    .filter((item): item is PathMatch => Boolean(item));
+    return [
+      {
+        url: pathMatch.url,
+        operation: found.operation,
+      },
+    ];
+  });
 }
 
 /**
@@ -488,16 +501,16 @@ export function filterPathMethods(
  * `<=`): `Oas.findOperationMatches()` relies on this by appending operation and path-item server
  * matches after root server ones, so that the server defined closest to the operation wins.
  *
- * @param pathMatches URL and PathsObject matches to narrow down to find a target path.
+ * @param pathMatches URL matches to narrow down to find a target path.
  * @returns An object containing matches that were discovered in the API definition.
  */
-export function findTargetPath(pathMatches: PathMatch[]): PathMatch | undefined {
+export function findTargetPath<T extends MatchedPath>(pathMatches: T[]): T | undefined {
   if (!pathMatches.length) {
     return undefined;
   }
 
   let minCount = Object.keys(pathMatches[0].url.slugs).length;
-  let found: PathMatch | undefined;
+  let found: T | undefined;
 
   for (let m = 0; m < pathMatches.length; m += 1) {
     const selection = pathMatches[m];

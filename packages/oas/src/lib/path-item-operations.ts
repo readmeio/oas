@@ -26,15 +26,23 @@ export function resolveKey(keys: string[], target: string): string | undefined {
 }
 
 /**
+ * Where an operation sits on a Path Item. `fixed` is a method field (`get`, `query`). `additional`
+ * is an OpenAPI 3.2 `additionalOperations` entry (`COPY`).
+ *
+ */
+export type PathItemOperationLocation = 'additional' | 'fixed';
+
+/**
  * An operation declared on a Path Item.
  *
  * `segments` are the pointer segments relative to the Path Item: `['get']` for a fixed method
  * field, or `['additionalOperations', 'COPY']` for an OpenAPI 3.2 custom method. The method key
- * keeps the casing from the document.
+ * keeps the casing from the document. `location` is how callers tell those two apart.
  *
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
  */
 export interface PathItemOperationEntry {
+  location: PathItemOperationLocation;
   method: string;
   operation: OperationObject;
   segments: readonly ['additionalOperations', string] | readonly [string];
@@ -57,6 +65,30 @@ function additionalOperationsOf(pathItem: object): Record<string, unknown> | und
   return additional as Record<string, unknown>;
 }
 
+function pathItemOperation(
+  location: PathItemOperationLocation,
+  method: string,
+  operation: OperationObject,
+): PathItemOperationEntry {
+  return {
+    location,
+    method,
+    operation,
+    segments: location === 'additional' ? (['additionalOperations', method] as const) : ([method] as const),
+  };
+}
+
+function filterByLocation(
+  operations: PathItemOperationEntry[],
+  location: PathItemOperationLocation | undefined,
+): PathItemOperationEntry[] {
+  if (!location) {
+    return operations;
+  }
+
+  return operations.filter(entry => entry.location === location);
+}
+
 /**
  * Every HTTP operation on a Path Item. Fixed method fields come first. OpenAPI 3.2
  * `additionalOperations` entries follow, except keys that repeat a fixed method (`GET`, `Query`),
@@ -70,6 +102,7 @@ function additionalOperationsOf(pathItem: object): Record<string, unknown> | und
 export function listPathItemOperations(
   pathItem: PathItemObject | null | undefined,
   definition: OASDocument,
+  location?: PathItemOperationLocation,
 ): PathItemOperationEntry[] {
   if (!pathItem || typeof pathItem !== 'object') {
     return [];
@@ -87,16 +120,16 @@ export function listPathItemOperations(
       return;
     }
 
-    operations.push({ method, operation, segments: [method] });
+    operations.push(pathItemOperation('fixed', method, operation));
   });
 
   if (!isOpenAPI32(definition)) {
-    return operations;
+    return filterByLocation(operations, location);
   }
 
   const additionalOperations = additionalOperationsOf(pathItem);
   if (!additionalOperations) {
-    return operations;
+    return filterByLocation(operations, location);
   }
 
   Object.keys(additionalOperations).forEach(method => {
@@ -109,10 +142,10 @@ export function listPathItemOperations(
       return;
     }
 
-    operations.push({ method, operation, segments: ['additionalOperations', method] });
+    operations.push(pathItemOperation('additional', method, operation));
   });
 
-  return operations;
+  return filterByLocation(operations, location);
 }
 
 /**
@@ -127,38 +160,33 @@ export function findPathItemOperation(
   definition: OASDocument,
   method: string,
 ): PathItemOperationEntry | undefined {
-  if (!pathItem || typeof pathItem !== 'object') {
+  const entries = listPathItemOperations(pathItem, definition);
+  // Fixed methods are listed first, so an exact or case-insensitive match prefers `get` over a
+  // custom method of the same name.
+  const methodKey = resolveKey(
+    entries.map(entry => entry.method),
+    method,
+  );
+  if (!methodKey) {
     return undefined;
   }
 
-  const methodKey = resolveKey(Object.keys(pathItem), method);
-  if (methodKey && isHttpMethod(methodKey)) {
-    const operation = pathItem[methodKey];
-    if (isOperationEntry(operation)) {
-      return { method: methodKey, operation, segments: [methodKey] };
-    }
-  }
+  return entries.find(entry => entry.method === methodKey);
+}
 
-  if (!isOpenAPI32(definition)) {
-    return undefined;
-  }
-
+/**
+ * Shallow-copy a Path Item, including its `additionalOperations` map, so later deletes do not
+ * change the document the copy came from.
+ *
+ */
+export function clonePathItem(pathItem: PathItemObject): PathItemObject {
+  const clone: PathItemObject = { ...pathItem };
   const additionalOperations = additionalOperationsOf(pathItem);
-  if (!additionalOperations) {
-    return undefined;
+  if (additionalOperations) {
+    (clone as { additionalOperations?: Record<string, unknown> }).additionalOperations = { ...additionalOperations };
   }
 
-  const additionalMethodKey = resolveKey(Object.keys(additionalOperations), method);
-  if (!additionalMethodKey || isHttpMethod(additionalMethodKey)) {
-    return undefined;
-  }
-
-  const operation = additionalOperations[additionalMethodKey];
-  if (!isOperationEntry(operation)) {
-    return undefined;
-  }
-
-  return { method: additionalMethodKey, operation, segments: ['additionalOperations', additionalMethodKey] };
+  return clone;
 }
 
 /**
@@ -167,7 +195,7 @@ export function findPathItemOperation(
  *
  */
 export function removePathItemOperation(pathItem: PathItemObject, entry: PathItemOperationEntry): void {
-  if (entry.segments[0] === 'additionalOperations') {
+  if (entry.location === 'additional') {
     const additionalOperations = additionalOperationsOf(pathItem);
     if (!additionalOperations) {
       return;
@@ -194,7 +222,7 @@ export function assignPathItemOperation(
   entry: PathItemOperationEntry,
   operation: OperationObject,
 ): void {
-  if (entry.segments[0] === 'additionalOperations') {
+  if (entry.location === 'additional') {
     const additionalOperations = additionalOperationsOf(pathItem) ?? {};
     additionalOperations[entry.method] = operation;
     (pathItem as { additionalOperations?: Record<string, unknown> }).additionalOperations = additionalOperations;
