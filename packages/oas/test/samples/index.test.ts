@@ -10,6 +10,10 @@ import { describe, expect, it } from 'vitest';
 
 import sampleFromSchema from '../../src/samples/index.js';
 
+function withSchemas(schemas: Record<string, SchemaObject>): OASDocument {
+  return { openapi: '3.1.0', info: { title: 'test', version: '1.0' }, paths: {}, components: { schemas } };
+}
+
 describe('sampleFromSchema', () => {
   it('returns object with no readonly fields for parameter', () => {
     const definition: SchemaObject = {
@@ -690,17 +694,10 @@ describe('sampleFromSchema', () => {
     });
 
     it('parses examples on `$ref` schemas', () => {
-      const definition: OASDocument = {
-        openapi: '3.0.0',
-        info: { title: 'test', version: '1.0' },
-        paths: {},
-        components: {
-          schemas: {
-            Tags: { type: 'array', items: { type: 'string' }, example: '["a", "b"]' },
-            Note: { type: 'string', example: '["a", "b"]' },
-          },
-        },
-      };
+      const definition = withSchemas({
+        Tags: { type: 'array', items: { type: 'string' }, example: '["a", "b"]' },
+        Note: { type: 'string', example: '["a", "b"]' },
+      });
 
       const schema: SchemaObject = {
         type: 'object',
@@ -727,18 +724,11 @@ describe('sampleFromSchema', () => {
     });
 
     it('parses examples on a schema whose type comes from its `allOf` branches', () => {
-      const definition: OASDocument = {
-        openapi: '3.0.0',
-        info: { title: 'test', version: '1.0' },
-        paths: {},
-        components: {
-          schemas: {
-            Tags: { type: 'array', items: { type: 'string' } },
-            // Refers back to itself through `allOf`.
-            Loop: { allOf: [{ $ref: '#/components/schemas/Loop' }, { type: 'array' }] },
-          },
-        },
-      };
+      const definition = withSchemas({
+        Tags: { type: 'array', items: { type: 'string' } },
+        // Refers back to itself through `allOf`.
+        Loop: { allOf: [{ $ref: '#/components/schemas/Loop' }, { type: 'array' }] },
+      });
 
       expect(sampleFromSchema({ allOf: [{ type: 'array' }], example: '["a"]' })).toStrictEqual(['a']);
       expect(
@@ -749,21 +739,47 @@ describe('sampleFromSchema', () => {
       ).toStrictEqual(['a']);
     });
 
+    it('parses `examples` set alongside a `$ref`', () => {
+      const definition = withSchemas({ Tags: { type: 'array', items: { type: 'string' } } });
+
+      expect(
+        sampleFromSchema(
+          { type: 'object', properties: { tags: { $ref: '#/components/schemas/Tags', examples: ['["a"]'] } } },
+          { definition },
+        ),
+      ).toStrictEqual({ tags: ['a'] });
+    });
+
+    it('parses examples whose `anyOf`/`oneOf` variants are all arrays or objects', () => {
+      const definition = withSchemas({
+        Base: { type: 'object', properties: { id: { type: 'integer' } } },
+        Cat: { allOf: [{ $ref: '#/components/schemas/Base' }, { properties: { meows: { type: 'boolean' } } }] },
+        Dog: { allOf: [{ $ref: '#/components/schemas/Base' }, { properties: { barks: { type: 'boolean' } } }] },
+      });
+
+      expect(
+        sampleFromSchema(
+          { oneOf: [{ $ref: '#/components/schemas/Cat' }, { $ref: '#/components/schemas/Dog' }], example: '{"id": 1}' },
+          { definition },
+        ),
+      ).toStrictEqual({ id: 1 });
+      expect(sampleFromSchema({ anyOf: [{ type: 'array' }, { items: {} }], example: '["a"]' })).toStrictEqual(['a']);
+    });
+
+    it('keeps the example as a string when an `anyOf`/`oneOf` variant declares no type', () => {
+      expect(sampleFromSchema({ oneOf: [{ type: 'object' }, {}], example: '{"a": 1}' })).toBe('{"a": 1}');
+    });
+
     describe('deep schemas', () => {
       const chainLength = 200;
-      const chainedDefinition: OASDocument = {
-        openapi: '3.0.0',
-        info: { title: 'test', version: '1.0' },
-        paths: {},
-        components: {
-          schemas: Object.fromEntries(
-            Array.from({ length: chainLength }, (_, i) => [
-              `Link${i}`,
-              i === chainLength - 1 ? { type: 'array' } : { allOf: [{ $ref: `#/components/schemas/Link${i + 1}` }] },
-            ]),
-          ),
-        },
-      };
+      const chainedDefinition = withSchemas(
+        Object.fromEntries(
+          Array.from({ length: chainLength }, (_, i) => [
+            `Link${i}`,
+            i === chainLength - 1 ? { type: 'array' } : { allOf: [{ $ref: `#/components/schemas/Link${i + 1}` }] },
+          ]),
+        ),
+      );
 
       it('resolves a type declared at the end of a long `allOf` chain', () => {
         expect(
@@ -777,17 +793,10 @@ describe('sampleFromSchema', () => {
       });
 
       it('terminates on `allOf` branches that refer to each other', () => {
-        const definition: OASDocument = {
-          openapi: '3.0.0',
-          info: { title: 'test', version: '1.0' },
-          paths: {},
-          components: {
-            schemas: {
-              A: { allOf: [{ $ref: '#/components/schemas/B' }] },
-              B: { allOf: [{ $ref: '#/components/schemas/A' }, { type: 'object' }] },
-            },
-          },
-        };
+        const definition = withSchemas({
+          A: { allOf: [{ $ref: '#/components/schemas/B' }] },
+          B: { allOf: [{ $ref: '#/components/schemas/A' }, { type: 'object' }] },
+        });
 
         expect(
           sampleFromSchema({ allOf: [{ $ref: '#/components/schemas/A' }], example: '{"a": 1}' }, { definition }),

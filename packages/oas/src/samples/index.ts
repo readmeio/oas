@@ -8,7 +8,6 @@ import type { OASDocument, SchemaObject } from '../types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 
-import { isObject } from '../lib/helpers.js';
 import { isRef, schemaObject } from '../types.js';
 import { dereferenceRef, dereferenceRefDeep } from '../utils.js';
 
@@ -74,40 +73,29 @@ const primitive = (schema: SchemaObject) => {
 };
 
 /**
- * Collect the types a schema declares, including those declared in its `allOf` branches.
+ * Collect the types a schema declares, following `$ref`s and `allOf`/`anyOf`/`oneOf` branches.
  *
- * Returns `undefined` when the schema (or an `allOf` branch) has a `oneOf`/`anyOf`, since the value
- * could then match any of those branches.
+ * Returns `undefined` when an `anyOf`/`oneOf` branch declares no type, since the value could then
+ * be anything.
  */
 function getDeclaredTypes(
-  schema: Record<string, any>,
+  schema: unknown,
   definition?: OASDocument,
   seenRefs = new Set<string>(),
-): unknown[] | undefined {
-  if (schema.oneOf || schema.anyOf) {
-    return undefined;
-  }
+): string[] | undefined {
+  const resolved = objectify(dereferenceRef(schema, definition, seenRefs));
+  const inferredType = resolved.properties || resolved.additionalProperties ? 'object' : resolved.items ? 'array' : [];
+  const types: string[] = [resolved.type ?? inferredType].flat();
 
-  const inferredType = schema.items ? 'array' : schema.properties || schema.additionalProperties ? 'object' : undefined;
-  const types: unknown[] = [schema.type ?? inferredType].flat();
-
-  for (const subSchema of schema.allOf ?? []) {
-    let branch = objectify(subSchema);
-    if (isRef(branch)) {
-      if (!definition || seenRefs.has(branch.$ref)) {
-        continue;
+  for (const key of ['allOf', 'anyOf', 'oneOf'] as const) {
+    for (const branch of resolved[key] ?? []) {
+      const branchTypes = getDeclaredTypes(branch, definition, seenRefs);
+      if (!branchTypes || (key !== 'allOf' && !branchTypes.length)) {
+        return undefined;
       }
 
-      seenRefs.add(branch.$ref);
-      branch = objectify(dereferenceRef(branch, definition, new Set<string>()));
+      types.push(...branchTypes);
     }
-
-    const branchTypes = getDeclaredTypes(branch, definition, seenRefs);
-    if (!branchTypes) {
-      return undefined;
-    }
-
-    types.push(...branchTypes);
   }
 
   return types;
@@ -117,25 +105,20 @@ function getDeclaredTypes(
  * Parse a schema-level example that was written as a JSON-encoded string when the schema says the
  * value is meant to be an array or object.
  */
-function parseStringifiedExample(example: unknown, schema: Record<string, any>, definition?: OASDocument) {
-  const firstChar = typeof example === 'string' ? example.trimStart()[0] : undefined;
-  if (firstChar !== '[' && firstChar !== '{') {
+function parseStringifiedExample(example: unknown, schema: unknown, definition?: OASDocument) {
+  if (typeof example !== 'string' || !/^\s*[[{]/.test(example)) {
     return example;
   }
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(example as string);
+    parsed = JSON.parse(example);
   } catch {
     return example;
   }
 
-  const kind = Array.isArray(parsed) ? 'array' : isObject(parsed) ? 'object' : undefined;
-  if (!kind) {
-    return example;
-  }
-
   const types = getDeclaredTypes(schema, definition);
+  const kind = Array.isArray(parsed) ? 'array' : 'object';
   return types && !types.includes('string') && types.includes(kind) ? parsed : example;
 }
 
