@@ -119,8 +119,8 @@ Because this library has full TypeScript types and docblocks this README is not 
 <!-- prettier-ignore-start -->
 | Method | Description |
 | :--- | :--- |
-| `.getExtension()` | Retrieve a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions) if it exists at the root of the API definition.  |
-| `.hasExtension()` | Determine if a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions) exists on the root of the API definition. |
+| `.getExtension()` | Retrieve a given [specification extension](https://spec.openapis.org/oas/v3.2.0.html#specification-extensions) if it exists at the root of the API definition.  |
+| `.hasExtension()` | Determine if a given [specification extension](https://spec.openapis.org/oas/v3.2.0.html#specification-extensions) exists on the root of the API definition. |
 | `.validateExtension()` | Determine if a given [ReadMe custom OpenAPI extension](https://docs.readme.com/docs/openapi-extensions) is valid or not. |
 | `.validateExtensions()` | Validate all of our [ReadMe custom OpenAPI extension](https://docs.readme.com/docs/openapi-extensions), throwing exceptions when necessary. |
 <!-- prettier-ignore-end -->
@@ -153,7 +153,7 @@ const operation = petstore.operation('/pet', 'post');
 | Method | Description |
 | :--- | :--- |
 | `.getContentType()` | Retrieve the primary request body content type. If multiple are present, prefer whichever is JSON-compliant. |
-| `.getDescription()` | Retrieve the `description` that's set on this operation. This supports common descriptions that may be set at the [path item level](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object). |
+| `.getDescription()` | Retrieve the `description` that's set on this operation. This supports common descriptions that may be set at the [path item level](https://spec.openapis.org/oas/v3.2.0.html#path-item-object). |
 | `.getOperationId()` | Retrieve the `operationId` that's present on the operation, and if one is not present one will be created based off the method + path and returned instead. |
 | `.hasOperationId()` | Determine if the operation has an `operationId` present. |
 | `.isDeprecated()` | Determine if this operation is marked as deprecated. |
@@ -164,8 +164,8 @@ const operation = petstore.operation('/pet', 'post');
 | `.isWebhook()` | Determine if this operation is an instance of the `Webhook` class. |
 | `.getExampleGroups()` | Returns an object with groups of all example definitions (body/header/query/path/response/etc.). The examples are grouped by their key when defined via the `examples` map. |
 | `.getHeaders()` | Retrieve all headers that can either be sent for or returned from this operation. This includes header-based authentication schemes, common header parameters, and request body and response content types. |
-| `.getSummary()` | Retrieve the `summary` that's set on this operation. This supports common summaries that may be set at the [path item level](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object). |
-| `.getTags()` | Retrieve all tags, and [their metadata](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#tag-object), that exist on this operation. |
+| `.getSummary()` | Retrieve the `summary` that's set on this operation. This supports common summaries that may be set at the [path item level](https://spec.openapis.org/oas/v3.2.0.html#path-item-object). |
+| `.getTags()` | Retrieve all tags, and [their metadata](https://spec.openapis.org/oas/v3.2.0.html#tag-object), that exist on this operation. |
 <!-- prettier-ignore-end -->
 
 #### Callbacks
@@ -182,7 +182,7 @@ const operation = petstore.operation('/pet', 'post');
 #### Parameters
 
 > [!NOTE]
-> All parameter accessors here support, and will automatically retrieve and handle, common parameters that may be set at the [path item level](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object).
+> All parameter accessors here support, and will automatically retrieve and handle, common parameters that may be set at the [path item level](https://spec.openapis.org/oas/v3.2.0.html#path-item-object).
 
 <!-- prettier-ignore-start -->
 | Method | Description |
@@ -232,14 +232,14 @@ const operation = petstore.operation('/pet', 'post');
 <!-- prettier-ignore-start -->
 | Method | Description |
 | :--- | :--- |
-| `.hasExtension()` | Determine if a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions) exists on this operation. |
+| `.hasExtension()` | Determine if a given [specification extension](https://spec.openapis.org/oas/v3.2.0.html#specification-extensions) exists on this operation. |
 <!-- prettier-ignore-end -->
 
 Information about ReadMe's supported OpenAPI extensions at https://docs.readme.com/docs/openapi-extensions.
 
 ### Callbacks
 
-The `Callback` class inherits `Operation` so every API available on instances of `Operation` is available here too. Much like `Operation`, we also support common parameters, summaries, and descriptions that may be set at the [path item level](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object) within a `callbacks` definition.
+The `Callback` class inherits `Operation` so every API available on instances of `Operation` is available here too. Much like `Operation`, we also support common parameters, summaries, and descriptions that may be set at the [path item level](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) within a `callbacks` definition.
 
 #### General
 
@@ -293,19 +293,19 @@ console.log(await analyzer(petstore, ['polymorphism', 'xml]));
 | Metric | Description |
 | :--- | :--- |
 | `additionalProperties` | Does your API use `additionalProperties`? |
-| `callbacks` | Does your API use [callbacks](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object)? |
+| `callbacks` | Does your API use [callbacks](https://spec.openapis.org/oas/v3.2.0.html#callback-object)? |
 | `circularRefs` | Does your API have any circular `$ref` pointers, and if so where are they located? |
-| `commonParameters` | Does your API utilize [common parameters](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object)? |
-| `discriminators` | Does your API use polymorphic [discriminators](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminator-object)? |
-| `links` | Does your API use [links](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#link-object)? |
-| `style` | Do any parameters in your API require [style](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-parameterstyle) serialization?
-| `polymorphism` | Does your API use [polymorphism](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#composition-and-inheritance-polymorphism) (`anyOf`, `oneOf`, `allOf`)? |
+| `commonParameters` | Does your API utilize [common parameters](https://spec.openapis.org/oas/v3.2.0.html#path-item-object)? |
+| `discriminators` | Does your API use polymorphic [discriminators](https://spec.openapis.org/oas/v3.2.0.html#discriminator-object)? |
+| `links` | Does your API use [links](https://spec.openapis.org/oas/v3.2.0.html#link-object)? |
+| `style` | Do any parameters in your API require [style](https://spec.openapis.org/oas/v3.2.0.html#style-values) serialization?
+| `polymorphism` | Does your API use [polymorphism](https://spec.openapis.org/oas/v3.2.0.html#composition-and-inheritance-polymorphism) (`anyOf`, `oneOf`, `allOf`)? |
 | `references` | Does your API use `$ref` pointers? |
-| `serverVariables` | Does your API use [server variables](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object)? |
-| `webhooks` | Does your API use [webhooks](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasWebhooks)?
-| `xmlRequests` | Does any parameter or schema in your API use the [XML object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object) for declaring how a schema should be treated in an XML request body? |
-| `xmlResponses` | Does any parameter or schema in your API use the [XML object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object) for declaring how a schema should be treated in an XML response? |
-| `xmlSchemas` | Does any parameter or schema in your API use the [XML object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object) for declaring how a schema should be treated in XML? |
+| `serverVariables` | Does your API use [server variables](https://spec.openapis.org/oas/v3.2.0.html#server-variable-object)? |
+| `webhooks` | Does your API use [webhooks](https://spec.openapis.org/oas/v3.2.0.html#oas-webhooks)?
+| `xmlRequests` | Does any parameter or schema in your API use the [XML object](https://spec.openapis.org/oas/v3.2.0.html#xml-object) for declaring how a schema should be treated in an XML request body? |
+| `xmlResponses` | Does any parameter or schema in your API use the [XML object](https://spec.openapis.org/oas/v3.2.0.html#xml-object) for declaring how a schema should be treated in an XML response? |
+| `xmlSchemas` | Does any parameter or schema in your API use the [XML object](https://spec.openapis.org/oas/v3.2.0.html#xml-object) for declaring how a schema should be treated in XML? |
 <!-- prettier-ignore-end -->
 
 #### Reducer

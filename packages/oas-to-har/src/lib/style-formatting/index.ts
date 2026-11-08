@@ -1,6 +1,7 @@
 import type { StylizerConfig } from './style-serializer.js';
-import type { ParameterObject, SchemaObject } from 'oas/types';
+import type { ParameterObject } from 'oas/types';
 
+import { isRef } from 'oas/types';
 import { matchesMimeType } from 'oas/utils';
 import qs from 'qs';
 
@@ -110,8 +111,9 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
    * All parameter types have a default `style` format so if they don't have one prescribed we
    * should still conform to what the spec defines.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-parameterstyle}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-parameterstyle}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#parameterStyle}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#parameterStyle}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#parameter-style}
    */
   let style = parameter.style;
   if (!style) {
@@ -131,8 +133,9 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
     /**
      * Per the spec if no `explode` is present but `style` is `form` then `explode` should default to `true`.
      *
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-parameterexplode}
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-parameterexplode}
+     * @see {@link https://spec.openapis.org/oas/v3.0.0.html#parameterExplode}
+     * @see {@link https://spec.openapis.org/oas/v3.1.0.html#parameterExplode}
+     * @see {@link https://spec.openapis.org/oas/v3.2.0.html#parameter-explode}
      */
     explode = true;
   }
@@ -202,7 +205,10 @@ function handleExplode(value: any, parameter: ParameterObject) {
   // https://github.com/OAI/OpenAPI-Specification/blob/36a3a67264cc1c4f1eff110cea3ebfe679435108/versions/3.1.0.md#style-examples
   if (
     Array.isArray(value) &&
-    (parameter.schema as SchemaObject)?.type === 'array' &&
+    parameter.schema &&
+    typeof parameter.schema === 'object' &&
+    !isRef(parameter.schema) &&
+    parameter.schema.type === 'array' &&
     parameter.style === 'deepObject'
   ) {
     const newObj: Record<string, unknown> = {};

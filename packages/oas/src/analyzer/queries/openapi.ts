@@ -25,8 +25,9 @@ function filterByScope(results: JSONPathResult[], scope?: OperationScope): JSONP
 /**
  * Determine if a given API definition uses the `additionalProperties` schema property.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#schema-object}
  */
 export function additionalProperties(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(queryCached(['$..additionalProperties'], definition), scope).map(res =>
@@ -37,8 +38,9 @@ export function additionalProperties(definition: OASDocument, scope?: OperationS
 /**
  * Determine if a given API definition utilizes `callbacks`.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#callback-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#callback-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#callback-object}
  */
 export function callbacks(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(
@@ -50,8 +52,9 @@ export function callbacks(definition: OASDocument, scope?: OperationScope): stri
 /**
  * Determine if a given API definition has circular refs.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#schema-object}
  */
 export async function circularRefs(definition: OASDocument, scope?: OperationScope): Promise<string[]> {
   // Dereferencing will update the passed in variable, which we don't want to do, so we
@@ -66,8 +69,9 @@ export async function circularRefs(definition: OASDocument, scope?: OperationSco
 /**
  * Determine if a given API definition utilizes common parameters.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-item-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#path-item-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#path-item-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
  */
 export function commonParameters(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(queryCached(['$..paths[*].parameters'], definition), scope).map(res =>
@@ -78,8 +82,9 @@ export function commonParameters(definition: OASDocument, scope?: OperationScope
 /**
  * Determine if a given API definition utilizes discriminators.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminator-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminator-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#discriminator-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#discriminator-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#discriminator-object}
  */
 export function discriminators(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(queryCached(['$..discriminator'], definition), scope).map(res => refizePointer(res.pointer));
@@ -88,8 +93,9 @@ export function discriminators(definition: OASDocument, scope?: OperationScope):
 /**
  * Determine if a given API definition utilizes `links`.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#link-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#link-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#link-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#link-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#link-object}
  */
 export function links(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(queryCached(['$.components.links', '$.paths..responses.*.links'], definition), scope).map(res =>
@@ -101,8 +107,9 @@ export function links(definition: OASDocument, scope?: OperationScope): string[]
  * Determine all of the available media types used within an API definition.
  *
  * @todo This query currently picks up false positives if there is an object named `content`.
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#request-body-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#request-body-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#request-body-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#request-body-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#request-body-object}
  */
 export function mediaTypes(definition: OASDocument, scope?: OperationScope): string[] {
   const results = Array.from(
@@ -133,8 +140,9 @@ export function mediaTypes(definition: OASDocument, scope?: OperationScope): str
 /**
  * Determine if a given API definition uses parameter serialization.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#parameter-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#parameter-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#parameter-object}
  */
 export function parameterSerialization(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(queryCached(['$..parameters[*].style^'], definition), scope).map(res =>
@@ -145,8 +153,9 @@ export function parameterSerialization(definition: OASDocument, scope?: Operatio
 /**
  * Determine if a given API definition utilizes schema polymorphism and/of interitance.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#schema-object}
  */
 export function polymorphism(definition: OASDocument, scope?: OperationScope): string[] {
   const results = Array.from(
@@ -172,8 +181,9 @@ export function references(definition: OASDocument, scope?: OperationScope): str
 /**
  * Determine every kind of security type that a given API definition has documented.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#security-scheme-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#security-scheme-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-scheme-object}
  */
 export function securityTypes(definition: OASDocument, scope?: OperationScope): string[] {
   return Array.from(
@@ -191,8 +201,9 @@ export function securityTypes(definition: OASDocument, scope?: OperationScope): 
  * Root-level `servers` apply to every operation unless a path or operation overrides them, so
  * these are always considered in scope regardless of which operation is being analyzed.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-variable-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#server-variable-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#server-variable-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#server-variable-object}
  */
 export function serverVariables(definition: OASDocument): string[] {
   return queryCached(['$.servers..variables^'], definition).map(res => refizePointer(res.pointer));
@@ -201,8 +212,9 @@ export function serverVariables(definition: OASDocument): string[] {
 /**
  * Determine how many operations are defined in a given API definition.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operation-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operation-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-object}
  */
 export function totalOperations(definition: OASDocument): number {
   return queryCached(['$..paths[*]'], definition).flatMap(res => Object.keys(res.value)).length;
@@ -211,7 +223,8 @@ export function totalOperations(definition: OASDocument): number {
 /**
  * Determine if a given API definition utilizes `webhooks` support in OpenAPI 3.1.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasWebhooks}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#oasWebhooks}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#oas-webhooks}
  */
 export function webhooks(definition: OASDocument, scope?: OperationScope): string[] {
   const results = queryCached(['$.webhooks[*]'], definition);
@@ -232,8 +245,9 @@ export function webhooks(definition: OASDocument, scope?: OperationScope): strin
  * Determine if a given API definition uses XML in a request body payload.
  *
  * @todo detect `+xml` media types
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#media-type-object}
  */
 export function xmlRequests(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(
@@ -256,8 +270,9 @@ export function xmlRequests(definition: OASDocument, scope?: OperationScope): st
  * Determine if a given API definition uses XML in a response body.
  *
  * @todo detect `+xml` media types
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#media-type-object}
  */
 export function xmlResponses(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(
@@ -279,8 +294,9 @@ export function xmlResponses(definition: OASDocument, scope?: OperationScope): s
 /**
  * Determine if a given API definition utilises the XML object for defining XML schemas.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#xml-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#xml-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#xml-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#xml-object}
  */
 export function xmlSchemas(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(

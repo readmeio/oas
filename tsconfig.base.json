@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src",
     "declaration": true,
     "declarationMap": true,
     "erasableSyntaxOnly": true,

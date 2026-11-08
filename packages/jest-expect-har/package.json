@@ -16,7 +16,7 @@
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "files": [
     "dist/"
@@ -43,7 +43,7 @@
   },
   "scripts": {
     "attw": "attw --pack --format ascii",
-    "build": "tsup",
+    "build": "tsdown",
     "lint": "npm run lint:types",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@types/har-format": "^1.2.14",
-    "@vitest/expect": "^5.0.2",
+    "@vitest/expect": "^5.0.5",
     "har-validator": "^5.1.5"
   },
   "peerDependencies": {
@@ -69,9 +69,8 @@
   "devDependencies": {
     "@jest/expect": "^30.0.0",
     "@types/jest": "^30.0.0",
-    "ts-jest": "^29.4.6",
-    "tsup": "^8.5.0",
-    "typescript": "^5.2.2",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "tsdown": "^0.23.5",
     "vitest": "^5.0.0"
   }
 }

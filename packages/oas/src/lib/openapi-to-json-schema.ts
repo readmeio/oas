@@ -1,11 +1,4 @@
-import type {
-  ExampleObject,
-  JSONSchema,
-  OASDocument,
-  ReferenceObject,
-  RequestBodyObject,
-  SchemaObject,
-} from '../types.js';
+import type { ExampleObject, JSONSchema, OASDocument, ReferenceObject, SchemaObject } from '../types.js';
 import type { JSONSchema4, JSONSchema7TypeName } from 'json-schema';
 import type { Options as JSONSchemaMergeAllOfOptions } from 'json-schema-merge-allof';
 
@@ -183,7 +176,56 @@ function formatEnumDescription(values: unknown[]): string {
     .join(' ');
 }
 
-function withoutGeneratedEnumDescription(schema: SchemaObject): SchemaObject {
+/**
+ * Appends a Markdown list of enum values to a description, unless the description already has it.
+ *
+ * Nested properties can run through `toJSONSchema` twice after `allOf` merging, so a list that
+ * already appears more than once is collapsed into one at the end.
+ *
+ * @param description Description to add the list to. Anything but a string is treated as empty.
+ * @param enumValues Enum values to list.
+ * @returns The new description, or `undefined` if there are no values worth listing.
+ */
+function appendEnumDescription(description: unknown, enumValues: unknown[]): string | undefined {
+  const enums = formatEnumDescription(enumValues);
+  if (!enums.length) {
+    return undefined;
+  }
+
+  const currentDescription = typeof description === 'string' ? description : '';
+  if (!currentDescription) {
+    return enums;
+  }
+
+  const paragraphs = currentDescription.split(/\n\n+/).map(p => p.trim());
+  const enumParagraphCount = paragraphs.filter(p => p === enums).length;
+  if (enumParagraphCount > 1) {
+    const withoutEnum = paragraphs.filter(p => p !== enums);
+    return withoutEnum.length > 0 ? `${withoutEnum.join('\n\n')}\n\n${enums}` : enums;
+  } else if (enumParagraphCount === 1) {
+    return currentDescription;
+  }
+
+  return `${currentDescription}\n\n${enums}`;
+}
+
+/**
+ * Removes generated enum lists from a schema's description, and from those of its nested
+ * properties, so they can be added again once the final enum is known.
+ */
+function withoutGeneratedEnumDescription(original: SchemaObject): SchemaObject {
+  const schema = isObject(original.properties)
+    ? ({
+        ...original,
+        properties: Object.fromEntries(
+          Object.entries(original.properties).map(([key, value]) => [
+            key,
+            isObject(value) ? withoutGeneratedEnumDescription(value as SchemaObject) : value,
+          ]),
+        ),
+      } as SchemaObject)
+    : original;
+
   if (!Array.isArray(schema.enum) || typeof schema.description !== 'string') {
     return schema;
   }
@@ -296,15 +338,15 @@ function inlinePropertyRefsForMerge(
         // - OAS 3.0: it becomes a Reference Object (the Schema Object section says "a Reference
         //   Object can be used in its place"), and Reference Objects forbid siblings. So 3.0
         //   strips everything.
-        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#schema-object
-        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#reference-object
+        //   https://spec.openapis.org/oas/v3.0.3.html#schema-object
+        //   https://spec.openapis.org/oas/v3.0.0.html#reference-object
         //
         // - OAS 3.1: it stays a Schema Object with `$ref` as a JSON Schema 2020-12 keyword. Per
         //   JSON Schema 2020-12 §8.2.3.1, "$ref" is an applicator whose "results are the results
         //   of the referenced schema", and the spec explicitly notes that "other keywords can
         //   appear alongside of '$ref' in the same schema object". Those siblings are part of
         //   the same schema; the spec doesn't say a `$ref` causes them to be dropped.
-        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.1.md#schema-object
+        //   https://spec.openapis.org/oas/v3.1.1.html#schema-object
         //   https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-8.2.3.1
         //
         // Since we flatten via spread instead of evaluating siblings alongside the resolved
@@ -590,8 +632,8 @@ function resolveAndCacheRefSchema({
   }
 }
 
-function isRequestBodySchema(schema: unknown): schema is RequestBodyObject {
-  return 'content' in (schema as RequestBodyObject);
+function isRequestBodySchema(schema: object): boolean {
+  return 'content' in schema;
 }
 
 /**
@@ -650,26 +692,30 @@ function searchForValueByPropAndPointer(
   const rev = [...schemas].toReversed();
 
   for (let ii = 0; ii < rev.length; ii += 1) {
-    let schema = rev[ii];
+    let value: unknown = rev[ii];
 
     if (property === 'example') {
-      if ('example' in schema) {
-        schema = schema.example;
-      } else {
-        if (!Array.isArray(schema.examples) || !schema.examples.length) {
-          continue;
-        }
-
-        // Prevent us from crashing if `examples` is a completely empty object.
-        schema = [...schema.examples].shift();
+      if (!isObject(value)) {
+        continue;
       }
+
+      if ('example' in value) {
+        value = value.example;
+      } else if (Array.isArray(value.examples) && value.examples.length) {
+        // Prevent us from crashing if `examples` is a completely empty object.
+        value = value.examples[0];
+      } else {
+        continue;
+      }
+    } else if (isObject(value)) {
+      value = 'default' in value ? value.default : undefined;
     } else {
-      schema = schema.default;
+      continue;
     }
 
     for (let i = pointers.length - 1; i >= 0; i -= 1) {
       try {
-        foundValue = jsonpointer.get(schema, pointers[i]);
+        foundValue = jsonpointer.get(value as object, pointers[i]);
       } catch {
         // If the schema we're looking at is `{obj: null}` and our pointer is `/obj/propertyName`
         // `jsonpointer` will throw an error. If that happens, we should silently catch and toss it
@@ -722,12 +768,13 @@ function searchForValueByPropAndPointer(
  * @todo add support for `schema: false` and `not` cases.
  * @todo tighten up `data` to allow for `SchemaObject | ReferenceObject`
  * @see {@link https://json-schema.org/draft/2019-09/json-schema-validation.html}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#schema-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#schema-object}
  * @param data OpenAPI Schema Object to convert to pure JSON Schema.
  */
 export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOptions): SchemaObject {
-  let schema = data === true ? {} : { ...data };
+  let schema: SchemaObject = typeof data === 'object' && data !== null ? { ...data } : {};
   const schemaAdditionalProperties = isSchema(schema) ? schema.additionalProperties : null;
 
   const {
@@ -795,13 +842,23 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         const examples: unknown[] = [];
 
         Object.entries(obj.examples as Record<string, unknown>).forEach(([name, example]) => {
-          let currentExample = example as ExampleObject | ReferenceObject;
+          let currentExample: ExampleObject | ReferenceObject;
           if (name === '$ref') {
-            currentExample = dereferenceRef({ $ref: currentExample } as ReferenceObject, definition, seenRefs);
-            if (!currentExample || isRef(currentExample)) {
-              refLogger(currentExample.$ref, 'ref');
+            if (typeof example !== 'string') {
               return;
             }
+
+            const resolved: ExampleObject | ReferenceObject = dereferenceRef({ $ref: example }, definition, seenRefs);
+            if (!resolved || isRef(resolved)) {
+              refLogger(isRef(resolved) ? resolved.$ref : example, 'ref');
+              return;
+            }
+
+            currentExample = resolved;
+          } else if (example && typeof example === 'object') {
+            currentExample = example as ExampleObject | ReferenceObject;
+          } else {
+            return;
           }
 
           if ('value' in currentExample) {
@@ -856,6 +913,37 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         // An `example` sibling (common when a parameter-level `example` is merged onto a `$ref`
         // schema) never reaches the `isSchema` normalization branch below, so normalize it here.
         convertExamples(siblings);
+
+        // A sibling `description` replaces the target's, which is where its enum list was added,
+        // so the list has to be added to the sibling too. A sibling `enum` wins over the target's.
+        if (addEnumsToDescriptions && typeof siblings.description === 'string') {
+          let target = isRef(resolved) ? usedSchemas.get(schema.$ref) : resolved;
+          let enumValues = siblings.enum;
+
+          // An alias (a schema that's a `$ref` to another) can be cached as that `$ref`, so follow
+          // the chain until we reach a schema with an enum. An alias's own `enum` may narrow its
+          // target's, so the first one found wins.
+          const followedRefs = new Set<string>();
+          while (enumValues === undefined && target && !isPendingSchema(target)) {
+            if ('enum' in target) {
+              enumValues = target.enum;
+            } else if (isRef(target) && !followedRefs.has(target.$ref)) {
+              followedRefs.add(target.$ref);
+              target = usedSchemas.get(target.$ref);
+              continue;
+            }
+
+            break;
+          }
+
+          if (Array.isArray(enumValues)) {
+            const description = appendEnumDescription(siblings.description, enumValues);
+            if (description !== undefined) {
+              siblings.description = description;
+            }
+          }
+        }
+
         return { ...resolved, ...siblings };
       }
 
@@ -991,22 +1079,22 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
           return toJSONSchema(item as SchemaObject, allOfOptions);
         });
 
-        if (addEnumsToDescriptions) {
-          // Enum values are added to descriptions during response schema conversion. They are
-          // generated display metadata, so they should not participate in `allOf` description
-          // precedence and overwrite an authored description alongside the `allOf`. Remove the
-          // generated paragraph from each converted branch before merging; the final enum handling
-          // below will append it once to the merged schema.
-          allOfSchemas = allOfSchemas.map(withoutGeneratedEnumDescription);
-        }
-
         // Find paths reached by 2+ branches, then inline each branch with deep recursion at
         // those conflict paths.
         const conflictPaths = collectConflictPaths(allOfSchemas, usedSchemas);
-        schema = {
-          ...schema,
-          allOf: allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger, conflictPaths)),
-        } as SchemaObject;
+        allOfSchemas = allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger, conflictPaths));
+
+        if (addEnumsToDescriptions) {
+          // Enum values are added to descriptions during response schema conversion. They are
+          // generated display metadata, so they should not participate in `allOf` description
+          // precedence, and a list for an enum that the merge narrows would no longer be accurate.
+          // Remove the generated paragraphs from each branch (including the `$ref` targets that
+          // were just inlined) before merging; the final enum handling below will append them
+          // again for the merged enums.
+          allOfSchemas = allOfSchemas.map(withoutGeneratedEnumDescription);
+        }
+
+        schema = { ...schema, allOf: allOfSchemas } as SchemaObject;
       }
 
       try {
@@ -1014,7 +1102,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
         // Reinstate the schema's own sibling `description` so it always wins over any `description`
         // merged in from json-schema-merge-allof.
-        if (siblingDescription !== undefined && isObject(schema) && !isRef(schema)) {
+        if (siblingDescription !== undefined && !isRef(schema)) {
           schema.description = siblingDescription;
         }
       } catch {
@@ -1573,30 +1661,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     // filtering away empty and falsy strings here because adding empty `` blocks to the description
     // will serve nobody any good.
     if (addEnumsToDescriptions) {
-      const enums = formatEnumDescription(schema.enum);
-
-      if (enums.length) {
-        const currentDescription =
-          'description' in schema && typeof schema.description === 'string' ? schema.description : '';
-
-        if (!currentDescription) {
-          schema.description = enums;
-        } else {
-          const paragraphs = currentDescription.split(/\n\n+/).map(p => p.trim());
-          const enumParagraphCount = paragraphs.filter(p => p === enums).length;
-
-          // After `allOf` merging nested properties are run through `toJSONSchema` again however
-          // enum description additions may already be present from the first pass, we should avoid
-          // duplicating thoes addendums.
-          if (enumParagraphCount > 1) {
-            const withoutEnum = paragraphs.filter(p => p !== enums);
-            schema.description = withoutEnum.length > 0 ? `${withoutEnum.join('\n\n')}\n\n${enums}` : enums;
-          } else if (paragraphs.some(p => p === enums)) {
-            // noop
-          } else {
-            schema.description = `${currentDescription}\n\n${enums}`;
-          }
-        }
+      const description = appendEnumDescription(schema.description, schema.enum);
+      if (description !== undefined) {
+        schema.description = description;
       }
     }
   }

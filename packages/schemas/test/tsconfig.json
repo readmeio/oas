@@ -2,7 +2,8 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "module": "ES2020",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "rootDir": ".."
   },
   "include": ["./**/*"]
 }

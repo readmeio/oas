@@ -1,5 +1,19 @@
 # @readme/openapi-parser
 
+## 10.0.0
+
+### Major Changes
+
+- 189a03d: Reject malformed OpenAPI server URLs, including square brackets used as hostname placeholders, while preserving server variables, relative URLs, and IPv6 hosts.
+
+  Defer URL validation for undeclared server variables that can be supplied by user data at runtime.
+
+  Expose shared URL normalization and server-variable substitution from `@readme/openapi-parser/lib/urls` and reuse them in `oas` so validation and request generation follow the same matching and normalization rules. Preserve OAS user-specific variable overrides and the existing `oas/utils` regex export.
+
+### Patch Changes
+
+- b35621f: Stop `validate()` from throwing when an OAS 3.1 boolean JSON Schema (`true` / `false`) is inlined by dereference.
+
 ## 9.1.0
 
 ### Minor Changes

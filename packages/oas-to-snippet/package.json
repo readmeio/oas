@@ -1,7 +1,7 @@
 {
   "name": "@readme/oas-to-snippet",
   "description": "Transform an OpenAPI operation into a code snippet",
-  "version": "38.2.0",
+  "version": "39.0.0",
   "author": "Jon Ursenbach <jon@readme.io>",
   "license": "MIT",
   "sideEffects": false,
@@ -25,7 +25,7 @@
   "module": "dist/index.js",
   "types": "dist/index.d.cts",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "files": [
     "dist"
@@ -40,7 +40,7 @@
   },
   "scripts": {
     "attw": "attw --pack --format ascii --profile node16",
-    "build": "tsup",
+    "build": "tsdown",
     "build:docs": "npm run build && node bin/generate-target-markdown-table.js",
     "lint": "npm run lint:types",
     "lint:types": "tsc --noEmit",
@@ -49,17 +49,17 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@readme/httpsnippet": "^11.4.0",
-    "@readme/oas-to-har": "^38.2.0"
+    "@readme/httpsnippet": "^11.4.1",
+    "@readme/oas-to-har": "^39.0.0",
+    "oas": "^39.0.1"
   },
   "devDependencies": {
     "@readme/oas-examples": "file:../oas-examples",
     "@types/har-format": "^1.2.14",
     "@types/node": "^25.3.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "har-examples": "file:../har-examples",
-    "oas": "file:../oas",
-    "tsup": "^8.5.0",
-    "typescript": "^5.2.2",
+    "tsdown": "^0.23.5",
     "vitest": "^5.0.0"
   }
 }

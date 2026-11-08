@@ -30,10 +30,12 @@ import type { OperationIDGeneratorOptions } from './lib/operationId.js';
 import type { getParametersAsJSONSchemaOptions } from './transformers/get-parameters-as-json-schema.js';
 import type { ResponseSchemaObject } from './transformers/get-response-as-json-schema.js';
 
+import { normalizeURL } from '@readme/openapi-parser/lib/urls';
+
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef } from '../lib/refs.js';
-import { defaultVariablesFromServers, normalizeURL, splitUrlFromServers, variablesFromServers } from '../lib/urls.js';
-import { isRef } from '../types.js';
+import { defaultVariablesFromServers, splitUrlFromServers, variablesFromServers } from '../lib/urls.js';
+import { isRef, parameterObject } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
@@ -44,6 +46,9 @@ import { getResponseExamples } from './lib/get-response-examples.js';
 import { getOperationId, hasOperationId } from './lib/operationId.js';
 import { getParametersAsJSONSchema } from './transformers/get-parameters-as-json-schema.js';
 import { getResponseAsJSONSchema } from './transformers/get-response-as-json-schema.js';
+
+// Re-exported so `Operation.getParametersAsJSONSchema()`'s parameter type is publicly nameable.
+export type { getParametersAsJSONSchemaOptions };
 
 export class Operation {
   /**
@@ -125,15 +130,16 @@ export class Operation {
   /**
    * Retrieve the `summary` for this operation.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationsummary}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-summary}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#operationSummary}
+   * @see {@link https://spec.openapis.org/oas/v3.1.2.html#operationSummary}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-summary}
    */
   getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
     }
 
-    const pathItem = this.api.paths?.[this.path];
+    const pathItem = this.getPathItem();
     if (pathItem?.summary && typeof pathItem.summary === 'string') {
       return pathItem.summary;
     }
@@ -144,20 +150,34 @@ export class Operation {
   /**
    * Retrieve the `description` for this operation.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationdescription}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-description}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#operationDescription}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationDescription}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-description}
    */
   getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
     }
 
-    const pathItem = this.api.paths?.[this.path];
+    const pathItem = this.getPathItem();
     if (pathItem?.description && typeof pathItem.description === 'string') {
       return pathItem.description;
     }
 
     return undefined;
+  }
+
+  /**
+   * Resolve this operation's Path Item, including when the live document still has a `$ref`.
+   * Does not write the target back into `this.api.paths`.
+   */
+  private getPathItem(): PathItemObject | undefined {
+    const pathItem = dereferenceRef(this.api.paths?.[this.path], this.api);
+    if (!pathItem || isRef(pathItem)) {
+      return undefined;
+    }
+
+    return pathItem;
   }
 
   /**
@@ -201,8 +221,9 @@ export class Operation {
    * Retrieve the primary content type for this operation. If multiple exist, the first JSON-like
    * type will be returned.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-requestbodycontent}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-request-body-content}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#requestBodyContent}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#requestBodyContent}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#request-body-content}
    */
   getContentType(): string {
     if (this.contentType) {
@@ -238,8 +259,9 @@ export class Operation {
   /**
    * Checks if the current operation has a `x-www-form-urlencoded` content type payload.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-requestbodycontent}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-request-body-content}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#requestBodyContent}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#requestBodyContent}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#request-body-content}
    */
   isFormUrlEncoded(): boolean {
     return matchesMimeType.formUrlEncoded(this.getContentType());
@@ -248,8 +270,9 @@ export class Operation {
   /**
    * Checks if the current operation has a mutipart content type payload.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-requestbodycontent}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-request-body-content}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#requestBodyContent}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#requestBodyContent}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#request-body-content}
    */
   isMultipart(): boolean {
     return matchesMimeType.multipart(this.getContentType());
@@ -258,8 +281,9 @@ export class Operation {
   /**
    * Checks if the current operation has a JSON-like content type payload.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-requestbodycontent}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-request-body-content}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#requestBodyContent}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#requestBodyContent}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#request-body-content}
    */
   isJson(): boolean {
     return matchesMimeType.json(this.getContentType());
@@ -268,8 +292,9 @@ export class Operation {
   /**
    * Checks if the current operation has an XML content type payload.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-requestbodycontent}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-request-body-content}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#requestBodyContent}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#requestBodyContent}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#request-body-content}
    */
   isXml(): boolean {
     return matchesMimeType.xml(this.getContentType());
@@ -278,7 +303,8 @@ export class Operation {
   /**
    * Checks if the current operation is a webhook or not.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#oas-webhooks}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#oasWebhooks}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#oas-webhooks}
    */
   isWebhook(): boolean {
     return this instanceof Webhook;
@@ -289,8 +315,9 @@ export class Operation {
    * defined at the operation level, the securities for the entire API definition are returned
    * (with an empty array as a final fallback).
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#security-requirement-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#security-requirement-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#security-requirement-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-requirement-object}
    */
   getSecurity(): SecurityRequirementObject[] {
     // If this definition doesn't have any security schemes defined then regardless if there are
@@ -308,8 +335,9 @@ export class Operation {
    * security schemes, the outer array determines OR-groups.
    *
    * @see {@link https://swagger.io/docs/specification/authentication/#multiple}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-requirement-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#security-requirement-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#security-requirement-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-requirement-object}
    * @param filterInvalid Optional flag that, when set to `true`, filters out invalid/nonexistent
    *    security schemes, rather than returning `false`.
    */
@@ -342,8 +370,10 @@ export class Operation {
         let type: SecurityType | null = null;
 
         if (security.type === 'http') {
-          if (security.scheme === 'basic') type = 'Basic';
-          else if (security.scheme === 'bearer') type = 'Bearer';
+          // HTTP authentication scheme names are case-insensitive (RFC 7235).
+          const httpScheme = security.scheme.toLowerCase();
+          if (httpScheme === 'basic') type = 'Basic';
+          else if (httpScheme === 'bearer') type = 'Bearer';
           else type = security.type;
         } else if (security.type === 'oauth2') {
           type = 'OAuth2';
@@ -509,8 +539,9 @@ export class Operation {
    * Determine if this operation has an `operationId` present in its schema. Note that if one is
    * present in the schema but is an empty string then this will return `false`.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationid}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-id}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationId}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationId}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-id}
    */
   hasOperationId(): boolean {
     return hasOperationId(this.schema);
@@ -520,8 +551,9 @@ export class Operation {
    * Determine if an operation has an `operationId` present in its schema. Note that if one is
    * present in the schema but is an empty string then this will return `false`.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationid}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-id}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationId}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationId}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-id}
    */
   static hasOperationId(schema: OperationObject): boolean {
     return hasOperationId(schema);
@@ -531,8 +563,9 @@ export class Operation {
    * Get an `operationId` for this operation. If one is not present (it's not required by the spec!)
    * a hash of the path and method will be returned instead.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationid}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-id}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationId}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationId}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-id}
    */
   getOperationId(opts: OperationIDGeneratorOptions = {}): string {
     return getOperationId(this.path, this.method, this.schema, opts);
@@ -542,8 +575,9 @@ export class Operation {
    * Get an `operationId` for an operation. If one is not present (it's not required by the spec!)
    * a hash of the path and method will be returned instead.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationid}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-id}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationId}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationId}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-id}
    */
   static getOperationId(
     path: string,
@@ -591,8 +625,9 @@ export class Operation {
   /**
    * Return is the operation is flagged as `deprecated` or not.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationdeprecated}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-deprecated}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationDeprecated}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationDeprecated}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-deprecated}
    */
   isDeprecated(): boolean {
     return Boolean('deprecated' in this.schema ? this.schema.deprecated : false);
@@ -607,35 +642,36 @@ export class Operation {
   }
 
   /**
+   * Dereference operation or path-item parameters into the flat {@link ParameterObject} shape.
+   *
+   */
+  protected listParameters(params: readonly object[] | undefined): ParameterObject[] {
+    const resolved: ParameterObject[] = [];
+
+    for (const entry of params ?? []) {
+      if (isRef(entry)) {
+        const dereferenced = dereferenceRef(entry, this.api);
+        if (!dereferenced || isRef(dereferenced)) continue;
+        resolved.push(parameterObject(dereferenced));
+        continue;
+      }
+
+      resolved.push(parameterObject(entry));
+    }
+
+    return resolved;
+  }
+
+  /**
    * Return the parameters (non-request body) on the operation.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationparameters}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-parameters}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationParameters}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationParameters}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-parameters}
    */
   getParameters(): ParameterObject[] {
-    let parameters = (this.schema?.parameters || [])
-      .map(p => {
-        let param = p;
-        if (isRef(param)) {
-          param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return;
-        }
-
-        return param;
-      })
-      .filter((param): param is ParameterObject => param !== undefined);
-
-    const commonParams = (this.getCommonParameterContainer()?.parameters || [])
-      .map(p => {
-        let param = p;
-        if (isRef(param)) {
-          param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return;
-        }
-
-        return param;
-      })
-      .filter((param): param is ParameterObject => param !== undefined);
+    let parameters = this.listParameters(this.schema?.parameters);
+    const commonParams = this.listParameters(this.getCommonParameterContainer()?.parameters);
 
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
@@ -660,11 +696,12 @@ export class Operation {
   /**
    * Determine if this operation has any required parameters.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationparameters}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-parameters}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationParameters}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationParameters}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-parameters}
    */
   hasRequiredParameters(): boolean {
-    return this.getParameters().some(param => 'required' in param && param.required);
+    return this.getParameters().some(param => param.required);
   }
 
   /**
@@ -761,16 +798,18 @@ export class Operation {
   /**
    * Retrieve an array of all content types that this operation can return.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#response-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#response-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#response-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#response-objec]}
    */
   getResponseContentTypes(): string[] {
     if (!this.schema.responses) return [];
 
     const contentTypes = new Set<string>();
-    Object.values(this.schema.responses).forEach((response: ReferenceObject | ResponseObject) => {
-      let resp = response;
-      if (!resp) return;
+    Object.values(this.schema.responses).forEach(response => {
+      if (!response || typeof response !== 'object') return;
+
+      let resp = response as ReferenceObject | ResponseObject;
       if (isRef(resp)) {
         resp = dereferenceRef(resp, this.api);
 
@@ -792,8 +831,9 @@ export class Operation {
   /**
    * Determine if the operation has any request bodies.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationrequestbody}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-request-body}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationRequestBody}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationRequestBody}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-request-body}
    */
   hasRequestBody(): boolean {
     return !!this.schema.requestBody;
@@ -821,8 +861,9 @@ export class Operation {
   /**
    * Retrieve the list of all available media types that the operations request body can accept.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#media-type-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#media-type-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#media-type-object}
    */
   getRequestBodyMediaTypes(): string[] {
     if (!this.hasRequestBody()) {
@@ -838,8 +879,9 @@ export class Operation {
   /**
    * Determine if this operation has a required request body.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#media-type-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#media-type-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#media-type-object}
    */
   hasRequiredRequestBody(): boolean {
     if (!this.hasRequestBody()) {
@@ -879,8 +921,9 @@ export class Operation {
    * is an object containing the selected media type, the media type object, and an optional
    * description.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#media-type-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#media-type-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#media-type-object}
    * @param mediaType Specific request body media type to retrieve if present.
    */
   getRequestBody(
@@ -893,14 +936,16 @@ export class Operation {
     const requestBody = this.getResolvedRequestBody();
     if (!requestBody) return false;
 
+    const content = requestBody.content;
+
     if (mediaType) {
-      if (!(mediaType in requestBody.content)) {
+      if (!(mediaType in content)) {
         return false;
       }
 
       return {
         mediaType,
-        mediaTypeObject: requestBody.content[mediaType],
+        mediaTypeObject: content[mediaType],
         description: requestBody.description,
       };
     }
@@ -926,7 +971,7 @@ export class Operation {
     if (availableMediaType) {
       return {
         mediaType: availableMediaType,
-        mediaTypeObject: requestBody.content[availableMediaType],
+        mediaTypeObject: content[availableMediaType],
         description: requestBody.description,
       };
     }
@@ -937,8 +982,9 @@ export class Operation {
   /**
    * Retrieve an array of request body examples that this operation has.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#request-body-examples}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#request-body-examples}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#request-body-examples}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#request-body-examples}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#request-body-examples}
    */
   getRequestBodyExamples(): RequestBodyExample[] {
     const isRequestExampleValueDefined = typeof this.requestBodyExamples?.[0]?.examples?.[0].value !== 'undefined';
@@ -955,8 +1001,9 @@ export class Operation {
    * Return a specific response out of the operation by a given HTTP status code.
    *
    * @param statusCode Status code to pull a response object for.
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#response-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#response-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#response-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#response-object}
    */
   getResponseByStatusCode(statusCode: number | string): ResponseObject | false {
     if (!this.schema.responses) {
@@ -979,8 +1026,9 @@ export class Operation {
   /**
    * Retrieve an array of response examples that this operation has.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object-examples}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#response-object-examples}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#response-object-examples}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#response-object-examples}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#response-object-examples}
    */
   getResponseExamples(): ResponseExample[] {
     if (this.responseExamples) {
@@ -994,8 +1042,9 @@ export class Operation {
   /**
    * Determine if the operation has callbacks.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#callback-object}
    */
   hasCallbacks(): boolean {
     return Boolean(this.schema.callbacks);
@@ -1004,8 +1053,9 @@ export class Operation {
   /**
    * Retrieve a specific callback.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#callback-object}
    * @param identifier Callback identifier to look for.
    * @param expression Callback expression to look for.
    * @param method HTTP Method on the callback to look for.
@@ -1033,18 +1083,22 @@ export class Operation {
       }
     }
 
-    if (!callback[method]) {
+    // `PathItemObject` also describes the OpenAPI 3.2 `query` operation.
+    const callbackPathItem: PathItemObject = callback;
+    if (!callbackPathItem[method]) {
       return false;
     }
 
-    return new Callback(this.oas, expression, method, callback[method], identifier, callback);
+    const callbackOperation = dereferenceRef(callbackPathItem[method], this.api);
+    return new Callback(this.oas, expression, method, callbackOperation, identifier, callback);
   }
 
   /**
    * Retrieve an array of operations created from each callback.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#callback-object}
    */
   getCallbacks(): Callback[] {
     if (!this.hasCallbacks()) return [];
@@ -1089,8 +1143,9 @@ export class Operation {
   /**
    * Retrieve an array of callback examples that this operation has.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#callback-object}
    */
   getCallbackExamples(): CallbackExample[] {
     if (this.callbackExamples) {
@@ -1104,8 +1159,9 @@ export class Operation {
   /**
    * Determine if a given a custom specification extension exists within the operation.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#specification-extensions}
    * @param extension Specification extension to lookup.
    */
   hasExtension(extension: string): boolean {
@@ -1115,14 +1171,20 @@ export class Operation {
   /**
    * Retrieve a custom specification extension off of the operation.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#specification-extensions}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#specification-extensions}
    * @param extension Specification extension to lookup.
    *
    * @deprecated Use `oas.getExtension(extension, operation)` instead.
    */
   getExtension(extension: string | keyof Extensions): any {
-    return this.schema?.[extension];
+    const schema = this.schema;
+    if (!schema || !(extension in schema)) {
+      return undefined;
+    }
+
+    return (schema as Record<string, unknown>)[extension];
   }
 
   /**
@@ -1175,8 +1237,9 @@ export class Callback extends Operation {
   /**
    * Return the primary identifier for this callback.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#callback-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#callback-object}
    */
   getIdentifier(): string {
     return this.identifier;
@@ -1185,8 +1248,9 @@ export class Callback extends Operation {
   /**
    * Retrieve the `summary` for this callback.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationsummary}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-summary}
+   * @see {@link https://spec.openapis.org/oas/v3.0.3.html#operationSummary}
+   * @see {@link https://spec.openapis.org/oas/v3.1.2.html#operationSummary}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-summary}
    */
   getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
@@ -1201,8 +1265,9 @@ export class Callback extends Operation {
   /**
    * Retrieve the `description` for this operation.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationdescription}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-description}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationDescription}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationDescription}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-description}
    */
   getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
@@ -1217,33 +1282,13 @@ export class Callback extends Operation {
   /**
    * Return the parameters (non-request body) on the operation.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationparameters}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-parameters}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationParameters}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationParameters}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-parameters}
    */
   getParameters(): ParameterObject[] {
-    let parameters = (this.schema?.parameters || [])
-      .map(p => {
-        let param = p;
-        if (isRef(param)) {
-          param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return;
-        }
-
-        return param;
-      })
-      .filter((param): param is ParameterObject => param !== undefined);
-
-    const commonParams = (this.parentSchema.parameters || [])
-      .map(p => {
-        let param = p;
-        if (isRef(param)) {
-          param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return;
-        }
-
-        return param;
-      })
-      .filter((param): param is ParameterObject => param !== undefined);
+    let parameters = this.listParameters(this.schema?.parameters);
+    const commonParams = this.listParameters(this.parentSchema.parameters);
 
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
@@ -1275,8 +1320,9 @@ export class Webhook extends Operation {
   /**
    * Retrieve the `summary` for this callback.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationsummary}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-summary}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationSummary}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationSummary}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-summary}
    */
   getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
@@ -1285,20 +1331,20 @@ export class Webhook extends Operation {
       return undefined;
     }
 
-    let webhookPath = this.api.webhooks[this.path];
-    if (isRef(webhookPath)) {
-      this.api.webhooks[this.path] = dereferenceRef(webhookPath, this.api);
-      webhookPath = this.api.webhooks[this.path];
+    const webhookPath = dereferenceRef(this.api.webhooks[this.path], this.api);
+    if (!webhookPath || isRef(webhookPath)) {
+      return undefined;
     }
 
-    return webhookPath?.summary;
+    return webhookPath.summary;
   }
 
   /**
    * Retrieve the `description` for this operation.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationdescription}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-description}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operationDescription}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operationDescription}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-description}
    */
   getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
@@ -1307,12 +1353,11 @@ export class Webhook extends Operation {
       return undefined;
     }
 
-    let webhookPath = this.api.webhooks[this.path];
-    if (isRef(webhookPath)) {
-      this.api.webhooks[this.path] = dereferenceRef(webhookPath, this.api);
-      webhookPath = this.api.webhooks[this.path];
+    const webhookPath = dereferenceRef(this.api.webhooks[this.path], this.api);
+    if (!webhookPath || isRef(webhookPath)) {
+      return undefined;
     }
 
-    return webhookPath?.description;
+    return webhookPath.description;
   }
 }

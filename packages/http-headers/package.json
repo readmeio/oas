@@ -17,7 +17,7 @@
   "module": "dist/index.js",
   "types": "dist/index.d.cts",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "files": [
     "dist"
@@ -35,7 +35,7 @@
   },
   "scripts": {
     "attw": "attw --pack --format ascii",
-    "build": "tsup",
+    "build": "tsdown",
     "lint": "npm run lint:types",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
@@ -43,8 +43,8 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "devDependencies": {
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.3",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "tsdown": "^0.23.5",
     "vitest": "^5.0.0"
   }
 }

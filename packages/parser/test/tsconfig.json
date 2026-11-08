@@ -3,6 +3,7 @@
   "compilerOptions": {
     "isolatedDeclarations": false,
     "noImplicitAny": false,
+    "rootDir": "..",
     "types": ["node"]
   },
   "include": ["./**/*"]

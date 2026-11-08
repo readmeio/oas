@@ -2,6 +2,7 @@ import type { AuthForHAR } from './types.js';
 import type { OASDocument, SecuritySchemeObject } from 'oas/types';
 
 import { isRef } from 'oas/types';
+import { dereferenceRef } from 'oas/utils';
 
 function harValue(
   type: 'cookies' | 'headers' | 'queryString',
@@ -21,19 +22,26 @@ export default function configureSecurity(
   if (Object.keys(values || {}).length === 0) return undefined;
 
   if (!apiDefinition.components?.securitySchemes?.[scheme]) return undefined;
-  const security = apiDefinition.components.securitySchemes[scheme] as SecuritySchemeObject & {
+  let security = apiDefinition.components.securitySchemes[scheme] as SecuritySchemeObject & {
     'x-bearer-format'?: string;
   };
 
   if (isRef(security)) {
-    return undefined;
-  } else if (!values[scheme]) {
+    security = dereferenceRef(security, apiDefinition);
+    if (!security || isRef(security)) {
+      return undefined;
+    }
+  }
+
+  if (!values[scheme]) {
     // If we don't have any data for this auth scheme then we shouldn't add it.
     return false;
   }
 
   if (security.type === 'http') {
-    if (security.scheme === 'basic') {
+    // HTTP authentication scheme names are case-insensitive (RFC 7235).
+    const httpScheme = security.scheme.toLowerCase();
+    if (httpScheme === 'basic') {
       const auth = values[scheme];
       if (typeof auth !== 'object') return false;
       if (!auth.user && !auth.pass) return false;
@@ -52,7 +60,7 @@ export default function configureSecurity(
         name: 'authorization',
         value: `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`,
       });
-    } else if (security.scheme === 'bearer') {
+    } else if (httpScheme === 'bearer') {
       return harValue('headers', {
         name: 'authorization',
         value: `Bearer ${values[scheme]}`,

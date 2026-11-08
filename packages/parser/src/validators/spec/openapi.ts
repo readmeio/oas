@@ -1,28 +1,48 @@
-import type { ParserRulesOpenAPI } from '../../types.js';
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIDocument, ParserRulesOpenAPI } from '../../types.js';
+import type * as OAS30 from '@scalar/openapi-types/3.0';
+import type * as OAS31 from '@scalar/openapi-types/3.1';
+import type * as OAS32 from '@scalar/openapi-types/3.2';
 
-import { isOpenAPI30, isOpenAPI31 } from '../../lib/assertions.js';
+import { isOpenAPI30, isOpenAPI31, isOpenAPI32 } from '../../lib/assertions.js';
 import { pathParameterTemplateRegExp, supportedHTTPMethods } from '../../lib/index.js';
+import { normalizeURL, substituteServerVariables } from '../../lib/urls.js';
 
 import { SpecificationValidator } from './index.js';
 
+type PathItemObject = OAS30.PathItemObject | OAS31.PathItemObject | OAS32.PathItemObject;
+type OperationObject = OAS30.OperationObject | OAS31.OperationObject | OAS32.OperationObject;
+type ResponseObject = OAS30.ResponseObject | OAS31.ResponseObject | OAS32.ResponseObject;
+type ServerObject = OAS30.ServerObject | OAS31.ServerObject | OAS32.ServerObject;
 type ParameterObject =
-  | (OpenAPIV3_1.ParameterObject | OpenAPIV3_1.ReferenceObject)
-  | (OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject);
+  | OAS30.ParameterObject
+  | OAS31.ParameterObject
+  | OAS32.ParameterObject
+  | OAS30.ReferenceObject
+  | OAS31.ReferenceObject
+  | OAS32.ReferenceObject;
+
+/**
+ * 3.0, 3.1, and 3.2 each type `parameters` as their own array. A readonly array of the shared
+ * element type accepts that union, and copying it gives `reduce` one accumulator.
+ */
+function parameterList(params: readonly ParameterObject[] | undefined): ParameterObject[] {
+  return params ? [...params] : [];
+}
 
 /**
  * Validates parts of the OpenAPI 3.0 and 3.1 specification that aren't covered by their JSON
  * Schema definitions.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html}
  */
 export class OpenAPISpecificationValidator extends SpecificationValidator {
-  api: OpenAPIV3_1.Document | OpenAPIV3.Document;
+  api: OpenAPIDocument;
 
   rules: ParserRulesOpenAPI;
 
-  constructor(api: OpenAPIV3_1.Document | OpenAPIV3.Document, rules: ParserRulesOpenAPI) {
+  constructor(api: OpenAPIDocument, rules: ParserRulesOpenAPI) {
     super();
 
     this.api = api;
@@ -33,13 +53,23 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     this.checkSecuritySchemes();
   }
 
+  /**
+   * `validate()` dereferences before this pass. OAS 3.1 boolean JSON Schemas (`true` / `false`)
+   * are valid schema values. Using `in` on a primitive throws `TypeError`.
+   */
+  private isObject(value: unknown): value is object {
+    return typeof value === 'object' && value !== null;
+  }
+
   run(): void {
+    this.validateServers(this.api.servers, '');
+
     const operationIds: string[] = [];
     Object.keys(this.api.paths || {}).forEach(pathName => {
       const path = this.api.paths[pathName];
       const pathId = `/paths${pathName}`;
 
-      if (path && pathName.startsWith('/')) {
+      if (this.isObject(path) && pathName.startsWith('/')) {
         this.validatePath(path, pathId, operationIds);
       }
     });
@@ -72,9 +102,10 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
      * specification now requires that either `components`, `webhooks`, or `paths` be present and
      * not empty. Unfortunately the JSON Schema for the specification is unable to specify this.
      *
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-document}
+     * @see {@link https://spec.openapis.org/oas/v3.1.0.html#oasWebhooks}
+     * @see {@link https://spec.openapis.org/oas/v3.2.0.html#oas-webhooks}
      */
-    if (isOpenAPI31(this.api)) {
+    if (isOpenAPI31(this.api) || isOpenAPI32(this.api)) {
       if (
         !Object.keys(this.api.paths || {}).length &&
         !Object.keys(this.api.webhooks || {}).length &&
@@ -91,16 +122,16 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * Validates the given path.
    *
    */
-  private validatePath(
-    path: OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObject,
-    pathId: string,
-    operationIds: string[],
-  ) {
+  private validatePath(path: PathItemObject, pathId: string, operationIds: string[]) {
+    this.validateServers(path.servers, pathId);
+
     supportedHTTPMethods.forEach(operationName => {
       const operation = path[operationName];
       const operationId = `${pathId}/${operationName}`;
 
       if (operation) {
+        this.validateServers(operation.servers, operationId);
+
         const declaredOperationId = operation.operationId;
         if (declaredOperationId) {
           if (!operationIds.includes(declaredOperationId)) {
@@ -117,10 +148,33 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
         Object.keys(operation.responses || {}).forEach(responseCode => {
           const response = operation.responses[responseCode];
           const responseId = `${operationId}/responses/${responseCode}`;
-          if (response && !('$ref' in response)) {
+          if (this.isObject(response) && !('$ref' in response)) {
             this.validateResponse(response, responseId);
           }
         });
+      }
+    });
+  }
+
+  private validateServers(servers: readonly ServerObject[] | undefined, parentId: string) {
+    servers?.forEach((server, index) => {
+      let hasUnresolvedVariables = false;
+      const url = substituteServerVariables(server.url, server.variables, () => {
+        hasUnresolvedVariables = true;
+      });
+
+      // Undeclared variables may come from user data at runtime. Their URL cannot be validated
+      // until those values are available, especially when they supply a protocol or port.
+      if (hasUnresolvedVariables) return;
+
+      try {
+        // Query- and fragment-only references need a base for validation. Normalize other inputs
+        // as URL selection does so malformed bare hosts are still checked as hosts.
+        const urlForValidation = url.startsWith('?') || url.startsWith('#') ? url : normalizeURL(url);
+        // oxlint-disable-next-line no-new -- Parsing the URL is the validation.
+        new URL(urlForValidation, 'https://example.com');
+      } catch {
+        this.reportError(`\`${parentId}/servers/${index}/url\` is not a valid server URL: \`${server.url}\`.`);
       }
     });
   }
@@ -129,14 +183,9 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * Validates the parameters for the given operation.
    *
    */
-  private validateParameters(
-    path: OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObject,
-    pathId: string,
-    operation: OpenAPIV3_1.OperationObject | OpenAPIV3.OperationObject,
-    operationId: string,
-  ) {
-    const pathParams = path.parameters || [];
-    const operationParams = operation.parameters || [];
+  private validateParameters(path: PathItemObject, pathId: string, operation: OperationObject, operationId: string) {
+    const pathParams = parameterList(path.parameters);
+    const operationParams = parameterList(operation.parameters);
 
     // Check for duplicate path parameters.
     this.checkForDuplicates(pathParams, pathId);
@@ -148,7 +197,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     // the path params.
     const params = pathParams.reduce((combinedParams, value) => {
       const duplicate = combinedParams.some(param => {
-        if ('$ref' in param || '$ref' in value) {
+        if (!this.isObject(param) || !this.isObject(value) || '$ref' in param || '$ref' in value) {
           return false;
         }
 
@@ -226,24 +275,27 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    */
   private validateParameterTypes(params: ParameterObject[], operationId: string) {
     params.forEach(param => {
-      if ('$ref' in param) {
+      if (!this.isObject(param) || '$ref' in param) {
         return;
       }
 
       const parameterId = `${operationId}/parameters/${param.name}`;
 
       /**
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#fixed-fields-10}
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-10}
+       * @see {@link https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-9}
+       * @see {@link https://spec.openapis.org/oas/v3.1.0.html#fixed-fields-9}
+       * @see {@link https://spec.openapis.org/oas/v3.2.0.html#fixed-fields-9}
        */
-      if (!param.schema && param.content) {
-        this.validateParameterContent(param.content, parameterId);
+      const schema = 'schema' in param ? param.schema : undefined;
+      const content = 'content' in param ? param.content : undefined;
+      if (!schema && this.isObject(content)) {
+        this.validateParameterContent(content, parameterId);
         return;
-      } else if ('$ref' in param.schema) {
+      } else if (!this.isObject(schema) || '$ref' in schema) {
         return;
       }
 
-      this.validateSchema(param.schema, parameterId);
+      this.validateSchema(schema, parameterId);
     });
   }
 
@@ -251,10 +303,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * Validates parameter content object.
    * Note: The requirement for exactly one media type is already enforced by the OpenAPI JSON schema.
    */
-  private validateParameterContent(
-    content: OpenAPIV3_1.ParameterObject['content'] | OpenAPIV3.ParameterObject['content'],
-    parameterId: string,
-  ) {
+  private validateParameterContent(content: object, parameterId: string) {
     const mediaTypes = Object.keys(content);
     if (mediaTypes.length !== 1) {
       this.reportError(
@@ -264,11 +313,9 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     }
 
     const mediaType = mediaTypes[0];
-    const contentSchema = content[mediaType].schema;
-    if (contentSchema) {
-      if ('$ref' in contentSchema) {
-        return;
-      }
+    const entry = Object.getOwnPropertyDescriptor(content, mediaType)?.value;
+    const contentSchema = this.isObject(entry) && 'schema' in entry ? entry.schema : undefined;
+    if (this.isObject(contentSchema) && !('$ref' in contentSchema)) {
       this.validateSchema(contentSchema, `${parameterId}/content/${mediaType}/schema`);
     }
   }
@@ -277,35 +324,35 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * Validates the given response object.
    *
    */
-  private validateResponse(response: OpenAPIV3_1.ResponseObject | OpenAPIV3.ResponseObject, responseId: string) {
+  private validateResponse(response: ResponseObject, responseId: string) {
     Object.keys(response.headers || {}).forEach(headerName => {
       const header = response.headers[headerName];
       const headerId = `${responseId}/headers/${headerName}`;
-      if ('$ref' in header) {
+      if (!this.isObject(header) || '$ref' in header) {
         return;
       }
 
-      if (header.schema) {
-        if (!('$ref' in header.schema)) {
-          this.validateSchema(header.schema, headerId);
-        }
-      } else if (header.content) {
-        Object.keys(header.content).forEach(mediaType => {
-          if (header.content[mediaType].schema) {
-            if (!('$ref' in header.content[mediaType].schema)) {
-              this.validateSchema(header.content[mediaType].schema || {}, `${headerId}/content/${mediaType}/schema`);
-            }
+      const headerSchema = 'schema' in header ? header.schema : undefined;
+      const headerContent = 'content' in header ? header.content : undefined;
+      if (this.isObject(headerSchema) && !('$ref' in headerSchema)) {
+        this.validateSchema(headerSchema, headerId);
+      } else if (this.isObject(headerContent)) {
+        Object.keys(headerContent).forEach(mediaType => {
+          const entry = Object.getOwnPropertyDescriptor(headerContent, mediaType)?.value;
+          const mediaSchema = this.isObject(entry) && 'schema' in entry ? entry.schema : undefined;
+          if (this.isObject(mediaSchema) && !('$ref' in mediaSchema)) {
+            this.validateSchema(mediaSchema, `${headerId}/content/${mediaType}/schema`);
           }
         });
       }
     });
 
     if (response.content) {
-      Object.keys(response.content).forEach(mediaType => {
-        if (response.content[mediaType].schema) {
-          if (!('$ref' in response.content[mediaType].schema)) {
-            this.validateSchema(response.content[mediaType].schema || {}, `${responseId}/content/${mediaType}/schema`);
-          }
+      Object.entries(response.content).forEach(([mediaType, mediaTypeObject]) => {
+        if (!this.isObject(mediaTypeObject) || !('schema' in mediaTypeObject)) return;
+        const mediaSchema = mediaTypeObject.schema;
+        if (this.isObject(mediaSchema) && !('$ref' in mediaSchema)) {
+          this.validateSchema(mediaSchema, `${responseId}/content/${mediaType}/schema`);
         }
       });
     }
@@ -315,8 +362,14 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * Validates the given Swagger schema object.
    *
    */
-  private validateSchema(schema: OpenAPIV3_1.SchemaObject | OpenAPIV3.SchemaObject, schemaId: string) {
-    if (schema.type === 'array' && !schema.items) {
+  private validateSchema(schema: object, schemaId: string) {
+    if (!this.isObject(schema)) {
+      return;
+    }
+
+    const type = 'type' in schema ? schema.type : undefined;
+    const items = 'items' in schema ? schema.items : undefined;
+    if (type === 'array' && !items) {
       if (this.rules['array-without-items'] === 'warning') {
         this.reportWarning(`\`${schemaId}\` is an array, so it should include an \`items\` schema.`);
       } else {
@@ -332,7 +385,9 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * fails every branch and produces overwhelming, unhelpful errors. This pre-AJV pass surfaces
    * a single targeted error per problem.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#security-scheme-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-scheme-object}
    */
   private checkSecuritySchemes() {
     const securitySchemes = this.api.components?.securitySchemes;
@@ -378,7 +433,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
 
     Object.keys(securitySchemes).forEach(name => {
       const scheme = securitySchemes[name] as Record<string, unknown>;
-      if ('$ref' in scheme) {
+      if (!this.isObject(scheme) || '$ref' in scheme) {
         return;
       }
 
@@ -473,7 +528,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
       const outer = params[i];
       for (let j = i + 1; j < params.length; j++) {
         const inner = params[j];
-        if ('$ref' in outer || '$ref' in inner) {
+        if (!this.isObject(outer) || !this.isObject(inner) || '$ref' in outer || '$ref' in inner) {
           continue;
         }
 

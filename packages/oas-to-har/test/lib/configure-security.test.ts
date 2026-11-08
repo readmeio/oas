@@ -51,6 +51,18 @@ describe('configure-security', () => {
         });
       });
 
+      it('should treat the scheme name as case-insensitive', () => {
+        const spec = createSecurityOAS({ type: 'http', scheme: 'Basic' });
+
+        expect(configureSecurity(spec, { busterAuth: { user: 'user', pass: 'pass' } }, 'busterAuth')).toStrictEqual({
+          type: 'headers',
+          value: {
+            name: 'authorization',
+            value: `Basic ${Buffer.from('user:pass').toString('base64')}`,
+          },
+        });
+      });
+
       it('should return with no header if wanted scheme is missing', () => {
         const spec = createSecurityOAS({ type: 'http', scheme: 'basic' });
 
@@ -87,6 +99,37 @@ describe('configure-security', () => {
           value: {
             name: 'authorization',
             value: `Bearer ${apiKey}`,
+          },
+        });
+      });
+
+      it('should dereference a `$ref` security scheme', () => {
+        const spec = {
+          components: {
+            securitySchemes: {
+              busterAuth: { $ref: '#/components/securitySchemes/actualBearer' },
+              actualBearer: { type: 'http', scheme: 'bearer' },
+            },
+          },
+        } as unknown as OASDocument;
+
+        expect(configureSecurity(spec, { busterAuth: 'secret-token' }, 'busterAuth')).toStrictEqual({
+          type: 'headers',
+          value: {
+            name: 'authorization',
+            value: 'Bearer secret-token',
+          },
+        });
+      });
+
+      it('should treat the scheme name as case-insensitive', () => {
+        const spec = createSecurityOAS({ type: 'http', scheme: 'Bearer' });
+
+        expect(configureSecurity(spec, { busterAuth: '123456' }, 'busterAuth')).toStrictEqual({
+          type: 'headers',
+          value: {
+            name: 'authorization',
+            value: 'Bearer 123456',
           },
         });
       });

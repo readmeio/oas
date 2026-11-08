@@ -110,7 +110,9 @@ export function stylize(config: StylizerConfig): any {
 }
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-examples}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#style-examples}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#style-examples}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#style-examples}
  */
 function encodeArray({
   location,
@@ -198,7 +200,9 @@ function encodeArray({
 }
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-examples}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#style-examples}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#style-examples}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#style-examples}
  */
 function encodeObject({ location, key, value, style, explode, escape, isAllowedReserved = false }: StylizerConfig) {
   const valueEncoder = (str: string) =>
@@ -323,7 +327,9 @@ function encodeObject({ location, key, value, style, explode, escape, isAllowedR
 }
 
 /**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-examples}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#style-examples}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#style-examples}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#style-examples}
  */
 function encodePrimitive({ location, key, value, style, escape, isAllowedReserved = false }: StylizerConfig) {
   const valueEncoder = (str: string) =>

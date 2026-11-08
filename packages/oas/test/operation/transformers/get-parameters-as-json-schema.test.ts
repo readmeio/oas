@@ -2534,6 +2534,43 @@ describe('.getParametersAsJSONSchema()', () => {
     });
 
     describe('hideReadOnlyProperties', () => {
+      it('should not remove readOnly properties from the source parameter schema', () => {
+        const oas = Oas.init({
+          openapi: '3.0.0',
+          info: { title: 'readOnly parameter', version: '1.0.0' },
+          paths: {
+            '/widgets': {
+              get: {
+                parameters: [
+                  {
+                    name: 'filter',
+                    in: 'query',
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string', readOnly: true },
+                        name: { type: 'string' },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        const operation = oas.operation('/widgets', 'get');
+
+        operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+
+        const parameter = operation.getParameters().find(param => param.name === 'filter');
+        expect(parameter?.schema).toMatchObject({
+          properties: {
+            id: { type: 'string', readOnly: true },
+            name: { type: 'string' },
+          },
+        });
+      });
+
       it('should hide readOnly properties from the generated schema', () => {
         const operation = readOnlyWriteOnly.operation('/readOnly', 'post');
 

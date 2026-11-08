@@ -2,13 +2,15 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "lib": [
-      // Needed because `@apidevtools/json-schema-ref-parser` uses `window` and `location`.
-      "DOM",
+      // Setting `lib` replaces the default library for our `target` so it must be re-added here.
+      "ES2024",
 
-      // Needed because we use `Intl.ListFormat()` in some error messsages. Unfortunately it has
-      // to be pegged at ES2021 as `ES2022.Intl` does not work.
-      "ES2021.Intl"
-    ]
+      // Needed because `@apidevtools/json-schema-ref-parser` uses `window` and `location`.
+      "DOM"
+    ],
+
+    // TypeScript 7 enables `strict` by default but this package has not yet been migrated to it.
+    "strict": false
   },
   "include": ["./src/**/*"],
   "exclude": ["dist"]

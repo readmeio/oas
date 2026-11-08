@@ -3,7 +3,7 @@ import type { MediaTypeObject, OASDocument } from '../../types.js';
 import matchesMimeType from '../../lib/matches-mimetype.js';
 import { collectRefsInSchema, dereferenceRef, dereferenceRefDeep } from '../../lib/refs.js';
 import sampleFromSchema from '../../samples/index.js';
-import { isRef } from '../../types.js';
+import { isRef, schemaObject } from '../../types.js';
 
 export interface MediaTypeExample {
   description?: string;
@@ -17,8 +17,9 @@ export interface MediaTypeExample {
  * come from the `example` property, the first item in an `examples` array, or if none of those are
  * present it will generate an example based off its schema.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.0.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.1.0.html#media-type-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#media-type-object}
  * @param mediaType The media type that we're looking for examples for.
  * @param mediaTypeObject The media type object that we're looking for examples for.
  */
@@ -61,6 +62,7 @@ export function getMediaTypeExamples(
         let description: string | undefined;
 
         let example = examples[key];
+        let value: unknown = example;
         if (example !== null && typeof example === 'object') {
           if (isRef(example)) {
             example = dereferenceRef(example, definition);
@@ -87,11 +89,13 @@ export function getMediaTypeExamples(
               return false;
             }
 
-            example = example.value;
+            value = example.value;
+          } else {
+            value = example;
           }
         }
 
-        const ret: MediaTypeExample = { summary, title: key, value: example };
+        const ret: MediaTypeExample = { summary, title: key, value };
         if (description) {
           ret.description = description;
         }
@@ -107,12 +111,13 @@ export function getMediaTypeExamples(
     }
   }
 
-  if (mediaTypeObject.schema) {
+  if ('schema' in mediaTypeObject && mediaTypeObject.schema) {
     // We do not fully support XML so we shouldn't generate XML samples for XML schemas.
     if (!matchesMimeType.xml(mediaType)) {
+      const schema = mediaTypeObject.schema;
       return [
         {
-          value: sampleFromSchema(structuredClone(mediaTypeObject.schema), {
+          value: sampleFromSchema(typeof schema === 'object' ? schemaObject(schema) : {}, {
             ...opts,
             definition,
           }),

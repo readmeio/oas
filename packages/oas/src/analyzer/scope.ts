@@ -1,4 +1,4 @@
-import type { OAS31Document, OASDocument, PathItemObject } from '../types.js';
+import type { OpenAPIDocumentWithWebhooks, OASDocument, PathItemObject } from '../types.js';
 
 import jsonPointer from 'jsonpointer';
 
@@ -264,11 +264,15 @@ export function computeOperationScope(definition: OASDocument, path: string, met
 }
 
 /**
- * Compute the `OperationScope` for a single webhook operation within an OpenAPI 3.1 definition.
+ * Compute the `OperationScope` for a single webhook operation.
  *
  */
-export function computeWebhookScope(definition: OAS31Document, webhookName: string, method: string): OperationScope {
-  const webhooks = ('webhooks' in definition ? definition.webhooks : {}) as NonNullable<OAS31Document['webhooks']>;
+export function computeWebhookScope(
+  definition: OpenAPIDocumentWithWebhooks,
+  webhookName: string,
+  method: string,
+): OperationScope {
+  const webhooks = definition.webhooks;
   const webhookKey = resolveKey(Object.keys(webhooks || {}), webhookName);
   if (!webhookKey) {
     throw new Error(`Webhook \`${webhookName}\` not found.`);

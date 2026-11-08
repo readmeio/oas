@@ -1,6 +1,6 @@
 {
   "name": "oas",
-  "version": "38.6.1",
+  "version": "39.0.1",
   "description": "Comprehensive tooling for working with OpenAPI definitions",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
@@ -49,7 +49,7 @@
   "module": "dist/index.js",
   "types": "dist/index.d.cts",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "files": [
     "dist"
@@ -78,7 +78,7 @@
   },
   "scripts": {
     "attw": "attw --pack --format ascii --profile node16",
-    "build": "tsup",
+    "build": "tsdown",
     "lint": "npm run lint:types",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
@@ -87,23 +87,23 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@readme/openapi-parser": "^9.0.0",
+    "@readme/openapi-parser": "^10.0.0",
+    "@scalar/openapi-types": "^0.9.8",
     "@types/json-schema": "^7.0.11",
     "json-schema-merge-allof": "^0.8.1",
     "jsonpath-plus": "^10.4.0",
     "jsonpointer": "^5.0.0",
-    "openapi-types": "^12.1.1",
     "path-to-regexp": "^8.4.2",
-    "remove-undefined-objects": "^9.0.0"
+    "remove-undefined-objects": "^9.0.2"
   },
   "devDependencies": {
     "@readme/oas-examples": "file:../oas-examples",
     "@types/json-schema-merge-allof": "^0.6.5",
     "@types/node": "^25.3.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "jest-expect-jsonschema": "file:../jest-expect-jsonschema",
     "jest-expect-openapi": "file:../jest-expect-openapi",
-    "tsup": "^8.5.0",
-    "typescript": "^5.4.4",
+    "tsdown": "^0.23.5",
     "vitest": "^5.0.0"
   }
 }

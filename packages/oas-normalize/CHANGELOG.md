@@ -1,5 +1,13 @@
 # oas-normalize
 
+## 18.0.3
+
+### Patch Changes
+
+- Updated dependencies [b35621f]
+- Updated dependencies [189a03d]
+  - @readme/openapi-parser@10.0.0
+
 ## 18.0.2
 
 ### Patch Changes
