@@ -748,6 +748,82 @@ describe('sampleFromSchema', () => {
         sampleFromSchema({ allOf: [{ $ref: '#/components/schemas/Loop' }], example: '["a"]' }, { definition }),
       ).toStrictEqual(['a']);
     });
+
+    describe('deep schemas', () => {
+      const chainLength = 200;
+      const chainedDefinition: OASDocument = {
+        openapi: '3.0.0',
+        info: { title: 'test', version: '1.0' },
+        paths: {},
+        components: {
+          schemas: Object.fromEntries(
+            Array.from({ length: chainLength }, (_, i) => [
+              `Link${i}`,
+              i === chainLength - 1 ? { type: 'array' } : { allOf: [{ $ref: `#/components/schemas/Link${i + 1}` }] },
+            ]),
+          ),
+        },
+      };
+
+      it('resolves a type declared at the end of a long `allOf` chain', () => {
+        expect(
+          sampleFromSchema(
+            { allOf: [{ $ref: '#/components/schemas/Link0' }], example: '["a"]' },
+            {
+              definition: chainedDefinition,
+            },
+          ),
+        ).toStrictEqual(['a']);
+      });
+
+      it('terminates on `allOf` branches that refer to each other', () => {
+        const definition: OASDocument = {
+          openapi: '3.0.0',
+          info: { title: 'test', version: '1.0' },
+          paths: {},
+          components: {
+            schemas: {
+              A: { allOf: [{ $ref: '#/components/schemas/B' }] },
+              B: { allOf: [{ $ref: '#/components/schemas/A' }, { type: 'object' }] },
+            },
+          },
+        };
+
+        expect(
+          sampleFromSchema({ allOf: [{ $ref: '#/components/schemas/A' }], example: '{"a": 1}' }, { definition }),
+        ).toStrictEqual({ a: 1 });
+      });
+
+      it('does not resolve `allOf` branches for examples that cannot be an array or object', () => {
+        let reads = 0;
+        const definition = new Proxy(chainedDefinition, {
+          get: (target, key, receiver) => {
+            reads += 1;
+            return Reflect.get(target, key, receiver);
+          },
+        });
+
+        ['plain text', '1', 'true', '[not json'].forEach(example => {
+          expect(sampleFromSchema({ allOf: [{ $ref: '#/components/schemas/Link0' }], example }, { definition })).toBe(
+            example,
+          );
+        });
+
+        expect(reads).toBe(0);
+      });
+
+      it('parses examples at every level of a deeply nested schema', () => {
+        const depth = 300;
+        let schema: SchemaObject = { type: 'array', example: '["leaf"]' };
+        let expected: unknown = ['leaf'];
+        for (let i = 0; i < depth; i += 1) {
+          schema = { type: 'object', properties: { child: schema, tags: { type: 'array', example: '["a"]' } } };
+          expected = { child: expected, tags: ['a'] };
+        }
+
+        expect(sampleFromSchema(schema)).toStrictEqual(expected);
+      });
+    });
   });
 
   describe('additionalProperties', () => {

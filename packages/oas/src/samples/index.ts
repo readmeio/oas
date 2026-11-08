@@ -118,27 +118,25 @@ function getDeclaredTypes(
  * value is meant to be an array or object.
  */
 function parseStringifiedExample(example: unknown, schema: Record<string, any>, definition?: OASDocument) {
-  if (typeof example !== 'string') {
-    return example;
-  }
-
-  const types = getDeclaredTypes(schema, definition);
-  if (!types || types.includes('string')) {
+  const firstChar = typeof example === 'string' ? example.trimStart()[0] : undefined;
+  if (firstChar !== '[' && firstChar !== '{') {
     return example;
   }
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(example);
+    parsed = JSON.parse(example as string);
   } catch {
     return example;
   }
 
-  if (Array.isArray(parsed)) {
-    return types.includes('array') ? parsed : example;
+  const kind = Array.isArray(parsed) ? 'array' : isObject(parsed) ? 'object' : undefined;
+  if (!kind) {
+    return example;
   }
 
-  return isObject(parsed) && types.includes('object') ? parsed : example;
+  const types = getDeclaredTypes(schema, definition);
+  return types && !types.includes('string') && types.includes(kind) ? parsed : example;
 }
 
 /**
