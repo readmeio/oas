@@ -412,6 +412,79 @@ describe('analyzer queries (OpenAPI)', () => {
       expect(analyzeTotalOperations(definition)).toBe(3);
     });
 
+    it('should count operations on a referenced OpenAPI 3.2 Path Item', () => {
+      const definition = {
+        openapi: '3.2.0',
+        info: { title: 'referenced path items', version: '1.0.0' },
+        paths: {
+          '/pets': { $ref: '#/components/pathItems/Pets' },
+          '/pets/{id}': {
+            $ref: '#/components/pathItems/Pet',
+            get: { responses: { '200': { description: 'Local get' } } },
+            delete: { responses: { '204': { description: 'Deleted' } } },
+          },
+          '/files/{id}': { $ref: '#/components/pathItems/FileAlias' },
+          '/spaced': { $ref: '#/components/pathItems/pet%20ById' },
+          '/external': {
+            $ref: './other.yaml#/paths/~1pets',
+            post: { responses: { '201': { description: 'Created' } } },
+          },
+        },
+        components: {
+          pathItems: {
+            Pets: {
+              get: { responses: { '200': { description: 'OK' } } },
+              post: { responses: { '201': { description: 'Created' } } },
+            },
+            Pet: {
+              get: { responses: { '200': { description: 'OK' } } },
+              put: { responses: { '200': { description: 'Updated' } } },
+            },
+            FileAlias: {
+              $ref: '#/components/pathItems/File',
+              head: { responses: { '200': { description: 'OK' } } },
+            },
+            File: {
+              get: { responses: { '200': { description: 'OK' } } },
+              additionalOperations: {
+                COPY: { responses: { '201': { description: 'Created' } } },
+              },
+            },
+            'pet ById': {
+              get: { responses: { '200': { description: 'OK' } } },
+            },
+          },
+        },
+      } as OASDocument;
+
+      // `/pets` contributes `get` and `post`. `/pets/{id}` contributes `put` from the target plus
+      // local `get` and `delete` (`get` is shared, so it counts once). `/files/{id}` contributes
+      // `head` from the alias and `get` plus `COPY` from the terminal Path Item. `/spaced` follows
+      // the percent-encoded pointer. `/external` keeps its local `post`; the external ref is not
+      // followed.
+      expect(analyzeTotalOperations(definition)).toBe(10);
+    });
+
+    it('should count each path when OpenAPI 3.2 Path Item `$ref`s cycle', () => {
+      const definition = {
+        openapi: '3.2.0',
+        info: { title: 'cycled path items', version: '1.0.0' },
+        paths: {
+          '/a': {
+            $ref: '#/paths/~1b',
+            get: { responses: { '200': { description: 'OK' } } },
+          },
+          '/b': {
+            $ref: '#/paths/~1a',
+            post: { responses: { '201': { description: 'Created' } } },
+          },
+        },
+      } as OASDocument;
+
+      // Each path keeps its own method and picks up the other path's method through the `$ref`.
+      expect(analyzeTotalOperations(definition)).toBe(4);
+    });
+
     it.each(['3.0.3', '3.1.0'])('should keep the historical path-item key count for OpenAPI %s', version => {
       const definition = {
         openapi: version,

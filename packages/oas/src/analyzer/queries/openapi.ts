@@ -1,10 +1,10 @@
-import type { OASDocument } from '../../types.js';
+import type { OASDocument, PathItemObject } from '../../types.js';
 import type { OperationScope } from '../scope.js';
 import type { JSONPathResult } from '../util.js';
 
 import { listPathItemOperations } from '../../lib/path-item-operations.js';
-import { toPointer } from '../../lib/refs.js';
-import { isOpenAPI32 } from '../../types.js';
+import { findRef, toPointer } from '../../lib/refs.js';
+import { isOpenAPI32, isRef } from '../../types.js';
 import { dereferenceOas } from '../dereference.js';
 import { queryCached } from '../query-cache.js';
 import { isAncestorOfScope, isPointerInScope } from '../scope.js';
@@ -226,17 +226,66 @@ export function serverVariables(definition: OASDocument): string[] {
 }
 
 /**
+ * Count the HTTP operations a Path Item contributes, including operations that live on a `$ref`
+ * target (`components.pathItems`, another path, or a chain of either).
+ *
+ * Operations written beside the `$ref` count too. The same method on the Path Item and on a
+ * target counts once. A cycle stops at the operations already recorded.
+ *
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+ */
+function countPathItemOperations(
+  pathItem: PathItemObject,
+  definition: OASDocument,
+  seenRefs: Set<string> = new Set(),
+  seenMethods: Set<string> = new Set(),
+): number {
+  const methods = new Set(seenMethods);
+  let count = 0;
+
+  listPathItemOperations(pathItem, definition).forEach(entry => {
+    const method = entry.method.toLowerCase();
+    if (!methods.has(method)) {
+      count += 1;
+    }
+    methods.add(method);
+  });
+
+  if (!isRef(pathItem) || seenRefs.has(pathItem.$ref)) {
+    return count;
+  }
+
+  seenRefs.add(pathItem.$ref);
+
+  // External refs and missing pointers throw. Keep the operations already counted.
+  let target: unknown;
+  try {
+    target = findRef(pathItem.$ref, definition);
+  } catch {
+    return count;
+  }
+
+  if (!target || typeof target !== 'object' || Array.isArray(target)) {
+    return count;
+  }
+
+  return count + countPathItemOperations(target as PathItemObject, definition, seenRefs, methods);
+}
+
+/**
  * Determine how many operations are defined in a given API definition.
  *
  * OpenAPI 3.0 and 3.1 keep the historical count of every key on each Path Item (`get`, `post`,
  * `parameters`, `summary`, `servers`, `$ref`). Definitions that already stored this number keep
  * the same result.
  *
- * OpenAPI 3.2 counts each HTTP operation, including every method inside `additionalOperations`.
+ * OpenAPI 3.2 counts each HTTP operation, including every method inside `additionalOperations`
+ * and every method reached through a Path Item `$ref`.
  *
  * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operation-object}
  * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operation-object}
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
  */
 export function totalOperations(definition: OASDocument): number {
   const results = queryCached(['$..paths[*]'], definition);
@@ -250,7 +299,7 @@ export function totalOperations(definition: OASDocument): number {
       return count;
     }
 
-    return count + listPathItemOperations(value, definition).length;
+    return count + countPathItemOperations(value, definition);
   }, 0);
 }
 
