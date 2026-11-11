@@ -21,6 +21,37 @@ import responsesRefExtensionSpec from '../__datasets__/responses-ref-extension.j
 import schemaDeprecatedSpec from '../__datasets__/schema-deprecated.json' with { type: 'json' };
 import { createOasForPaths } from '../__fixtures__/create-oas.js';
 
+function callbackIdentifierRefOas() {
+  return Oas.init({
+    openapi: '3.1.0',
+    info: { title: 'Callback identifier refs', version: '1.0.0' },
+    paths: {
+      '/events': {
+        post: {
+          callbacks: {
+            onEvent: {
+              $ref: '#/components/callbacks/onEvent',
+            },
+          },
+          responses: { 200: { description: 'ok' } },
+        },
+      },
+    },
+    components: {
+      callbacks: {
+        onEvent: {
+          '{$request.body#/callbackUrl}': {
+            post: {
+              operationId: 'notifyEvent',
+              responses: { 200: { description: 'ok' } },
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
 let petstore: Oas;
 let callbackSchema: Oas;
 let multipleSecurities: Oas;
@@ -2476,37 +2507,6 @@ describe('#getCallbacks()', () => {
     expect(callbacks[0].method).toBe('NOTIFY');
     expect(callbacks[0].getOperationId()).toBe('notifyCallback');
   });
-
-  function callbackIdentifierRefOas() {
-    return Oas.init({
-      openapi: '3.1.0',
-      info: { title: 'Callback identifier refs', version: '1.0.0' },
-      paths: {
-        '/events': {
-          post: {
-            callbacks: {
-              onEvent: {
-                $ref: '#/components/callbacks/onEvent',
-              },
-            },
-            responses: { 200: { description: 'ok' } },
-          },
-        },
-      },
-      components: {
-        callbacks: {
-          onEvent: {
-            '{$request.body#/callbackUrl}': {
-              post: {
-                operationId: 'notifyEvent',
-                responses: { 200: { description: 'ok' } },
-              },
-            },
-          },
-        },
-      },
-    });
-  }
 
   it('should dereference a callback identifier `$ref` in getCallback()', () => {
     const callback = callbackIdentifierRefOas()

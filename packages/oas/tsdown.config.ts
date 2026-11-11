@@ -25,7 +25,8 @@ export default defineConfig(options => ({
     // `cjsDefault` only rewrites a declaration entry when its sole export is the default.
     // `src/index.ts` also re-exports a type, so the CJS `.d.cts` keeps `export { Oas as default }`
     // while the JavaScript is `module.exports = Oas`. Rewrite that entry so the two agree.
-    'build:done': function rewriteCjsDefaultExport(ctx) {
+    // oxlint-disable-next-line unicorn/consistent-function-scoping
+    'build:done': function rewriteCjsDefaultExport(ctx: { options: { cwd: string; outDir: string } }) {
       const file = path.resolve(ctx.options.cwd, ctx.options.outDir, 'index.d.cts');
       if (!fs.existsSync(file)) return;
 
