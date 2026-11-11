@@ -1,9 +1,9 @@
 import type { Extensions } from './extensions.js';
-import type { PathMatch, PathMatches, SplitUrlResult } from './lib/urls.js';
+import type { OperationMatch, PathItemMatch, SplitUrlResult } from './lib/urls.js';
 import type {
   AuthForHAR,
-  HttpMethods,
   OASDocument,
+  OperationMethod,
   OperationObject,
   PathItemObject,
   PathsObject,
@@ -36,6 +36,13 @@ import {
 } from './extensions.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
+import {
+  assignPathItemOperation,
+  clonePathItem,
+  findPathItemOperation,
+  listPathItemOperations,
+  removePathItemOperation,
+} from './lib/path-item-operations.js';
 import { dereferenceRef } from './lib/refs.js';
 import {
   defaultVariablesFromServers,
@@ -49,7 +56,6 @@ import {
 } from './lib/urls.js';
 import { Operation, Webhook } from './operation/index.js';
 import { hasWebhooks, isRef } from './types.js';
-import { supportedMethods } from './utils.js';
 
 // Re-exported so `Operation.getParametersAsJSONSchema()`'s parameter type is publicly nameable.
 // The class declaration is emitted from this entry.
@@ -219,14 +225,33 @@ export default class Oas {
   }
 
   /**
+   * Resolve one operation on an already-dereferenced Path Item. The `Operation` keeps the method
+   * string the caller asked for; lookup itself is case-insensitive.
+   *
+   */
+  private readPathItemOperation(pathItem: PathItemObject, method: OperationMethod): OperationObject | undefined {
+    const found = findPathItemOperation(pathItem, this.api, method);
+    if (!found) {
+      return undefined;
+    }
+
+    return dereferenceRef(found.operation, this.api) || undefined;
+  }
+
+  /**
    * Retrieve an Operation of Webhook class instance for a given path and method.
    *
+   * For OpenAPI 3.2 definitions this method can also retrieve operations that are defined within
+   * a Path Item's `additionalOperations` map by supplying the method that they were defined under
+   * (eg. `COPY`).
+   *
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    * @param path Path to lookup and retrieve.
    * @param method HTTP Method to retrieve on the path.
    */
   operation(
     path: string,
-    method: HttpMethods,
+    method: OperationMethod,
     opts: {
       /**
        * If you prefer to first look for a webhook with this path and method.
@@ -245,23 +270,25 @@ export default class Oas {
     const api = this.api;
     if (opts.isWebhook && hasWebhooks(api)) {
       const webhookPath = dereferenceRef(api.webhooks[path] as PathItemObject | undefined, api);
-      if (webhookPath && !isRef(webhookPath) && webhookPath[method]) {
-        operation = dereferenceRef(webhookPath[method], api);
-        return new Webhook(this, path, method, operation);
+      if (webhookPath && !isRef(webhookPath)) {
+        const webhookOperation = this.readPathItemOperation(webhookPath, method);
+        if (webhookOperation) {
+          return new Webhook(this, path, method, webhookOperation);
+        }
       }
     }
 
     if (this?.api?.paths?.[path]) {
       const pathItem = dereferenceRef(this.api.paths[path] as PathItemObject, this.api);
-      if (pathItem?.[method]) {
-        operation = dereferenceRef(pathItem[method], this.api);
+      if (pathItem) {
+        operation = this.readPathItemOperation(pathItem, method) ?? operation;
       }
     }
 
     return new Operation(this, path, method, operation);
   }
 
-  findOperationMatches(url: string): PathMatches | undefined {
+  findOperationMatches(url: string): PathItemMatch[] | undefined {
     // Root server matches are collected first so that when `findTargetPath()` breaks a tie
     // between equally-specific matches, the last one -- the server defined closest to the
     // operation -- wins.
@@ -277,7 +304,7 @@ export default class Oas {
   /**
    * Find matches for a URL against paths as they are served by the root-level `servers`.
    */
-  private findRootServerOperationMatches(url: string): PathMatches | undefined {
+  private findRootServerOperationMatches(url: string): PathItemMatch[] | undefined {
     let origin: string;
     let hostname: string;
     try {
@@ -360,9 +387,9 @@ export default class Oas {
    *
    * @see {@link https://spec.openapis.org/oas/v3.1.0#path-item-object}
    */
-  private findOverriddenServerOperationMatches(url: string): PathMatches {
+  private findOverriddenServerOperationMatches(url: string): PathItemMatch[] {
     const { paths } = this.api;
-    const matches: PathMatches = [];
+    const matches: PathItemMatch[] = [];
     if (!paths) return matches;
 
     Object.keys(paths).forEach(path => {
@@ -374,9 +401,8 @@ export default class Oas {
       // or hides them behind a `$ref` that we'd have to resolve to know.
       let mayHaveOverrides = isRef(rawPathItem) || !!rawPathItem.servers?.length;
       if (!mayHaveOverrides) {
-        for (const method of supportedMethods) {
-          const rawOperation = rawPathItem[method];
-          if (rawOperation && (isRef(rawOperation) || (rawOperation as OperationObject).servers?.length)) {
+        for (const entry of listPathItemOperations(rawPathItem, this.api)) {
+          if (isRef(entry.operation) || entry.operation.servers?.length) {
             mayHaveOverrides = true;
             break;
           }
@@ -392,9 +418,9 @@ export default class Oas {
       // server precedence: operation-level servers, then path-item servers. Operations with
       // neither are served by the root-level servers and are already covered by
       // `findRootServerOperationMatches()`.
-      const groups = new Map<string, { operations: Record<string, OperationObject>; servers: ServerObject[] }>();
-      supportedMethods.forEach(method => {
-        const operation = dereferenceRef(pathItem[method], this.api);
+      const groups = new Map<string, { pathItem: PathItemObject; servers: ServerObject[] }>();
+      listPathItemOperations(pathItem, this.api).forEach(entry => {
+        const operation = dereferenceRef(entry.operation, this.api);
         if (!operation || isRef(operation)) return;
 
         const servers = operation.servers?.length
@@ -407,19 +433,19 @@ export default class Oas {
         const key = JSON.stringify(servers);
         let group = groups.get(key);
         if (!group) {
-          group = { operations: {}, servers };
+          group = { pathItem: {}, servers };
           groups.set(key, group);
         }
-        group.operations[method] = operation;
+        assignPathItemOperation(group.pathItem, entry, operation);
       });
 
-      groups.forEach(({ operations, servers }) => {
+      groups.forEach(({ pathItem: groupedPathItem, servers }) => {
         for (const server of servers) {
           const target = this.splitURLIntoOriginAndPathName(url, server);
           if (!target) continue;
 
           const annotatedPaths = generatePathMatches(
-            { [path]: operations } as PathsObject,
+            { [path]: groupedPathItem } as PathsObject,
             target.pathName || '/',
             target.origin,
           );
@@ -441,23 +467,19 @@ export default class Oas {
    */
   private pathItemForRootServerMatching(pathItem: PathItemObject): PathItemObject {
     const hasPathItemServers = Boolean(pathItem.servers?.length);
-    const filtered: PathItemObject = { ...pathItem };
+    const filtered = clonePathItem(pathItem);
 
-    supportedMethods.forEach(method => {
-      if (!(method in filtered)) {
-        return;
-      }
-
-      const operation = dereferenceRef(pathItem[method], this.api);
+    listPathItemOperations(filtered, this.api).forEach(entry => {
+      const operation = dereferenceRef(entry.operation, this.api);
       if (!operation || isRef(operation)) {
         if (hasPathItemServers) {
-          delete filtered[method];
+          removePathItemOperation(filtered, entry);
         }
         return;
       }
 
       if (operation.servers?.length || hasPathItemServers) {
-        delete filtered[method];
+        removePathItemOperation(filtered, entry);
       }
     });
 
@@ -525,13 +547,13 @@ export default class Oas {
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
    */
-  findOperation(url: string, method: HttpMethods): PathMatch | undefined {
+  findOperation(url: string, method: OperationMethod): OperationMatch | undefined {
     const annotatedPaths = this.findOperationMatches(url);
     if (!annotatedPaths) {
       return undefined;
     }
 
-    const matches = filterPathMethods(annotatedPaths, method);
+    const matches = filterPathMethods(annotatedPaths, method, this.api);
     if (!matches.length) return undefined;
     return findTargetPath(matches);
   }
@@ -542,7 +564,7 @@ export default class Oas {
    *
    * @param url A full URL to look up.
    */
-  findOperationWithoutMethod(url: string): PathMatch | undefined {
+  findOperationWithoutMethod(url: string): PathItemMatch | undefined {
     const annotatedPaths = this.findOperationMatches(url);
     if (!annotatedPaths) {
       return undefined;
@@ -559,7 +581,7 @@ export default class Oas {
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
    */
-  getOperation(url: string, method: HttpMethods): Operation | undefined {
+  getOperation(url: string, method: OperationMethod): Operation | undefined {
     const op = this.findOperation(url, method);
     if (op === undefined) {
       return undefined;
@@ -581,23 +603,16 @@ export default class Oas {
    * @param id The `operationId` to look up.
    */
   getOperationById(id: string): Operation | Webhook | undefined {
-    let found: Operation | Webhook | undefined;
-
-    Object.values(this.getPaths()).forEach(operations => {
-      if (found) return;
-      found = Object.values(operations).find(operation => operation.getOperationId() === id);
-    });
-
-    if (found) {
-      return found;
+    for (const collection of [this.getPaths(), this.getWebhooks()]) {
+      for (const operations of Object.values(collection)) {
+        const found = Object.values(operations).find(operation => operation.getOperationId() === id);
+        if (found) {
+          return found;
+        }
+      }
     }
 
-    Object.entries(this.getWebhooks()).forEach(([, webhooks]) => {
-      if (found) return;
-      found = Object.values(webhooks).find(webhook => webhook.getOperationId() === id);
-    });
-
-    return found;
+    return undefined;
   }
 
   /**
@@ -656,94 +671,90 @@ export default class Oas {
   }
 
   /**
-   * Returns the `paths` object that exists in this API definition but with every `method` mapped
-   * to an instance of the `Operation` class.
+   * Returns the `paths` object with every operation mapped to an instance of the `Operation`
+   * class, keyed by path and then by the method it was declared under.
+   *
+   * OpenAPI 3.2 definitions with paths that contain `additionalOperations` entries will be
+   * automatically included in this returned dataset.
    *
    * @see {@link https://spec.openapis.org/oas/v3.0.0.html#openapi-object}
    * @see {@link https://spec.openapis.org/oas/v3.1.0.html#openapi-object}
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    */
-  getPaths(): Record<string, Record<HttpMethods, Operation | Webhook>> {
-    const paths: Record<string, Record<HttpMethods, Operation | Webhook>> = {};
-    if (!this.api.paths) {
-      return paths;
+  getPaths(): Record<string, Record<string, Operation>> {
+    const { paths } = this.api;
+    if (!paths) {
+      return {};
     }
 
-    Object.keys(this.api.paths).forEach(path => {
-      // If this is a specification extension then we should ignore it.
-      if (path.startsWith('x-')) {
-        return;
-      }
-
-      paths[path] = {} as Record<HttpMethods, Operation | Webhook>;
-
-      let pathItem = this.api.paths![path];
-      if (!pathItem) {
-        return;
-      } else if (isRef(pathItem)) {
-        // Resolve Path Item `$ref`s for this accessor only. Do not write the target back into
-        // `this.api.paths` — callers (and `getDefinition()`) still need the authored `$ref`.
-        pathItem = dereferenceRef(pathItem, this.api);
-        if (!pathItem || isRef(pathItem)) {
-          return;
-        }
-      }
-
-      Object.keys(pathItem).forEach(method => {
-        /**
-         * Because a path doesn't need to contain a keyed-object of HTTP methods, we should exclude
-         * anything from within the paths object that isn't a known HTTP method.
-         *
-         * @see {@link https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-7}
-         * @see {@link https://spec.openapis.org/oas/v3.1.0.html#fixed-fields-7}
-         * @see {@link https://spec.openapis.org/oas/v3.2.0.html#fixed-fields-7}
-         */
-        if (!supportedMethods.includes(method as HttpMethods)) {
-          return;
-        }
-
-        paths[path][method as HttpMethods] = this.operation(path, method as HttpMethods);
-      });
-    });
-
-    return paths;
+    return this.collectOperations(
+      Object.keys(paths).filter(path => !path.startsWith('x-')),
+      path => paths[path],
+      (path, method, operation) => new Operation(this, path, method, operation),
+    );
   }
 
   /**
-   * Returns the `webhooks` object that exists in this API definition but with every `method`
-   * mapped to an instance of the `Webhook` class.
+   * Returns the `webhooks` object with every operation mapped to an instance of the `Webhook`
+   * class, keyed by webhook name and then by the method it was declared under.
    *
-   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#openapi-object}
+   * OpenAPI 3.2 definitions with paths that contain `additionalOperations` entries will be
+   * automatically included in this returned dataset.
+   *
    * @see {@link https://spec.openapis.org/oas/v3.1.0.html#openapi-object}
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    */
-  getWebhooks(): Record<string, Record<HttpMethods, Webhook>> {
-    const webhooks: Record<string, Record<HttpMethods, Webhook>> = {};
-    const api = this.api;
-    if (!hasWebhooks(api)) {
-      return webhooks;
+  getWebhooks(): Record<string, Record<string, Webhook>> {
+    if (!hasWebhooks(this.api)) {
+      return {};
     }
 
-    const webhookMap = api.webhooks;
+    const webhooks = this.api.webhooks;
+    return this.collectOperations(
+      Object.keys(webhooks),
+      id => webhooks[id],
+      (id, method, operation) => new Webhook(this, id, method, operation),
+    );
+  }
 
-    Object.keys(webhookMap).forEach(id => {
-      webhooks[id] = {} as Record<HttpMethods, Webhook>;
+  /**
+   * Walk path or webhook names and collect every operation on each Path Item.
+   *
+   * Names and methods come straight out of a user-supplied document, so they're collected into
+   * `Map`s and only converted into plain objects at the end. Assigning a key like `__proto__`
+   * directly onto a plain object would modify its prototype instead.
+   *
+   * Path Item `$ref`s are resolved for this accessor only. The target is not written back into
+   * the definition — callers (and `getDefinition()`) still need the authored `$ref`.
+   *
+   */
+  private collectOperations<T extends Operation>(
+    keys: string[],
+    pathItemAt: (key: string) => PathItemObject | undefined,
+    create: (key: string, method: string, operation: OperationObject) => T,
+  ): Record<string, Record<string, T>> {
+    const collected = new Map<string, Map<string, T>>();
 
-      const webhookPath = dereferenceRef(webhookMap[id], api);
-      if (webhookPath) {
-        Object.keys(webhookPath).forEach(method => {
-          if (!supportedMethods.includes(method as HttpMethods)) {
+    keys.forEach(key => {
+      const operations = new Map<string, T>();
+      const pathItem = dereferenceRef(pathItemAt(key), this.api);
+      if (pathItem && !isRef(pathItem)) {
+        listPathItemOperations(pathItem, this.api).forEach(entry => {
+          const operation = dereferenceRef(entry.operation, this.api);
+          if (!operation) {
             return;
           }
 
-          webhooks[id][method as HttpMethods] = this.operation(id, method as HttpMethods, {
-            isWebhook: true,
-          }) as Webhook;
+          operations.set(entry.method, create(key, entry.method, operation));
         });
       }
+
+      collected.set(key, operations);
     });
 
-    return webhooks;
+    return Object.fromEntries(Array.from(collected, ([key, operations]) => [key, Object.fromEntries(operations)]));
   }
 
   /**
@@ -765,30 +776,18 @@ export default class Oas {
 
     const disableTagSorting = getExtension('disable-tag-sorting', this.api);
 
-    Object.entries(this.getPaths()).forEach(([path, operations]) => {
-      Object.values(operations).forEach(operation => {
-        const tags = operation.getTags();
-        if (setIfMissing && !tags.length) {
-          allTags.add(path);
-          return;
-        }
+    [this.getPaths(), this.getWebhooks()].forEach(collection => {
+      Object.entries(collection).forEach(([path, operations]) => {
+        Object.values(operations).forEach(operation => {
+          const tags = operation.getTags();
+          if (setIfMissing && !tags.length) {
+            allTags.add(path);
+            return;
+          }
 
-        tags.forEach(tag => {
-          allTags.add(tag.name);
-        });
-      });
-    });
-
-    Object.entries(this.getWebhooks()).forEach(([path, webhooks]) => {
-      Object.values(webhooks).forEach(webhook => {
-        const tags = webhook.getTags();
-        if (setIfMissing && !tags.length) {
-          allTags.add(path);
-          return;
-        }
-
-        tags.forEach(tag => {
-          allTags.add(tag.name);
+          tags.forEach(tag => {
+            allTags.add(tag.name);
+          });
         });
       });
     });

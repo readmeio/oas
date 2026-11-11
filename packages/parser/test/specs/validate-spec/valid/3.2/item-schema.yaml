@@ -1,0 +1,42 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Valid API
+paths:
+  /events:
+    get:
+      responses:
+        '200':
+          description: A stream of events
+          content:
+            application/jsonl:
+              itemSchema:
+                type: object
+                properties:
+                  id:
+                    type: string
+            text/event-stream:
+              itemSchema:
+                $ref: '#/components/schemas/Event'
+    post:
+      requestBody:
+        content:
+          multipart/mixed:
+            schema:
+              type: array
+              items:
+                type: string
+            prefixEncoding:
+              - contentType: text/plain
+            itemEncoding:
+              contentType: application/json
+      responses:
+        '202':
+          description: Accepted
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          type: string

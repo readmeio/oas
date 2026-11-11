@@ -12,6 +12,7 @@ describe.each([
   ['Swagger 2.0', 'swagger', '2.0'],
   ['OpenAPI 3.0', 'openapi', '3.0'],
   ['OpenAPI 3.1', 'openapi', '3.1'],
+  ['OpenAPI 3.2', 'openapi', '3.2'],
 ])('%s', (_, specification, version) => {
   it('should have parity between JSON and YAML petstores', async () => {
     const json = await parse(path.join(import.meta.dirname, `../${version}/json/petstore.json`));

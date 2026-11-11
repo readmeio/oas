@@ -1521,6 +1521,72 @@ describe('.getParametersAsJSONSchema()', () => {
         },
       );
 
+      it('should use `dataValue` and `serializedValue` when an example has no `value`', async () => {
+        const oas = createOasForOperation({
+          parameters: [
+            {
+              name: 'limit',
+              in: 'query',
+              schema: { type: 'integer' },
+              examples: {
+                small: { dataValue: 5 },
+                encoded: { serializedValue: '10' },
+                preferred: { value: 1, dataValue: 2 },
+              },
+            },
+          ],
+          responses: { '200': { description: 'OK' } },
+        });
+
+        const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema).toMatchObject({
+          properties: {
+            limit: { type: 'integer', examples: [5, '10', 1] },
+          },
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should resolve a parameter `content` `$ref`', async () => {
+        const oas = Oas.init({
+          openapi: '3.2.0',
+          info: { title: 'media types', version: '1.0.0' },
+          paths: {
+            '/': {
+              get: {
+                parameters: [
+                  {
+                    name: 'filter',
+                    in: 'query',
+                    content: {
+                      'application/json': { $ref: '#/components/mediaTypes/Filter' },
+                    },
+                  },
+                ],
+                responses: { '200': { description: 'OK' } },
+              },
+            },
+          },
+          components: {
+            mediaTypes: {
+              Filter: { schema: { type: 'object', properties: { q: { type: 'string' } } } },
+            },
+          },
+        });
+
+        const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema).toMatchObject({
+          properties: {
+            filter: { type: 'object', properties: { q: { type: 'string' } } },
+          },
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
       it('should support top-level `$ref` pointers', async () => {
         const oas = createOasForOperation({
           operationId: 'listTransactions',
@@ -1572,6 +1638,46 @@ describe('.getParametersAsJSONSchema()', () => {
     });
 
     describe('request bodies', () => {
+      it('should use `dataValue` when a request body example has no `value`', async () => {
+        const oas = createOasForOperation({
+          requestBody: {
+            content: {
+              'application/json': {
+                examples: {
+                  example1: {
+                    dataValue: { name: 'John Doe', age: { name: 'test' } },
+                  },
+                },
+                schema: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    age: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: { '200': { description: 'OK' } },
+        });
+
+        const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema).toMatchObject({
+          properties: {
+            name: { examples: ['John Doe'] },
+            age: { properties: { name: { examples: ['test'] } } },
+          },
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
       it('should not give a nested property the example of a shallower property with the same name', async () => {
         const oas = createOasForOperation({
           requestBody: {

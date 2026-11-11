@@ -222,8 +222,9 @@ export async function analyzeOperation(
 }
 
 /**
- * Analyze a single webhook operation within a given OpenAPI 3.1 definition for any, or a specific,
- * OpenAPI or JSON Schema feature uses that it, or anything it references, may contain or utilize.
+ * Analyze a single webhook operation within a given OpenAPI 3.1 or 3.2 definition for any, or a
+ * specific, OpenAPI or JSON Schema feature uses that it, or anything it references, may contain or
+ * utilize.
  *
  * @see {@link analyzeOperation}
  */

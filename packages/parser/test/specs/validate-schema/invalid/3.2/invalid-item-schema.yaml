@@ -1,0 +1,13 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Invalid API
+paths:
+  /events:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/jsonl:
+              itemSchema: a string is not a valid schema # <---- must be a schema object or boolean
