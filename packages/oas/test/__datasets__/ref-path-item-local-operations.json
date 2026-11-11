@@ -1,0 +1,81 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Path Items that combine `$ref` with local operations",
+    "description": "A Path Item may `$ref` another Path Item and still declare its own operations for any fields the referenced Path Item does not define. The transformer must walk those local operations so the components they reference are retained.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/shared": {
+      "post": {
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/Created"
+          }
+        }
+      }
+    },
+    "/pets": {
+      "$ref": "#/paths/~1shared",
+      "get": {
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Saved"
+          }
+        }
+      }
+    },
+    "/extra": {
+      "get": {
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Extra"
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "sharedEvent": {
+      "post": {
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Acknowledged"
+          }
+        }
+      }
+    },
+    "petEvent": {
+      "$ref": "#/webhooks/sharedEvent",
+      "put": {
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Stored"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "Created": {
+        "description": "Created"
+      },
+      "Saved": {
+        "description": "Saved"
+      },
+      "Extra": {
+        "description": "Extra"
+      },
+      "Acknowledged": {
+        "description": "Acknowledged"
+      },
+      "Stored": {
+        "description": "Stored"
+      },
+      "Unused": {
+        "description": "Unused"
+      }
+    }
+  }
+}

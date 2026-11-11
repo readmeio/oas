@@ -27,15 +27,15 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/cli": "^2.30.0",
-    "@readme/oxlint-config": "^1.2.1",
-    "@vitest/coverage-v8": "^5.0.0",
+    "@readme/oxlint-config": "^15.0.10",
+    "@vitest/coverage-v8": "^5.1.0",
     "knip": "^6.41.0",
-    "oxfmt": "^0.48.0",
-    "oxlint": "^1.63.0",
+    "oxfmt": "^0.78.0",
+    "oxlint": "^1.93.0",
     "tsdown": "^0.23.5",
     "turbo": "^2.10.12",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "vitest": "^5.0.0"
+    "vitest": "^5.1.0"
   },
   "engines": {
     "node": ">=22.18.0"

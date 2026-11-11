@@ -1,0 +1,17 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Valid API
+webhooks:
+  fileCopied:
+    post:
+      operationId: fileCopied
+      responses:
+        '200':
+          description: OK
+    additionalOperations:
+      NOTIFY:
+        operationId: notifyFileCopied
+        responses:
+          '200':
+            description: OK

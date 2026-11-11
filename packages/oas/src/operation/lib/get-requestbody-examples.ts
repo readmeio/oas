@@ -1,6 +1,7 @@
 import type { OASDocument, OperationObject } from '../../types.js';
 import type { MediaTypeExample } from './get-mediatype-examples.js';
 
+import { resolveMediaType } from '../../lib/media-type.js';
 import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
@@ -34,7 +35,11 @@ export function getRequestBodyExamples(operation: OperationObject, definition: O
 
   return Object.keys(content)
     .map(mediaType => {
-      const mediaTypeObject = content[mediaType];
+      const mediaTypeObject = resolveMediaType(content[mediaType], definition);
+      if (!mediaTypeObject) {
+        return false;
+      }
+
       const examples = getMediaTypeExamples(mediaType, mediaTypeObject, definition, {
         includeReadOnly: false,
         includeWriteOnly: true,

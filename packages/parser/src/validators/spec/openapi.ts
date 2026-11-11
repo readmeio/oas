@@ -30,7 +30,35 @@ function parameterList(params: readonly ParameterObject[] | undefined): Paramete
 }
 
 /**
- * Validates parts of the OpenAPI 3.0 and 3.1 specification that aren't covered by their JSON
+ * A Path Item from `paths` or `webhooks`, plus the identifiers used when reporting errors against it.
+ */
+interface PathItemLocation {
+  /** `paths` or `webhooks`. */
+  container: 'paths' | 'webhooks';
+
+  /** Error identifier, eg. `/paths/pets` or `/webhooks/newPet`. */
+  id: string;
+
+  /** The path or webhook name, as declared. */
+  key: string;
+
+  pathItem: PathItemObject;
+
+  /** JSON Pointer to the Path Item, with `key` escaped. */
+  pointer: string;
+}
+
+/**
+ * Escape a path name for use within a JSON Pointer, which is what AJV reports instance paths as.
+ *
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc6901#section-3}
+ */
+function escapeJSONPointer(segment: string): string {
+  return segment.replace(/~/g, '~0').replace(/\//g, '~1');
+}
+
+/**
+ * Validates parts of the OpenAPI 3.0, 3.1, and 3.2 specification that aren't covered by their JSON
  * Schema definitions.
  *
  * @see {@link https://spec.openapis.org/oas/v3.0.0.html}
@@ -51,6 +79,17 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
 
   runPreSchemaChecks(): void {
     this.checkSecuritySchemes();
+
+    // These stay ahead of AJV so a targeted error can suppress the schema's "must NOT be valid"
+    // noise. Both checks share the path-item walk below, including webhook Path Items.
+    if (!isOpenAPI32(this.api)) {
+      return;
+    }
+
+    this.eachPathItem(location => {
+      this.checkAdditionalOperations(location);
+      this.checkQuerystringParameters(location);
+    });
   }
 
   /**
@@ -65,12 +104,11 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     this.validateServers(this.api.servers, '');
 
     const operationIds: string[] = [];
-    Object.keys(this.api.paths || {}).forEach(pathName => {
-      const path = this.api.paths[pathName];
-      const pathId = `/paths${pathName}`;
-
-      if (this.isObject(path) && pathName.startsWith('/')) {
-        this.validatePath(path, pathId, operationIds);
+    this.eachPathItem(({ container, key, id, pathItem }) => {
+      // Path-parameter checks treat the key as a URL path. Webhook names are not URL paths, and a
+      // path key without a leading slash is rejected before this pass.
+      if (container === 'paths' && key.startsWith('/')) {
+        this.validatePath(pathItem, id, operationIds);
       }
     });
 
@@ -111,8 +149,9 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
         !Object.keys(this.api.webhooks || {}).length &&
         !Object.keys(this.api.components || {}).length
       ) {
+        const version = isOpenAPI32(this.api) ? '3.2' : '3.1';
         this.reportError(
-          'OpenAPI 3.1 definitions must contain at least one entry in either `paths`, `webhooks`, or `components`.',
+          `OpenAPI ${version} definitions must contain at least one entry in either \`paths\`, \`webhooks\`, or \`components\`.`,
         );
       }
     }
@@ -125,33 +164,103 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
   private validatePath(path: PathItemObject, pathId: string, operationIds: string[]) {
     this.validateServers(path.servers, pathId);
 
-    supportedHTTPMethods.forEach(operationName => {
-      const operation = path[operationName];
-      const operationId = `${pathId}/${operationName}`;
+    this.eachOperation(path, (operation, operationName) => {
+      this.validateOperation(path, pathId, operation, `${pathId}/${operationName}`, operationIds);
+    });
+  }
 
-      if (operation) {
-        this.validateServers(operation.servers, operationId);
+  /**
+   * Walk every Path Item in `paths` and, when the document has them, `webhooks`.
+   *
+   */
+  private eachPathItem(visit: (location: PathItemLocation) => void): void {
+    const containers: {
+      entries: Record<string, PathItemObject | undefined> | undefined;
+      name: PathItemLocation['container'];
+    }[] = [{ entries: this.api.paths, name: 'paths' }];
 
-        const declaredOperationId = operation.operationId;
-        if (declaredOperationId) {
-          if (!operationIds.includes(declaredOperationId)) {
-            operationIds.push(declaredOperationId);
-          } else if (this.rules['duplicate-operation-id'] === 'warning') {
-            this.reportWarning(`The operationId \`${declaredOperationId}\` is duplicated and should be made unique.`);
-          } else {
-            this.reportError(`The operationId \`${declaredOperationId}\` is duplicated and must be made unique.`);
-          }
+    if ('webhooks' in this.api && this.api.webhooks) {
+      containers.push({ entries: this.api.webhooks, name: 'webhooks' });
+    }
+
+    containers.forEach(({ entries, name }) => {
+      Object.keys(entries || {}).forEach(key => {
+        const pathItem = entries?.[key];
+        if (!this.isObject(pathItem)) {
+          return;
         }
 
-        this.validateParameters(path, pathId, operation, operationId);
-
-        Object.keys(operation.responses || {}).forEach(responseCode => {
-          const response = operation.responses[responseCode];
-          const responseId = `${operationId}/responses/${responseCode}`;
-          if (this.isObject(response) && !('$ref' in response)) {
-            this.validateResponse(response, responseId);
-          }
+        visit({
+          container: name,
+          id: name === 'paths' ? `/paths${key}` : `/webhooks/${key}`,
+          key,
+          pathItem,
+          pointer: `/${name}/${escapeJSONPointer(key)}`,
         });
+      });
+    });
+  }
+
+  /**
+   * Walk every operation on a Path Item. `operationName` is the pointer segment after the Path
+   * Item: a fixed method like `get`, or `additionalOperations/COPY` for an OpenAPI 3.2 custom
+   * method.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#path-item-object}
+   */
+  private eachOperation(
+    pathItem: PathItemObject,
+    visit: (operation: OperationObject, operationName: string) => void,
+  ): void {
+    supportedHTTPMethods.forEach(method => {
+      const operation = (pathItem as OAS32.PathItemObject)[method];
+      if (operation) {
+        visit(operation, method);
+      }
+    });
+
+    if (!isOpenAPI32(this.api) || !('additionalOperations' in pathItem) || !pathItem.additionalOperations) {
+      return;
+    }
+
+    Object.entries(pathItem.additionalOperations).forEach(([method, operation]) => {
+      if (operation) {
+        visit(operation, `additionalOperations/${method}`);
+      }
+    });
+  }
+
+  /**
+   * Validates the given operation.
+   *
+   */
+  private validateOperation(
+    path: PathItemObject,
+    pathId: string,
+    operation: OperationObject,
+    operationId: string,
+    operationIds: string[],
+  ) {
+    this.validateServers(operation.servers, operationId);
+
+    const declaredOperationId = operation.operationId;
+    if (declaredOperationId) {
+      if (!operationIds.includes(declaredOperationId)) {
+        operationIds.push(declaredOperationId);
+      } else if (this.rules['duplicate-operation-id'] === 'warning') {
+        this.reportWarning(`The operationId \`${declaredOperationId}\` is duplicated and should be made unique.`);
+      } else {
+        this.reportError(`The operationId \`${declaredOperationId}\` is duplicated and must be made unique.`);
+      }
+    }
+
+    this.validateParameters(path, pathId, operation, operationId);
+
+    Object.keys(operation.responses || {}).forEach(responseCode => {
+      const response = operation.responses[responseCode];
+      const responseId = `${operationId}/responses/${responseCode}`;
+      if (this.isObject(response) && !('$ref' in response)) {
+        this.validateResponse(response, responseId);
       }
     });
   }
@@ -193,9 +302,19 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     // Check for duplicate operation parameters.
     this.checkForDuplicates(operationParams, operationId);
 
-    // Combine the path and operation parameters, with the operation params taking precedence over
-    // the path params.
-    const params = pathParams.reduce((combinedParams, value) => {
+    const params = this.combineParameters(pathParams, operationParams);
+
+    this.validatePathParameters(params, pathId, operationId);
+    this.validateParameterTypes(params, operationId);
+  }
+
+  /**
+   * Combine path item and operation parameters, with the operation parameters taking precedence
+   * over the path item parameters.
+   *
+   */
+  private combineParameters(pathParams: ParameterObject[], operationParams: ParameterObject[]): ParameterObject[] {
+    return pathParams.reduce((combinedParams, value) => {
       const duplicate = combinedParams.some(param => {
         if (!this.isObject(param) || !this.isObject(value) || '$ref' in param || '$ref' in value) {
           return false;
@@ -210,9 +329,87 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
 
       return combinedParams;
     }, operationParams.slice());
+  }
 
-    this.validatePathParameters(params, pathId, operationId);
-    this.validateParameterTypes(params, operationId);
+  /**
+   * Checks OpenAPI 3.2 `querystring` parameters on one Path Item. An operation may only have a
+   * single `querystring` parameter and it cannot be used alongside `query` parameters, including
+   * any that are inherited from the path item.
+   *
+   * The JSON Schema catches these cases when they occur within a single `parameters` list but
+   * AJV renders those failures as an inscrutable "must NOT be valid" error, and it can't see
+   * conflicts between path item and operation parameters, so this pre-AJV pass surfaces targeted
+   * errors instead.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#parameter-locations}
+   */
+  private checkQuerystringParameters({ id, pathItem, pointer }: PathItemLocation): void {
+    const pathParams = this.getWellFormedParameters(pathItem.parameters);
+
+    const pathHasIssues = this.validateQuerystringParameters(pathParams, id);
+    if (pathHasIssues) {
+      this.flagInstancePath(`${pointer}/parameters`);
+    }
+
+    this.eachOperation(pathItem, (operation, operationName) => {
+      if (!this.isObject(operation)) {
+        return;
+      }
+
+      const operationId = `${id}/${operationName}`;
+      const operationParams = this.getWellFormedParameters(operation.parameters);
+
+      if (this.validateQuerystringParameters(operationParams, operationId)) {
+        this.flagInstancePath(`${pointer}/${operationName}/parameters`);
+      } else if (!pathHasIssues && pathParams.length && operationParams.length) {
+        // Neither list has a problem on its own so make sure that they don't conflict with each
+        // other once the path item parameters are inherited by the operation.
+        this.validateQuerystringParameters(this.combineParameters(pathParams, operationParams), operationId);
+      }
+    });
+  }
+
+  /**
+   * Retrieve the parameters from a `parameters` list that are objects. Because this runs before
+   * schema validation the list may contain malformed entries (eg. `null` or a string) that we
+   * can't inspect; those are left for AJV to report on.
+   *
+   */
+  private getWellFormedParameters(parameters: unknown): ParameterObject[] {
+    if (!Array.isArray(parameters)) {
+      return [];
+    }
+
+    return parameters.filter(
+      (param): param is ParameterObject => param !== null && typeof param === 'object' && !Array.isArray(param),
+    );
+  }
+
+  /**
+   * Validates the `querystring` parameters within a list of parameters, reporting an error for
+   * each violation.
+   *
+   * @returns If any errors were reported.
+   */
+  private validateQuerystringParameters(params: ParameterObject[], id: string): boolean {
+    const locations = params.filter(param => 'in' in param).map(param => param.in);
+    const querystringParams = locations.filter(location => location === 'querystring').length;
+    if (!querystringParams) {
+      return false;
+    }
+
+    let hasIssues = false;
+    if (querystringParams > 1) {
+      this.reportError(`\`${id}\` has ${querystringParams} \`querystring\` parameters. Only one is allowed.`);
+      hasIssues = true;
+    }
+
+    if (locations.includes('query')) {
+      this.reportError(`\`${id}\` has \`query\` and \`querystring\` parameters. Only one or the other is allowed.`);
+      hasIssues = true;
+    }
+
+    return hasIssues;
   }
 
   /**
@@ -398,11 +595,23 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     const schemeTypeProps: Record<string, { foreign: Record<string, string>; required: string[] }> = {
       apiKey: {
         required: ['name', 'in'],
-        foreign: { scheme: 'http', bearerFormat: 'http', flows: 'oauth2', openIdConnectUrl: 'openIdConnect' },
+        foreign: {
+          scheme: 'http',
+          bearerFormat: 'http',
+          flows: 'oauth2',
+          oauth2MetadataUrl: 'oauth2',
+          openIdConnectUrl: 'openIdConnect',
+        },
       },
       http: {
         required: ['scheme'],
-        foreign: { name: 'apiKey', in: 'apiKey', flows: 'oauth2', openIdConnectUrl: 'openIdConnect' },
+        foreign: {
+          name: 'apiKey',
+          in: 'apiKey',
+          flows: 'oauth2',
+          oauth2MetadataUrl: 'oauth2',
+          openIdConnectUrl: 'openIdConnect',
+        },
       },
       oauth2: {
         required: ['flows'],
@@ -416,7 +625,14 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
       },
       openIdConnect: {
         required: ['openIdConnectUrl'],
-        foreign: { name: 'apiKey', in: 'apiKey', scheme: 'http', bearerFormat: 'http', flows: 'oauth2' },
+        foreign: {
+          name: 'apiKey',
+          in: 'apiKey',
+          scheme: 'http',
+          bearerFormat: 'http',
+          flows: 'oauth2',
+          oauth2MetadataUrl: 'oauth2',
+        },
       },
       mutualTLS: {
         required: [],
@@ -426,6 +642,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
           scheme: 'http',
           bearerFormat: 'http',
           flows: 'oauth2',
+          oauth2MetadataUrl: 'oauth2',
           openIdConnectUrl: 'openIdConnect',
         },
       },
@@ -502,10 +719,40 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
       // check passes, but the spec demands at least one grant type inside.
       if (type === 'oauth2' && scheme.flows && typeof scheme.flows === 'object') {
         if (Object.keys(scheme.flows as object).length === 0) {
-          reportIssue(
-            `\`${schemeId}\` has empty \`flows\`. At least one grant type is required: \`implicit\`, \`password\`, \`clientCredentials\`, or \`authorizationCode\`.`,
-          );
+          // OpenAPI 3.2 added the `deviceAuthorization` grant type.
+          const grantTypes = isOpenAPI32(this.api)
+            ? '`implicit`, `password`, `clientCredentials`, `authorizationCode`, or `deviceAuthorization`'
+            : '`implicit`, `password`, `clientCredentials`, or `authorizationCode`';
+
+          reportIssue(`\`${schemeId}\` has empty \`flows\`. At least one grant type is required: ${grantTypes}.`);
         }
+      }
+    });
+  }
+
+  /**
+   * Checks one OpenAPI 3.2 `additionalOperations` map for keys that duplicate the HTTP methods that
+   * already have fixed fields on the path item (`get`, `put`, etc.).
+   *
+   * The JSON Schema catches this through a `propertyNames.not.enum` constraint but AJV renders
+   * that failure as an inscrutable "must NOT be valid" error, so this pre-AJV pass surfaces a
+   * targeted error instead.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#path-item-object}
+   */
+  private checkAdditionalOperations({ id, pathItem, pointer }: PathItemLocation): void {
+    if (!('additionalOperations' in pathItem) || !pathItem.additionalOperations) {
+      return;
+    }
+
+    const fixedFieldMethods: string[] = supportedHTTPMethods.map(method => method.toUpperCase());
+
+    Object.keys(pathItem.additionalOperations).forEach(method => {
+      if (fixedFieldMethods.includes(method.toUpperCase())) {
+        this.flagInstancePath(`${pointer}/additionalOperations`);
+        this.reportError(
+          `\`${id}/additionalOperations\` must not contain \`${method}\` because it already has a fixed field on the path item. Define this operation within \`${method.toLowerCase()}\` instead.`,
+        );
       }
     });
   }

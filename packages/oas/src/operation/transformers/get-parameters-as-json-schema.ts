@@ -5,8 +5,10 @@ import type { Operation } from '../index.js';
 import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
 import { cloneObject } from '../../lib/clone-object.js';
+import { exampleValue } from '../../lib/example-value.js';
 import { getParameterContentType } from '../../lib/get-parameter-content-type.js';
 import { isPrimitive } from '../../lib/helpers.js';
+import { mediaTypeSchema, resolveMediaType } from '../../lib/media-type.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
 import {
   collectRefsInSchema,
@@ -159,7 +161,7 @@ export function getParametersAsJSONSchema(
               if (!example || isRef(example)) return;
             }
 
-            return example.value;
+            return exampleValue(example);
           })
           .filter((item): item is ExampleObject => item !== undefined),
       });
@@ -238,9 +240,10 @@ export function getParametersAsJSONSchema(
             const contentKeys = Object.keys(current.content);
             if (contentKeys.length) {
               const contentType = getParameterContentType(contentKeys);
-              const mediaType = contentType ? current.content[contentType] : undefined;
-              if (mediaType && 'schema' in mediaType && mediaType.schema && typeof mediaType.schema === 'object') {
-                const currentSchema = schemaObject(cloneObject(mediaType.schema));
+              const mediaType = contentType ? resolveMediaType(current.content[contentType], operation.api) : undefined;
+              const mediaSchema = mediaType && mediaTypeSchema(mediaType);
+              if (mediaSchema && typeof mediaSchema === 'object') {
+                const currentSchema = schemaObject(cloneObject(mediaSchema));
 
                 if (current.example !== undefined) {
                   // `example` can be present outside of the `schema` block so if it's there we

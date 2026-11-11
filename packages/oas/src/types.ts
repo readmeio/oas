@@ -109,6 +109,17 @@ export type SecurityType = 'apiKey' | 'Basic' | 'Bearer' | 'Cookie' | 'Header' |
 
 export type HttpMethods = 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put' | 'query' | 'trace';
 
+/**
+ * An HTTP method that an operation may be defined under. Fixed methods (`get`, `post`, `query`, …)
+ * stay members of the union so callers get autocomplete. OpenAPI 3.2 also allows arbitrary
+ * methods (`COPY`) inside `additionalOperations`, so any other string is accepted.
+ *
+ * `string & {}` keeps that autocomplete from collapsing into plain `string`.
+ *
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+ */
+export type OperationMethod = HttpMethods | (string & {});
+
 // The following are custom OpenAPI types that we use throughout this library, sans
 // `ReferenceObject` because we assume that the API definition has been dereferenced.
 //
@@ -130,6 +141,9 @@ export type OASDocument = OpenAPIDocument;
 
 /** @deprecated Use {@link OpenAPI31Document} instead. This will be removed in a future release. */
 export type OAS31Document = OpenAPI31Document;
+
+/** @deprecated Use {@link OpenAPI32Document} instead. This will be removed in a future release. */
+export type OAS32Document = OpenAPI32Document;
 
 /**
  * OpenAPI 3.1 or 3.2 document with a `webhooks` map. 3.0 documents do not have webhooks.
@@ -194,6 +208,14 @@ export type PathsObject = OAS30.PathsObject | OAS31.PathsObject | OAS32.PathsObj
  */
 export type PathItemObject = (OAS30.PathItemObject | OAS31.PathItemObject | OAS32.PathItemObject) & {
   /**
+   * OpenAPI 3.2 custom methods (`COPY`, `LOCK`, …). 3.0 and 3.1 path items do not include it.
+   * Fixed method names are not valid keys here.
+   *
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+   */
+  additionalOperations?: Record<string, OperationObject>;
+
+  /**
    * OpenAPI 3.2 operation for the HTTP QUERY method. 3.0 and 3.1 path items do not include it.
    *
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
@@ -219,7 +241,7 @@ export type OperationObject = OAS30.OperationObject | OAS31.OperationObject | OA
 export interface ParameterObject {
   allowEmptyValue?: boolean;
   allowReserved?: boolean;
-  content?: Record<string, MediaTypeObject>;
+  content?: Record<string, MediaTypeObject | ReferenceObject>;
   deprecated?: boolean;
   description?: string;
   example?: unknown;
@@ -289,7 +311,7 @@ export type TagObject = OAS30.TagObject | OAS31.TagObject | OAS32.TagObject;
  */
 export interface HeaderObject {
   allowEmptyValue?: boolean;
-  content?: Record<string, MediaTypeObject>;
+  content?: Record<string, MediaTypeObject | ReferenceObject>;
   deprecated?: boolean;
   description?: string;
   example?: unknown;

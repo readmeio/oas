@@ -4,6 +4,7 @@ import type { Operation } from '../index.js';
 import type { MediaTypeExample } from './get-mediatype-examples.js';
 
 import { getExtension } from '../../extensions.js';
+import { exampleValue } from '../../lib/example-value.js';
 import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
@@ -179,9 +180,11 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
   // add request param examples
   operation.getParameters().forEach(param => {
-    if (!param.examples) return;
+    // OpenAPI 3.2 `querystring` parameters must use `content` so their examples live within media
+    // types, not here, and they have no `DataForHAR` slot to be placed into.
+    if (param.in === 'querystring' || !param.examples) return;
+    const location = param.in;
 
-    const location = param.in === 'querystring' ? 'query' : param.in;
     Object.entries(param.examples).forEach(([exampleKey, paramExample]) => {
       let example = paramExample;
       if (isRef(example)) {
@@ -197,7 +200,7 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
           ...groups[exampleKey]?.request,
           [location]: {
             ...groups[exampleKey]?.request?.[location],
-            [param.name]: example.value,
+            [param.name]: exampleValue(example),
           },
         },
       };

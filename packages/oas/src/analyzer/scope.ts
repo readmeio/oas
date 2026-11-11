@@ -1,10 +1,10 @@
-import type { OpenAPIDocumentWithWebhooks, OASDocument, PathItemObject } from '../types.js';
+import type { OASDocument, OpenAPIDocumentWithWebhooks, PathItemObject } from '../types.js';
 
 import jsonPointer from 'jsonpointer';
 
+import { findPathItemOperation, resolveKey } from '../lib/path-item-operations.js';
 import { collectRefsInSchema, dereferenceRef, encodePointer, toPointer } from '../lib/refs.js';
 import { isRef } from '../types.js';
-import { supportedMethods } from '../utils.js';
 
 /**
  * Convert a `$ref` into the same JSON pointer shape `jsonpath-plus` emits. Local refs may be
@@ -102,16 +102,6 @@ export interface OperationScope {
 }
 
 /**
- * Case-insensitively find the real key for a given target within a list of keys. OpenAPI paths and
- * HTTP methods aren't case-sensitive as far as most tooling (including this) is concerned, but the
- * pointers we build need to match the casing that's actually in the document.
- *
- */
-function resolveKey(keys: string[], target: string): string | undefined {
-  return keys.find(key => key === target) || keys.find(key => key.toLowerCase() === target.toLowerCase());
-}
-
-/**
  * Resolve a Path Item that may be a `$ref` (including OpenAPI 3.1 `components.pathItems`) without
  * mutating the authored definition. Returns `undefined` when the pointer cannot be followed.
  */
@@ -122,15 +112,6 @@ function resolvePathItem(raw: unknown, definition: OASDocument): PathItemObject 
   }
 
   return resolved as PathItemObject;
-}
-
-function resolveMethodKey(container: object, method: string): string | undefined {
-  const methodKey = resolveKey(Object.keys(container), method);
-  if (!methodKey || !supportedMethods.includes(methodKey.toLowerCase() as (typeof supportedMethods)[number])) {
-    return undefined;
-  }
-
-  return methodKey;
 }
 
 /**
@@ -228,17 +209,14 @@ export function computeOperationScope(definition: OASDocument, path: string, met
     throw new Error(`Operation \`${method} ${path}\` not found.`);
   }
 
-  const methodKey = resolveMethodKey(pathItem, method);
-  if (!methodKey) {
+  const resolved = findPathItemOperation(pathItem, definition, method);
+  if (!resolved) {
     throw new Error(`Operation \`${method} ${path}\` not found.`);
   }
 
-  const operation = pathItem[methodKey as keyof PathItemObject];
-  if (!operation || typeof operation !== 'object') {
-    throw new Error(`Operation \`${method} ${path}\` not found.`);
-  }
-
-  const rootPointer = `/paths/${encodePointer(pathKey)}/${methodKey}`;
+  const { operation } = resolved;
+  const methodPointer = resolved.segments.map(encodePointer).join('/');
+  const rootPointer = `/paths/${encodePointer(pathKey)}/${methodPointer}`;
   const extraPointers: string[] = [];
   const seeds = new Set<string>(collectRefsInSchema(operation));
 
@@ -247,7 +225,7 @@ export function computeOperationScope(definition: OASDocument, path: string, met
   // Scope only this method (and its common parameters) so sibling operations stay out.
   const targetPointer = resolvePathItemTargetPointer(rawPathItem, definition);
   if (targetPointer) {
-    extraPointers.push(`${targetPointer}/${methodKey}`);
+    extraPointers.push(`${targetPointer}/${methodPointer}`);
   }
 
   if (pathItem.parameters) {
@@ -284,23 +262,20 @@ export function computeWebhookScope(
     throw new Error(`Webhook operation \`${method} ${webhookName}\` not found.`);
   }
 
-  const methodKey = resolveMethodKey(webhook, method);
-  if (!methodKey) {
+  const resolved = findPathItemOperation(webhook, definition, method);
+  if (!resolved) {
     throw new Error(`Webhook operation \`${method} ${webhookName}\` not found.`);
   }
 
-  const operation = webhook[methodKey as keyof PathItemObject];
-  if (!operation || typeof operation !== 'object') {
-    throw new Error(`Webhook operation \`${method} ${webhookName}\` not found.`);
-  }
-
-  const rootPointer = `/webhooks/${encodePointer(webhookKey)}/${methodKey}`;
+  const { operation } = resolved;
+  const methodPointer = resolved.segments.map(encodePointer).join('/');
+  const rootPointer = `/webhooks/${encodePointer(webhookKey)}/${methodPointer}`;
   const extraPointers: string[] = [];
   const seeds = new Set<string>(collectRefsInSchema(operation));
 
   const targetPointer = resolvePathItemTargetPointer(rawWebhook, definition);
   if (targetPointer) {
-    extraPointers.push(`${targetPointer}/${methodKey}`);
+    extraPointers.push(`${targetPointer}/${methodPointer}`);
   }
 
   if (webhook.parameters) {

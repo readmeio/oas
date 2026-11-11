@@ -1,8 +1,8 @@
+// oxlint-disable vitest/expect-expect vitest/no-standalone-expect
 import type { DataForHAR } from '../../../src/lib/types.js';
-import type { Request } from 'har-format';
 
 import toBeAValidHAR from 'jest-expect-har';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import oasToHar from '../../../src/index.js';
 import { createOas as oasFixture } from '../../__fixtures__/create-oas.js';
@@ -29,6 +29,126 @@ const createOas = oasFixture('get');
 const semicolon = ';'; // %3B when encoded, which we don't want
 const equals = '='; // %3D when encoded, which we don't want
 const comma = ','; // %2C when encoded, which we don't want
+
+const assertMatrixPath = vi.defineHelper(async (operation, formData: DataForHAR, expected: string) => {
+  const oas = createOas('/style-path/{color}', operation);
+  const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
+
+  await expect(har).toBeAValidHAR();
+
+  expect(har.log.entries[0].request.url).toBe(expected);
+});
+
+const assertLabelPath = vi.defineHelper(async (operation, formData: DataForHAR, expected: string) => {
+  const oas = createOas('/style-path/{color}', operation);
+  const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
+
+  await expect(har).toBeAValidHAR();
+
+  expect(har.log.entries[0].request.url).toBe(expected);
+});
+
+const assertSimplePath = vi.defineHelper(async (operation, formData: DataForHAR, expected: string) => {
+  const oas = createOas('/style-path/{color}', operation);
+  const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
+
+  await expect(har).toBeAValidHAR();
+
+  expect(har.log.entries[0].request.url).toBe(expected);
+});
+
+const assertFormStyle = vi.defineHelper(async (operation, formData: DataForHAR, expected: Request['queryString']) => {
+  const oas = createOas('/query', operation);
+  const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+
+  await expect(har).toBeAValidHAR();
+
+  expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+});
+
+const assertSpaceDelimitedStyle = vi.defineHelper(
+  async (operation, formData: DataForHAR, expected: Request['queryString']) => {
+    const oas = createOas('/query', operation);
+    const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+  },
+);
+
+const assertPipeDelimitedStyle = vi.defineHelper(
+  async (operation, formData: DataForHAR, expected: Request['queryString']) => {
+    const oas = createOas('/query', operation);
+    const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+  },
+);
+
+const assertDeepObjectStyle = vi.defineHelper(
+  async (operation, formData: DataForHAR, expected: Request['queryString']) => {
+    const oas = createOas('/query', operation);
+    const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+  },
+);
+
+const assertContentBasedStyle = vi.defineHelper(
+  async (operation, formData: DataForHAR, expected: Request['queryString']) => {
+    const oas = createOas('/query', operation);
+    const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+  },
+);
+
+const assertCookies = vi.defineHelper(async (operation, formData: DataForHAR, expected: Request['cookies']) => {
+  const oas = createOas('/cookies', operation);
+  const har = oasToHar(oas, oas.operation('/cookies', 'get'), formData);
+
+  await expect(har).toBeAValidHAR();
+
+  expect(har.log.entries[0].request.cookies).toStrictEqual(expected);
+});
+
+const assertHeaders = vi.defineHelper(async (operation, formData: DataForHAR, expected: Request['headers']) => {
+  const oas = createOas('/header', operation);
+  const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
+
+  await expect(har).toBeAValidHAR();
+
+  expect(har.log.entries[0].request.headers).toStrictEqual(expected);
+});
+
+const assertContentBasedHeaders = vi.defineHelper(
+  async (operation, formData: DataForHAR, expected: Request['headers']) => {
+    const oas = createOas('/header', operation);
+    const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.headers).toStrictEqual(expected);
+  },
+);
+
+const assertSchemaBasedHeaders = vi.defineHelper(
+  async (operation, formData: DataForHAR, expected: Request['headers']) => {
+    const oas = createOas('/header', operation);
+    const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.headers).toStrictEqual(expected);
+  },
+);
 
 describe('style formatting', () => {
   it('should not crash on uri decoding errors', async () => {
@@ -118,142 +238,117 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertMatrixPath(operation, formData: DataForHAR, expected: string) {
-        return async () => {
-          const oas = createOas('/style-path/{color}', operation);
-          const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.url).toBe(expected);
-        };
-      }
-
-      it(
-        'should support matrix path styles non exploded empty input',
-        assertMatrixPath(
+      it('should support matrix path styles non exploded empty input', async () => {
+        await assertMatrixPath(
           paramNoExplode,
           { path: { color: emptyInput } },
           `https://example.com/style-path/${semicolon}color`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles styles for exploded empty input',
-        assertMatrixPath(
+      it('should support matrix path styles styles for exploded empty input', async () => {
+        await assertMatrixPath(
           paramExplode,
           { path: { color: emptyInput } },
           `https://example.com/style-path/${semicolon}color`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles non exploded undefined input',
-        assertMatrixPath(
+      it('should support matrix path styles non exploded undefined input', async () => {
+        await assertMatrixPath(
           paramNoExplode,
           { path: { color: undefinedInput } },
           `https://example.com/style-path/${semicolon}color`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles styles for exploded undefined input',
-        assertMatrixPath(
+      it('should support matrix path styles styles for exploded undefined input', async () => {
+        await assertMatrixPath(
           paramExplode,
           { path: { color: undefinedInput } },
           `https://example.com/style-path/${semicolon}color`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles non exploded undefined array input',
-        assertMatrixPath(
+      it('should support matrix path styles non exploded undefined array input', async () => {
+        await assertMatrixPath(
           paramNoExplode,
           { path: { color: undefinedArrayInput } },
           `https://example.com/style-path/${semicolon}color`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles styles for exploded undefined array input',
-        assertMatrixPath(
+      it('should support matrix path styles styles for exploded undefined array input', async () => {
+        await assertMatrixPath(
           paramExplode,
           { path: { color: undefinedArrayInput } },
           `https://example.com/style-path/${semicolon}color`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles non exploded undefined object input',
-        assertMatrixPath(
+      it('should support matrix path styles non exploded undefined object input', async () => {
+        await assertMatrixPath(
           paramNoExplode,
           { path: { color: undefinedObjectInput } },
           `https://example.com/style-path/${semicolon}color${equals}R${comma}`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles styles for exploded undefined object input',
-        assertMatrixPath(
+      it('should support matrix path styles styles for exploded undefined object input', async () => {
+        await assertMatrixPath(
           paramExplode,
           { path: { color: undefinedObjectInput } },
           `https://example.com/style-path/${semicolon}R${equals}`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles styles for non exploded string input',
-        assertMatrixPath(
+      it('should support matrix path styles styles for non exploded string input', async () => {
+        await assertMatrixPath(
           paramNoExplode,
           { path: { color: stringInput } },
           `https://example.com/style-path/${semicolon}color${equals}blue`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles styles for exploded string input',
-        assertMatrixPath(
+      it('should support matrix path styles styles for exploded string input', async () => {
+        await assertMatrixPath(
           paramExplode,
           { path: { color: stringInput } },
           `https://example.com/style-path/${semicolon}color${equals}blue`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles styles for non exploded array input',
-        assertMatrixPath(
+      it('should support matrix path styles styles for non exploded array input', async () => {
+        await assertMatrixPath(
           paramNoExplode,
           { path: { color: arrayInput } },
           `https://example.com/style-path/${semicolon}color${equals}blue${comma}black${comma}brown`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles styles for exploded array input',
-        assertMatrixPath(
+      it('should support matrix path styles styles for exploded array input', async () => {
+        await assertMatrixPath(
           paramExplode,
           { path: { color: arrayInput } },
           `https://example.com/style-path/${semicolon}color${equals}blue${semicolon}color${equals}black${semicolon}color${equals}brown`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles styles for non exploded object input',
-        assertMatrixPath(
+      it('should support matrix path styles styles for non exploded object input', async () => {
+        await assertMatrixPath(
           paramNoExplode,
           { path: { color: objectInput } },
           `https://example.com/style-path/${semicolon}color${equals}R${comma}100${comma}G${comma}200${comma}B${comma}150`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support matrix path styles styles for exploded object input',
-        assertMatrixPath(
+      it('should support matrix path styles styles for exploded object input', async () => {
+        await assertMatrixPath(
           paramExplode,
           { path: { color: objectInput } },
           `https://example.com/style-path/${semicolon}R${equals}100${semicolon}G${equals}200${semicolon}B${equals}150`,
-        ),
-      );
+        );
+      });
     });
 
     describe('label path', () => {
@@ -279,72 +374,53 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertLabelPath(operation, formData: DataForHAR, expected: string) {
-        return async () => {
-          const oas = createOas('/style-path/{color}', operation);
-          const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
+      it('should support label path styles non exploded empty input', async () => {
+        await assertLabelPath(paramNoExplode, { path: { color: emptyInput } }, 'https://example.com/style-path/.');
+      });
 
-          await expect(har).toBeAValidHAR();
+      it('should support label path styles styles for exploded empty input', async () => {
+        await assertLabelPath(paramExplode, { path: { color: emptyInput } }, 'https://example.com/style-path/.');
+      });
 
-          expect(har.log.entries[0].request.url).toBe(expected);
-        };
-      }
+      it('should support label path styles styles for non exploded string input', async () => {
+        await assertLabelPath(paramNoExplode, { path: { color: stringInput } }, 'https://example.com/style-path/.blue');
+      });
 
-      it(
-        'should support label path styles non exploded empty input',
-        assertLabelPath(paramNoExplode, { path: { color: emptyInput } }, 'https://example.com/style-path/.'),
-      );
+      it('should support label path styles styles for exploded string input', async () => {
+        await assertLabelPath(paramExplode, { path: { color: stringInput } }, 'https://example.com/style-path/.blue');
+      });
 
-      it(
-        'should support label path styles styles for exploded empty input',
-        assertLabelPath(paramExplode, { path: { color: emptyInput } }, 'https://example.com/style-path/.'),
-      );
-
-      it(
-        'should support label path styles styles for non exploded string input',
-        assertLabelPath(paramNoExplode, { path: { color: stringInput } }, 'https://example.com/style-path/.blue'),
-      );
-
-      it(
-        'should support label path styles styles for exploded string input',
-        assertLabelPath(paramExplode, { path: { color: stringInput } }, 'https://example.com/style-path/.blue'),
-      );
-
-      it(
-        'should support label path styles styles for non exploded array input',
-        assertLabelPath(
+      it('should support label path styles styles for non exploded array input', async () => {
+        await assertLabelPath(
           paramNoExplode,
           { path: { color: arrayInput } },
           'https://example.com/style-path/.blue.black.brown',
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support label path styles styles for exploded array input',
-        assertLabelPath(
+      it('should support label path styles styles for exploded array input', async () => {
+        await assertLabelPath(
           paramExplode,
           { path: { color: arrayInput } },
           'https://example.com/style-path/.blue.black.brown',
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support label path styles styles for non exploded object input',
-        assertLabelPath(
+      it('should support label path styles styles for non exploded object input', async () => {
+        await assertLabelPath(
           paramNoExplode,
           { path: { color: objectInput } },
           'https://example.com/style-path/.R.100.G.200.B.150',
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support label path styles styles for exploded object input',
-        assertLabelPath(
+      it('should support label path styles styles for exploded object input', async () => {
+        await assertLabelPath(
           paramExplode,
           { path: { color: objectInput } },
           `https://example.com/style-path/.R${equals}100.G${equals}200.B${equals}150`,
-        ),
-      );
+        );
+      });
     });
 
     describe('simple path', () => {
@@ -370,72 +446,53 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertSimplePath(operation, formData: DataForHAR, expected: string) {
-        return async () => {
-          const oas = createOas('/style-path/{color}', operation);
-          const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
+      it('should NOT support simple path styles non exploded empty input', async () => {
+        await assertSimplePath(paramNoExplode, { path: { color: emptyInput } }, 'https://example.com/style-path/');
+      });
 
-          await expect(har).toBeAValidHAR();
+      it('should NOT support simple path styles styles for exploded empty input', async () => {
+        await assertSimplePath(paramExplode, { path: { color: emptyInput } }, 'https://example.com/style-path/');
+      });
 
-          expect(har.log.entries[0].request.url).toBe(expected);
-        };
-      }
+      it('should support simple path styles styles for non exploded string input', async () => {
+        await assertSimplePath(paramNoExplode, { path: { color: stringInput } }, 'https://example.com/style-path/blue');
+      });
 
-      it(
-        'should NOT support simple path styles non exploded empty input',
-        assertSimplePath(paramNoExplode, { path: { color: emptyInput } }, 'https://example.com/style-path/'),
-      );
+      it('should support simple path styles styles for exploded string input', async () => {
+        await assertSimplePath(paramExplode, { path: { color: stringInput } }, 'https://example.com/style-path/blue');
+      });
 
-      it(
-        'should NOT support simple path styles styles for exploded empty input',
-        assertSimplePath(paramExplode, { path: { color: emptyInput } }, 'https://example.com/style-path/'),
-      );
-
-      it(
-        'should support simple path styles styles for non exploded string input',
-        assertSimplePath(paramNoExplode, { path: { color: stringInput } }, 'https://example.com/style-path/blue'),
-      );
-
-      it(
-        'should support simple path styles styles for exploded string input',
-        assertSimplePath(paramExplode, { path: { color: stringInput } }, 'https://example.com/style-path/blue'),
-      );
-
-      it(
-        'should support simple path styles styles for non exploded array input',
-        assertSimplePath(
+      it('should support simple path styles styles for non exploded array input', async () => {
+        await assertSimplePath(
           paramNoExplode,
           { path: { color: arrayInput } },
           `https://example.com/style-path/blue${comma}black${comma}brown`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support simple path styles styles for exploded array input',
-        assertSimplePath(
+      it('should support simple path styles styles for exploded array input', async () => {
+        await assertSimplePath(
           paramExplode,
           { path: { color: arrayInput } },
           `https://example.com/style-path/blue${comma}black${comma}brown`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support simple path styles styles for non exploded object input',
-        assertSimplePath(
+      it('should support simple path styles styles for non exploded object input', async () => {
+        await assertSimplePath(
           paramNoExplode,
           { path: { color: objectInput } },
           `https://example.com/style-path/R${comma}100${comma}G${comma}200${comma}B${comma}150`,
-        ),
-      );
+        );
+      });
 
-      it(
-        'should support simple path styles styles for exploded object input',
-        assertSimplePath(
+      it('should support simple path styles styles for exploded object input', async () => {
+        await assertSimplePath(
           paramExplode,
           { path: { color: objectInput } },
           `https://example.com/style-path/R${equals}100${comma}G${equals}200${comma}B${equals}150`,
-        ),
-      );
+        );
+      });
     });
   });
 
@@ -489,120 +546,94 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertFormStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
-        return async () => {
-          const oas = createOas('/query', operation);
-          const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+      it('should support form delimited query styles for non exploded empty input', async () => {
+        await assertFormStyle(paramNoExplode, { query: { color: emptyInput } }, [{ name: 'color', value: '' }]);
+      });
 
-          await expect(har).toBeAValidHAR();
+      it('should support form delimited query styles for exploded empty input', async () => {
+        await assertFormStyle(paramExplode, { query: { color: emptyInput } }, [{ name: 'color', value: '' }]);
+      });
 
-          expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-        };
-      }
+      it('should support form delimited query styles for non exploded string input', async () => {
+        await assertFormStyle(paramNoExplode, { query: { color: stringInput } }, [{ name: 'color', value: 'blue' }]);
+      });
 
-      it(
-        'should support form delimited query styles for non exploded empty input',
-        assertFormStyle(paramNoExplode, { query: { color: emptyInput } }, [{ name: 'color', value: '' }]),
-      );
-
-      it(
-        'should support form delimited query styles for exploded empty input',
-        assertFormStyle(paramExplode, { query: { color: emptyInput } }, [{ name: 'color', value: '' }]),
-      );
-
-      it(
-        'should support form delimited query styles for non exploded string input',
-        assertFormStyle(paramNoExplode, { query: { color: stringInput } }, [{ name: 'color', value: 'blue' }]),
-      );
-
-      it(
-        'should support form delimited query styles for non exploded string input and NOT encode already encoded values',
-        assertFormStyle(paramNoExplode, { query: { color: stringInputEncoded } }, [
+      it('should support form delimited query styles for non exploded string input and NOT encode already encoded values', async () => {
+        await assertFormStyle(paramNoExplode, { query: { color: stringInputEncoded } }, [
           { name: 'color', value: 'something%26nothing%3Dtrue' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support form delimited query styles for exploded string input',
-        assertFormStyle(paramExplode, { query: { color: stringInput } }, [{ name: 'color', value: 'blue' }]),
-      );
+      it('should support form delimited query styles for exploded string input', async () => {
+        await assertFormStyle(paramExplode, { query: { color: stringInput } }, [{ name: 'color', value: 'blue' }]);
+      });
 
-      it(
-        'should support form delimited query styles for exploded string input and NOT encode already encoded values',
-        assertFormStyle(paramExplode, { query: { color: stringInputEncoded } }, [
+      it('should support form delimited query styles for exploded string input and NOT encode already encoded values', async () => {
+        await assertFormStyle(paramExplode, { query: { color: stringInputEncoded } }, [
           { name: 'color', value: 'something%26nothing%3Dtrue' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support form delimited query styles for non exploded array input',
-        assertFormStyle(paramNoExplode, { query: { color: arrayInput } }, [
+      it('should support form delimited query styles for non exploded array input', async () => {
+        await assertFormStyle(paramNoExplode, { query: { color: arrayInput } }, [
           { name: 'color', value: 'blue,black,brown' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support form delimited query styles for non exploded array input and NOT encode already encoded values',
-        assertFormStyle(paramNoExplode, { query: { color: arrayInputEncoded } }, [
+      it('should support form delimited query styles for non exploded array input and NOT encode already encoded values', async () => {
+        await assertFormStyle(paramNoExplode, { query: { color: arrayInputEncoded } }, [
           { name: 'color', value: 'something%26nothing%3Dtrue,hash%23data' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support form delimited query styles for exploded array input',
-        assertFormStyle(paramExplode, { query: { color: arrayInput } }, [
+      it('should support form delimited query styles for exploded array input', async () => {
+        await assertFormStyle(paramExplode, { query: { color: arrayInput } }, [
           { name: 'color', value: 'blue' },
           { name: 'color', value: 'black' },
           { name: 'color', value: 'brown' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support form delimited query styles for exploded array inpu and NOT encode already encoded values',
-        assertFormStyle(paramExplode, { query: { color: arrayInputEncoded } }, [
+      it('should support form delimited query styles for exploded array inpu and NOT encode already encoded values', async () => {
+        await assertFormStyle(paramExplode, { query: { color: arrayInputEncoded } }, [
           { name: 'color', value: 'something%26nothing%3Dtrue' },
           { name: 'color', value: 'hash%23data' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support form delimited query styles for non exploded object input',
-        assertFormStyle(paramNoExplode, { query: { color: objectInput } }, [
+      it('should support form delimited query styles for non exploded object input', async () => {
+        await assertFormStyle(paramNoExplode, { query: { color: objectInput } }, [
           { name: 'color', value: 'R,100,G,200,B,150' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support form delimited query styles for non exploded object input and NOT encode already encoded values',
-        assertFormStyle(paramNoExplode, { query: { color: objectInputEncoded } }, [
+      it('should support form delimited query styles for non exploded object input and NOT encode already encoded values', async () => {
+        await assertFormStyle(paramNoExplode, { query: { color: objectInputEncoded } }, [
           { name: 'color', value: 'pound,something%26nothing%3Dtrue,hash,hash%23data' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support form delimited query styles for exploded object input',
-        assertFormStyle(paramExplode, { query: { color: objectInput } }, [
+      it('should support form delimited query styles for exploded object input', async () => {
+        await assertFormStyle(paramExplode, { query: { color: objectInput } }, [
           { name: 'R', value: '100' },
           { name: 'G', value: '200' },
           { name: 'B', value: '150' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support form delimited query styles for exploded object input and NOT encode already encoded values',
-        assertFormStyle(paramExplode, { query: { color: objectInputEncoded } }, [
+      it('should support form delimited query styles for exploded object input and NOT encode already encoded values', async () => {
+        await assertFormStyle(paramExplode, { query: { color: objectInputEncoded } }, [
           { name: 'pound', value: 'something%26nothing%3Dtrue' },
           { name: 'hash', value: 'hash%23data' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support allowReserved for query parameters and not replace reserved characters',
-        assertFormStyle(paramReserved, { query: { color: objectInputEncoded } }, [
+      it('should support allowReserved for query parameters and not replace reserved characters', async () => {
+        await assertFormStyle(paramReserved, { query: { color: objectInputEncoded } }, [
           { name: 'pound', value: 'something&nothing=true' },
           { name: 'hash', value: 'hash#data' },
-        ]),
-      );
+        ]);
+      });
     });
 
     describe('spaceDelimited style', () => {
@@ -628,67 +659,47 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertSpaceDelimitedStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
-        return async () => {
-          const oas = createOas('/query', operation);
-          const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+      it('should NOT support space delimited query styles for non exploded empty input', async () => {
+        await assertSpaceDelimitedStyle(paramNoExplode, { query: { color: emptyInput } }, []);
+      });
 
-          await expect(har).toBeAValidHAR();
+      it('should NOT support space delimited query styles for exploded empty input', async () => {
+        await assertSpaceDelimitedStyle(paramExplode, { query: { color: emptyInput } }, []);
+      });
 
-          expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-        };
-      }
+      it('should NOT support space delimited query styles for non exploded string input', async () => {
+        await assertSpaceDelimitedStyle(paramNoExplode, { query: { color: stringInput } }, []);
+      });
 
-      it(
-        'should NOT support space delimited query styles for non exploded empty input',
-        assertSpaceDelimitedStyle(paramNoExplode, { query: { color: emptyInput } }, []),
-      );
+      it('should NOT support space delimited query styles for exploded string input', async () => {
+        await assertSpaceDelimitedStyle(paramExplode, { query: { color: stringInput } }, []);
+      });
 
-      it(
-        'should NOT support space delimited query styles for exploded empty input',
-        assertSpaceDelimitedStyle(paramExplode, { query: { color: emptyInput } }, []),
-      );
-
-      it(
-        'should NOT support space delimited query styles for non exploded string input',
-        assertSpaceDelimitedStyle(paramNoExplode, { query: { color: stringInput } }, []),
-      );
-
-      it(
-        'should NOT support space delimited query styles for exploded string input',
-        assertSpaceDelimitedStyle(paramExplode, { query: { color: stringInput } }, []),
-      );
-
-      it(
-        'should support space delimited query styles for non exploded array input',
-        assertSpaceDelimitedStyle(paramNoExplode, { query: { color: arrayInput } }, [
+      it('should support space delimited query styles for non exploded array input', async () => {
+        await assertSpaceDelimitedStyle(paramNoExplode, { query: { color: arrayInput } }, [
           { name: 'color', value: 'blue black brown' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support space delimited query styles for non exploded array input and NOT encode already encoded values',
-        assertSpaceDelimitedStyle(paramNoExplode, { query: { color: arrayInputEncoded } }, [
+      it('should support space delimited query styles for non exploded array input and NOT encode already encoded values', async () => {
+        await assertSpaceDelimitedStyle(paramNoExplode, { query: { color: arrayInputEncoded } }, [
           { name: 'color', value: 'something%26nothing%3Dtrue hash%23data' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should NOT support space delimited query styles for exploded array input',
-        assertSpaceDelimitedStyle(paramExplode, { query: { color: arrayInput } }, []),
-      );
+      it('should NOT support space delimited query styles for exploded array input', async () => {
+        await assertSpaceDelimitedStyle(paramExplode, { query: { color: arrayInput } }, []);
+      });
 
-      it(
-        'should support space delimited query styles for non exploded object input',
-        assertSpaceDelimitedStyle(paramNoExplode, { query: { color: objectInput } }, [
+      it('should support space delimited query styles for non exploded object input', async () => {
+        await assertSpaceDelimitedStyle(paramNoExplode, { query: { color: objectInput } }, [
           { name: 'color', value: 'R 100 G 200 B 150' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should NOT support space delimited query styles for exploded object input',
-        assertSpaceDelimitedStyle(paramExplode, { query: { color: objectInput } }, []),
-      );
+      it('should NOT support space delimited query styles for exploded object input', async () => {
+        await assertSpaceDelimitedStyle(paramExplode, { query: { color: objectInput } }, []);
+      });
     });
 
     describe('pipeDelimited style', () => {
@@ -714,67 +725,47 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertPipeDelimitedStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
-        return async () => {
-          const oas = createOas('/query', operation);
-          const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+      it('should NOT support pipe delimited query styles for non exploded empty input', async () => {
+        await assertPipeDelimitedStyle(paramNoExplode, { query: { color: emptyInput } }, []);
+      });
 
-          await expect(har).toBeAValidHAR();
+      it('should NOT support pipe delimited query styles for exploded empty input', async () => {
+        await assertPipeDelimitedStyle(paramExplode, { query: { color: emptyInput } }, []);
+      });
 
-          expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-        };
-      }
+      it('should NOT support pipe delimited query styles for non exploded string input', async () => {
+        await assertPipeDelimitedStyle(paramNoExplode, { query: { color: stringInput } }, []);
+      });
 
-      it(
-        'should NOT support pipe delimited query styles for non exploded empty input',
-        assertPipeDelimitedStyle(paramNoExplode, { query: { color: emptyInput } }, []),
-      );
+      it('should NOT support pipe delimited query styles for exploded string input', async () => {
+        await assertPipeDelimitedStyle(paramExplode, { query: { color: stringInput } }, []);
+      });
 
-      it(
-        'should NOT support pipe delimited query styles for exploded empty input',
-        assertPipeDelimitedStyle(paramExplode, { query: { color: emptyInput } }, []),
-      );
-
-      it(
-        'should NOT support pipe delimited query styles for non exploded string input',
-        assertPipeDelimitedStyle(paramNoExplode, { query: { color: stringInput } }, []),
-      );
-
-      it(
-        'should NOT support pipe delimited query styles for exploded string input',
-        assertPipeDelimitedStyle(paramExplode, { query: { color: stringInput } }, []),
-      );
-
-      it(
-        'should support pipe delimited query styles for non exploded array input',
-        assertPipeDelimitedStyle(paramNoExplode, { query: { color: arrayInput } }, [
+      it('should support pipe delimited query styles for non exploded array input', async () => {
+        await assertPipeDelimitedStyle(paramNoExplode, { query: { color: arrayInput } }, [
           { name: 'color', value: 'blue|black|brown' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support pipe delimited query styles for non exploded array input and NOT encode already encoded values',
-        assertPipeDelimitedStyle(paramNoExplode, { query: { color: arrayInputEncoded } }, [
+      it('should support pipe delimited query styles for non exploded array input and NOT encode already encoded values', async () => {
+        await assertPipeDelimitedStyle(paramNoExplode, { query: { color: arrayInputEncoded } }, [
           { name: 'color', value: 'something%26nothing%3Dtrue|hash%23data' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should NOT support pipe delimited query styles for exploded array input',
-        assertPipeDelimitedStyle(paramExplode, { query: { color: arrayInput } }, []),
-      );
+      it('should NOT support pipe delimited query styles for exploded array input', async () => {
+        await assertPipeDelimitedStyle(paramExplode, { query: { color: arrayInput } }, []);
+      });
 
-      it(
-        'should support pipe delimited query styles for non exploded object input',
-        assertPipeDelimitedStyle(paramNoExplode, { query: { color: objectInput } }, [
+      it('should support pipe delimited query styles for non exploded object input', async () => {
+        await assertPipeDelimitedStyle(paramNoExplode, { query: { color: objectInput } }, [
           { name: 'color', value: 'R|100|G|200|B|150' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should NOT support pipe delimited query styles for exploded object input',
-        assertPipeDelimitedStyle(paramExplode, { query: { color: objectInput } }, []),
-      );
+      it('should NOT support pipe delimited query styles for exploded object input', async () => {
+        await assertPipeDelimitedStyle(paramExplode, { query: { color: objectInput } }, []);
+      });
     });
 
     describe('deepObject style', () => {
@@ -834,46 +825,29 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertDeepObjectStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
-        return async () => {
-          const oas = createOas('/query', operation);
-          const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+      it('should NOT support deepObject delimited query styles for non exploded empty input', async () => {
+        await assertDeepObjectStyle(paramNoExplode, { query: { color: emptyInput } }, []);
+      });
 
-          await expect(har).toBeAValidHAR();
+      it('should NOT support deepObject delimited query styles for exploded empty input', async () => {
+        await assertDeepObjectStyle(paramExplode, { query: { color: emptyInput } }, []);
+      });
 
-          expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-        };
-      }
+      it('should NOT support deepObject delimited query styles for non exploded string input', async () => {
+        await assertDeepObjectStyle(paramNoExplode, { query: { color: stringInput } }, []);
+      });
 
-      it(
-        'should NOT support deepObject delimited query styles for non exploded empty input',
-        assertDeepObjectStyle(paramNoExplode, { query: { color: emptyInput } }, []),
-      );
+      it('should NOT support deepObject delimited query styles for exploded string input', async () => {
+        await assertDeepObjectStyle(paramExplode, { query: { color: stringInput } }, []);
+      });
 
-      it(
-        'should NOT support deepObject delimited query styles for exploded empty input',
-        assertDeepObjectStyle(paramExplode, { query: { color: emptyInput } }, []),
-      );
-
-      it(
-        'should NOT support deepObject delimited query styles for non exploded string input',
-        assertDeepObjectStyle(paramNoExplode, { query: { color: stringInput } }, []),
-      );
-
-      it(
-        'should NOT support deepObject delimited query styles for exploded string input',
-        assertDeepObjectStyle(paramExplode, { query: { color: stringInput } }, []),
-      );
-
-      it(
-        'should NOT support deepObject delimited query styles for non exploded array input',
-        assertDeepObjectStyle(paramNoExplode, { query: { color: arrayInput } }, []),
-      );
+      it('should NOT support deepObject delimited query styles for non exploded array input', async () => {
+        await assertDeepObjectStyle(paramNoExplode, { query: { color: arrayInput } }, []);
+      });
 
       // This breaks from the spec, but we have had requests to support arrays as if they are numerically keyed objects, and this is the easiest way
-      it(
-        'should support deepObject delimited query styles for exploded array input',
-        assertDeepObjectStyle(paramExplode, { query: { color: arrayInput } }, [
+      it('should support deepObject delimited query styles for exploded array input', async () => {
+        await assertDeepObjectStyle(paramExplode, { query: { color: arrayInput } }, [
           {
             name: 'color',
             value: 'blue',
@@ -886,50 +860,44 @@ describe('style formatting', () => {
             name: 'color',
             value: 'brown',
           },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should NOT support deepObject delimited query styles for non exploded object input',
-        assertDeepObjectStyle(paramNoExplode, { query: { color: objectInput } }, []),
-      );
+      it('should NOT support deepObject delimited query styles for non exploded object input', async () => {
+        await assertDeepObjectStyle(paramNoExplode, { query: { color: objectInput } }, []);
+      });
 
-      it(
-        'should support deepObject delimited query styles for exploded object input',
-        assertDeepObjectStyle(paramExplode, { query: { color: objectInput } }, [
+      it('should support deepObject delimited query styles for exploded object input', async () => {
+        await assertDeepObjectStyle(paramExplode, { query: { color: objectInput } }, [
           { name: 'color[R]', value: '100' },
           { name: 'color[G]', value: '200' },
           { name: 'color[B]', value: '150' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support deepObject delimited query styles for implicit exploded object input',
-        assertDeepObjectStyle(paramImplicitExplode, { query: { color: objectInput } }, [
+      it('should support deepObject delimited query styles for implicit exploded object input', async () => {
+        await assertDeepObjectStyle(paramImplicitExplode, { query: { color: objectInput } }, [
           { name: 'color[R]', value: '100' },
           { name: 'color[G]', value: '200' },
           { name: 'color[B]', value: '150' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should NOT support deepObject delimited query styles for non exploded nested object input',
-        assertDeepObjectStyle(paramNoExplode, { query: { color: objectNestedObject } }, []),
-      );
+      it('should NOT support deepObject delimited query styles for non exploded nested object input', async () => {
+        await assertDeepObjectStyle(paramNoExplode, { query: { color: objectNestedObject } }, []);
+      });
 
-      it(
-        'should support deepObject delimited query styles for exploded nested object input',
-        assertDeepObjectStyle(paramExplode, { query: { color: objectNestedObject } }, [
+      it('should support deepObject delimited query styles for exploded nested object input', async () => {
+        await assertDeepObjectStyle(paramExplode, { query: { color: objectNestedObject } }, [
           { name: 'color[id]', value: 'someID' },
           { name: 'color[child][name]', value: 'childName' },
           { name: 'color[child][age]', value: 'null' },
           { name: 'color[child][metadata][name]', value: 'meta' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support deepObject delimited query styles for exploded nested object (of a ridiculious shape) input',
-        assertDeepObjectStyle(paramExplode, { query: { color: objectNestedObjectOfARidiculiousShape } }, [
+      it('should support deepObject delimited query styles for exploded nested object (of a ridiculious shape) input', async () => {
+        await assertDeepObjectStyle(paramExplode, { query: { color: objectNestedObjectOfARidiculiousShape } }, [
           { name: 'color[id]', value: 'someID' },
           { name: 'color[petLicense]', value: 'null' },
           { name: 'color[dog][name]', value: 'buster' },
@@ -939,20 +907,18 @@ describe('style formatting', () => {
           { name: 'color[pets][0][name]', value: 'buster' },
           { name: 'color[pets][0][age]', value: 'null' },
           { name: 'color[pets][0][metadata][isOld]', value: 'true' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support deepObject delimited query styles for exploded object input and NOT encode already encoded values',
-        assertDeepObjectStyle(paramExplode, { query: { color: objectInputEncoded } }, [
+      it('should support deepObject delimited query styles for exploded object input and NOT encode already encoded values', async () => {
+        await assertDeepObjectStyle(paramExplode, { query: { color: objectInputEncoded } }, [
           { name: 'color[pound]', value: 'something%26nothing%3Dtrue' },
           { name: 'color[hash]', value: 'hash%23data' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should support `deepObject` with arrays of objects',
-        assertDeepObjectStyle(
+      it('should support `deepObject` with arrays of objects', async () => {
+        await assertDeepObjectStyle(
           arrayParamExplode,
           {
             query: {
@@ -968,8 +934,8 @@ describe('style formatting', () => {
             { name: 'line_items[1][a_string]', value: 'def' },
             { name: 'line_items[1][quantity]', value: '2' },
           ],
-        ),
-      );
+        );
+      });
     });
 
     describe('content-based parameters', () => {
@@ -1105,117 +1071,93 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertContentBasedStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
-        return async () => {
-          const oas = createOas('/query', operation);
-          const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-        };
-      }
-
-      it(
-        'should JSON-encode object input and ignore style/explode settings',
-        assertContentBasedStyle(paramContentJson, { query: { color: objectInput } }, [
+      it('should JSON-encode object input and ignore style/explode settings', async () => {
+        await assertContentBasedStyle(paramContentJson, { query: { color: objectInput } }, [
           { name: 'color', value: encodeURIComponent('{"R":100,"G":200,"B":150}') },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should JSON-encode object input even when style and explode are set',
-        assertContentBasedStyle(paramContentJsonWithStyle, { query: { color: objectInput } }, [
+      it('should JSON-encode object input even when style and explode are set', async () => {
+        await assertContentBasedStyle(paramContentJsonWithStyle, { query: { color: objectInput } }, [
           { name: 'color', value: encodeURIComponent('{"R":100,"G":200,"B":150}') },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should JSON-encode array input',
-        assertContentBasedStyle(paramContentJsonArray, { query: { color: arrayInput } }, [
+      it('should JSON-encode array input', async () => {
+        await assertContentBasedStyle(paramContentJsonArray, { query: { color: arrayInput } }, [
           { name: 'color', value: encodeURIComponent('["blue","black","brown"]') },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should JSON-encode nested object input',
-        assertContentBasedStyle(paramContentJson, { query: { color: objectNestedObject } }, [
+      it('should JSON-encode nested object input', async () => {
+        await assertContentBasedStyle(paramContentJson, { query: { color: objectNestedObject } }, [
           {
             name: 'color',
             value: encodeURIComponent(
               '{"id":"someID","child":{"name":"childName","age":null,"metadata":{"name":"meta"}}}',
             ),
           },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should JSON-encode complex nested object input',
-        assertContentBasedStyle(paramContentJson, { query: { color: objectNestedObjectOfARidiculiousShape } }, [
+      it('should JSON-encode complex nested object input', async () => {
+        await assertContentBasedStyle(paramContentJson, { query: { color: objectNestedObjectOfARidiculiousShape } }, [
           {
             name: 'color',
             value: encodeURIComponent(
               '{"id":"someID","petLicense":null,"dog":{"name":"buster","age":18,"treats":["peanut butter","apple"]},"pets":[{"name":"buster","age":null,"metadata":{"isOld":true}}]}',
             ),
           },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should JSON-encode string input',
-        assertContentBasedStyle(paramContentJsonArray, { query: { color: stringInput } }, [
+      it('should JSON-encode string input', async () => {
+        await assertContentBasedStyle(paramContentJsonArray, { query: { color: stringInput } }, [
           { name: 'color', value: encodeURIComponent('"blue"') },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should JSON-encode empty object input',
-        assertContentBasedStyle(paramContentJson, { query: { color: {} } }, [
+      it('should JSON-encode empty object input', async () => {
+        await assertContentBasedStyle(paramContentJson, { query: { color: {} } }, [
           { name: 'color', value: encodeURIComponent('{}') },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should JSON-encode empty array input',
-        assertContentBasedStyle(paramContentJsonArray, { query: { color: [] } }, [
+      it('should JSON-encode empty array input', async () => {
+        await assertContentBasedStyle(paramContentJsonArray, { query: { color: [] } }, [
           { name: 'color', value: encodeURIComponent('[]') },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should ignore spaceDelimited style when content is present',
-        assertContentBasedStyle(paramContentJsonWithSpaceDelimited, { query: { color: objectInput } }, [
+      it('should ignore spaceDelimited style when content is present', async () => {
+        await assertContentBasedStyle(paramContentJsonWithSpaceDelimited, { query: { color: objectInput } }, [
           { name: 'color', value: encodeURIComponent('{"R":100,"G":200,"B":150}') },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should ignore pipeDelimited style when content is present',
-        assertContentBasedStyle(paramContentJsonWithPipeDelimited, { query: { color: objectInput } }, [
+      it('should ignore pipeDelimited style when content is present', async () => {
+        await assertContentBasedStyle(paramContentJsonWithPipeDelimited, { query: { color: objectInput } }, [
           { name: 'color', value: encodeURIComponent('{"R":100,"G":200,"B":150}') },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should ignore deepObject style when content is present',
-        assertContentBasedStyle(paramContentJsonWithDeepObject, { query: { color: objectInput } }, [
+      it('should ignore deepObject style when content is present', async () => {
+        await assertContentBasedStyle(paramContentJsonWithDeepObject, { query: { color: objectInput } }, [
           { name: 'color', value: encodeURIComponent('{"R":100,"G":200,"B":150}') },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should handle object with encoded values',
-        assertContentBasedStyle(paramContentJson, { query: { color: objectInputEncoded } }, [
+      it('should handle object with encoded values', async () => {
+        await assertContentBasedStyle(paramContentJson, { query: { color: objectInputEncoded } }, [
           {
             name: 'color',
             value: encodeURIComponent('{"pound":"something&nothing=true","hash":"hash#data"}'),
           },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should return undefined when content object is empty',
-        assertContentBasedStyle(
+      it('should return undefined when content object is empty', async () => {
+        await assertContentBasedStyle(
           {
             parameters: [
               {
@@ -1227,12 +1169,11 @@ describe('style formatting', () => {
           },
           { query: { color: objectInput } },
           [],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should handle non-application/json content type by stringifying the value',
-        assertContentBasedStyle(
+      it('should handle non-application/json content type by stringifying the value', async () => {
+        await assertContentBasedStyle(
           {
             parameters: [
               {
@@ -1250,12 +1191,11 @@ describe('style formatting', () => {
           },
           { query: { color: objectInput } },
           [{ name: 'color', value: encodeURIComponent(String(objectInput)) }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should handle text/plain content type by stringifying the value',
-        assertContentBasedStyle(
+      it('should handle text/plain content type by stringifying the value', async () => {
+        await assertContentBasedStyle(
           {
             parameters: [
               {
@@ -1273,12 +1213,11 @@ describe('style formatting', () => {
           },
           { query: { color: stringInput } },
           [{ name: 'color', value: encodeURIComponent(stringInput) }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should handle non-application/json content type with array input',
-        assertContentBasedStyle(
+      it('should handle non-application/json content type with array input', async () => {
+        await assertContentBasedStyle(
           {
             parameters: [
               {
@@ -1296,8 +1235,8 @@ describe('style formatting', () => {
           },
           { query: { color: arrayInput } },
           [{ name: 'color', value: encodeURIComponent(String(arrayInput)) }],
-        ),
-      );
+        );
+      });
     });
   });
 
@@ -1339,30 +1278,16 @@ describe('style formatting', () => {
       ],
     };
 
-    function assertCookies(operation, formData: DataForHAR, expected: Request['cookies']) {
-      return async () => {
-        const oas = createOas('/cookies', operation);
-        const har = oasToHar(oas, oas.operation('/cookies', 'get'), formData);
+    it('should support form delimited cookie styles for non exploded empty input', async () => {
+      await assertCookies(paramNoExplode, { cookie: { color: emptyInput } }, [{ name: 'color', value: '' }]);
+    });
 
-        await expect(har).toBeAValidHAR();
+    it('should support form delimited cookie styles for exploded empty input', async () => {
+      await assertCookies(paramExplode, { cookie: { color: emptyInput } }, [{ name: 'color', value: '' }]);
+    });
 
-        expect(har.log.entries[0].request.cookies).toStrictEqual(expected);
-      };
-    }
-
-    it(
-      'should support form delimited cookie styles for non exploded empty input',
-      assertCookies(paramNoExplode, { cookie: { color: emptyInput } }, [{ name: 'color', value: '' }]),
-    );
-
-    it(
-      'should support form delimited cookie styles for exploded empty input',
-      assertCookies(paramExplode, { cookie: { color: emptyInput } }, [{ name: 'color', value: '' }]),
-    );
-
-    it(
-      'should support form delimited cookie styles for non exploded string input',
-      assertCookies(
+    it('should support form delimited cookie styles for non exploded string input', async () => {
+      await assertCookies(
         {
           parameters: [
             {
@@ -1375,43 +1300,40 @@ describe('style formatting', () => {
         },
         { cookie: { color: stringInput } },
         [{ name: 'color', value: 'blue' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should support form delimited cookie styles for exploded string input',
-      assertCookies(paramExplode, { cookie: { color: stringInput } }, [{ name: 'color', value: 'blue' }]),
-    );
+    it('should support form delimited cookie styles for exploded string input', async () => {
+      await assertCookies(paramExplode, { cookie: { color: stringInput } }, [{ name: 'color', value: 'blue' }]);
+    });
 
-    it(
-      'should support form delimited cookie styles for non exploded array input',
-      assertCookies(paramNoExplode, { cookie: { color: arrayInput } }, [{ name: 'color', value: 'blue,black,brown' }]),
-    );
+    it('should support form delimited cookie styles for non exploded array input', async () => {
+      await assertCookies(paramNoExplode, { cookie: { color: arrayInput } }, [
+        { name: 'color', value: 'blue,black,brown' },
+      ]);
+    });
 
-    it(
-      'should support form delimited cookie styles for exploded array input',
-      assertCookies(paramExplode, { cookie: { color: arrayInput } }, [
+    it('should support form delimited cookie styles for exploded array input', async () => {
+      await assertCookies(paramExplode, { cookie: { color: arrayInput } }, [
         { name: 'color', value: 'blue' },
         { name: 'color', value: 'black' },
         { name: 'color', value: 'brown' },
-      ]),
-    );
+      ]);
+    });
 
-    it(
-      'should support form delimited cookie styles for non exploded object input',
-      assertCookies(paramNoExplode, { cookie: { color: objectInput } }, [
+    it('should support form delimited cookie styles for non exploded object input', async () => {
+      await assertCookies(paramNoExplode, { cookie: { color: objectInput } }, [
         { name: 'color', value: 'R,100,G,200,B,150' },
-      ]),
-    );
+      ]);
+    });
 
-    it(
-      'should support form delimited cookie styles for exploded object input',
-      assertCookies(paramExplode, { cookie: { color: objectInput } }, [
+    it('should support form delimited cookie styles for exploded object input', async () => {
+      await assertCookies(paramExplode, { cookie: { color: objectInput } }, [
         { name: 'R', value: '100' },
         { name: 'G', value: '200' },
         { name: 'B', value: '150' },
-      ]),
-    );
+      ]);
+    });
   });
 
   describe('header parameters', () => {
@@ -1452,45 +1374,30 @@ describe('style formatting', () => {
       ],
     };
 
-    function assertHeaders(operation, formData: DataForHAR, expected: Request['headers']) {
-      return async () => {
-        const oas = createOas('/header', operation);
-        const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
+    it('should NOT support simple header styles for non exploded empty input', async () => {
+      await assertHeaders(paramNoExplode, { header: { color: emptyInput } }, []);
+    });
 
-        await expect(har).toBeAValidHAR();
+    it('should NOT support simple header styles for exploded empty input', async () => {
+      await assertHeaders(paramExplode, { header: { color: emptyInput } }, []);
+    });
 
-        expect(har.log.entries[0].request.headers).toStrictEqual(expected);
-      };
-    }
+    it('should support simple header styles for non exploded string input', async () => {
+      await assertHeaders(paramNoExplode, { header: { color: stringInput } }, [{ name: 'color', value: 'blue' }]);
+    });
 
-    it(
-      'should NOT support simple header styles for non exploded empty input',
-      assertHeaders(paramNoExplode, { header: { color: emptyInput } }, []),
-    );
+    it('should support simple header styles for exploded string input', async () => {
+      await assertHeaders(paramExplode, { header: { color: stringInput } }, [{ name: 'color', value: 'blue' }]);
+    });
 
-    it(
-      'should NOT support simple header styles for exploded empty input',
-      assertHeaders(paramExplode, { header: { color: emptyInput } }, []),
-    );
+    it('should support simple header styles for non exploded arrays', async () => {
+      await assertHeaders(paramNoExplode, { header: { color: arrayInput } }, [
+        { name: 'color', value: 'blue,black,brown' },
+      ]);
+    });
 
-    it(
-      'should support simple header styles for non exploded string input',
-      assertHeaders(paramNoExplode, { header: { color: stringInput } }, [{ name: 'color', value: 'blue' }]),
-    );
-
-    it(
-      'should support simple header styles for exploded string input',
-      assertHeaders(paramExplode, { header: { color: stringInput } }, [{ name: 'color', value: 'blue' }]),
-    );
-
-    it(
-      'should support simple header styles for non exploded arrays',
-      assertHeaders(paramNoExplode, { header: { color: arrayInput } }, [{ name: 'color', value: 'blue,black,brown' }]),
-    );
-
-    it(
-      'should support simple header styles for exploded arrays',
-      assertHeaders(
+    it('should support simple header styles for exploded arrays', async () => {
+      await assertHeaders(
         paramExplode,
         { header: { color: arrayInput } },
         /**
@@ -1502,19 +1409,17 @@ describe('style formatting', () => {
          * @see {@link https://swagger.io/docs/specification/serialization/#header}
          * */
         [{ name: 'color', value: 'blue,black,brown' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should support simple header styles for non exploded objects',
-      assertHeaders(paramNoExplode, { header: { color: objectInput } }, [
+    it('should support simple header styles for non exploded objects', async () => {
+      await assertHeaders(paramNoExplode, { header: { color: objectInput } }, [
         { name: 'color', value: 'R,100,G,200,B,150' },
-      ]),
-    );
+      ]);
+    });
 
-    it(
-      'should support simple header styles for exploded objects',
-      assertHeaders(
+    it('should support simple header styles for exploded objects', async () => {
+      await assertHeaders(
         paramExplode,
         { header: { color: objectInput } },
         /**
@@ -1526,8 +1431,8 @@ describe('style formatting', () => {
          * @see {@link https://swagger.io/docs/specification/serialization/#header}
          */
         [{ name: 'color', value: 'R=100,G=200,B=150' }],
-      ),
-    );
+      );
+    });
 
     /**
      * Eventhough `accept`, `authorization`, and `content-type` headers can be defined as path
@@ -1616,78 +1521,50 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertContentBasedHeaders(operation, formData: DataForHAR, expected: Request['headers']) {
-        return async () => {
-          const oas = createOas('/header', operation);
-          const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.headers).toStrictEqual(expected);
-        };
-      }
-
-      it(
-        'should JSON-encode object input',
-        assertContentBasedHeaders(paramContentJson, { header: { color: objectInput } }, [
+      it('should JSON-encode object input', async () => {
+        await assertContentBasedHeaders(paramContentJson, { header: { color: objectInput } }, [
           { name: 'color', value: '{"R":100,"G":200,"B":150}' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should JSON-encode array input',
-        assertContentBasedHeaders(paramContentJsonArray, { header: { color: arrayInput } }, [
+      it('should JSON-encode array input', async () => {
+        await assertContentBasedHeaders(paramContentJsonArray, { header: { color: arrayInput } }, [
           { name: 'color', value: '["blue","black","brown"]' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should JSON-encode empty object input',
-        assertContentBasedHeaders(paramContentJson, { header: { color: {} } }, [{ name: 'color', value: '{}' }]),
-      );
+      it('should JSON-encode empty object input', async () => {
+        await assertContentBasedHeaders(paramContentJson, { header: { color: {} } }, [{ name: 'color', value: '{}' }]);
+      });
 
-      it(
-        'should JSON-encode empty array input',
-        assertContentBasedHeaders(paramContentJsonArray, { header: { color: [] } }, [{ name: 'color', value: '[]' }]),
-      );
+      it('should JSON-encode empty array input', async () => {
+        await assertContentBasedHeaders(paramContentJsonArray, { header: { color: [] } }, [
+          { name: 'color', value: '[]' },
+        ]);
+      });
 
-      it(
-        'should not URL-encode header values',
-        assertContentBasedHeaders(paramContentJson, { header: { color: objectInput } }, [
+      it('should not URL-encode header values', async () => {
+        await assertContentBasedHeaders(paramContentJson, { header: { color: objectInput } }, [
           { name: 'color', value: '{"R":100,"G":200,"B":150}' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should JSON-encode vendor +json content types',
-        assertContentBasedHeaders(paramContentVendorJson, { header: { color: objectInput } }, [
+      it('should JSON-encode vendor +json content types', async () => {
+        await assertContentBasedHeaders(paramContentVendorJson, { header: { color: objectInput } }, [
           { name: 'color', value: '{"R":100,"G":200,"B":150}' },
-        ]),
-      );
+        ]);
+      });
 
-      it(
-        'should use String() for non-JSON content types',
-        assertContentBasedHeaders(paramContentNonJson, { header: { color: 'hello' } }, [
+      it('should use String() for non-JSON content types', async () => {
+        await assertContentBasedHeaders(paramContentNonJson, { header: { color: 'hello' } }, [
           { name: 'color', value: 'hello' },
-        ]),
-      );
+        ]);
+      });
     });
 
     describe('schema-based parameters (without content property)', () => {
-      function assertSchemaBasedHeaders(operation, formData: DataForHAR, expected: Request['headers']) {
-        return async () => {
-          const oas = createOas('/header', operation);
-          const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.headers).toStrictEqual(expected);
-        };
-      }
-
-      it(
-        'should not URL-encode schema-based string header values',
-        assertSchemaBasedHeaders(
+      it('should not URL-encode schema-based string header values', async () => {
+        await assertSchemaBasedHeaders(
           {
             parameters: [
               {
@@ -1701,12 +1578,11 @@ describe('style formatting', () => {
           },
           { header: { 'x-custom': 'value with spaces & special=chars' } },
           [{ name: 'x-custom', value: 'value with spaces & special=chars' }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should not URL-encode date-time format header values',
-        assertSchemaBasedHeaders(
+      it('should not URL-encode date-time format header values', async () => {
+        await assertSchemaBasedHeaders(
           {
             parameters: [
               {
@@ -1721,12 +1597,11 @@ describe('style formatting', () => {
           },
           { header: { 'If-Modified-Since': 'Wed, 21 Oct 2015 07:28:00 GMT' } },
           [{ name: 'If-Modified-Since', value: 'Wed, 21 Oct 2015 07:28:00 GMT' }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should preserve commas and colons in header values unencoded',
-        assertSchemaBasedHeaders(
+      it('should preserve commas and colons in header values unencoded', async () => {
+        await assertSchemaBasedHeaders(
           {
             parameters: [
               {
@@ -1740,8 +1615,8 @@ describe('style formatting', () => {
           },
           { header: { 'x-timestamp': 'Mon, 01 Jan 2024 12:00:00 GMT' } },
           [{ name: 'x-timestamp', value: 'Mon, 01 Jan 2024 12:00:00 GMT' }],
-        ),
-      );
+        );
+      });
     });
 
     describe('should ignore styling definitions on OAS-level handled headers', () => {
