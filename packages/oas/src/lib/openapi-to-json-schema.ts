@@ -8,6 +8,7 @@ import removeUndefinedObjects from 'remove-undefined-objects';
 
 import { isOpenAPI30, isRef, isSchema } from '../types.js';
 
+import { exampleValue } from './example-value.js';
 import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
 import { collectRefsInSchema, dereferenceRef, encodePointer } from './refs.js';
 
@@ -861,15 +862,16 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
             return;
           }
 
-          if ('value' in currentExample) {
-            if (isPrimitive(currentExample.value)) {
-              examples.push(currentExample.value);
+          if ('value' in currentExample || 'dataValue' in currentExample || 'serializedValue' in currentExample) {
+            const payload = exampleValue(currentExample);
+            if (isPrimitive(payload)) {
+              examples.push(payload);
               reshapedExamples = true;
-            } else if (Array.isArray(currentExample.value) && isPrimitive(currentExample.value[0])) {
-              examples.push(currentExample.value[0]);
+            } else if (Array.isArray(payload) && isPrimitive(payload[0])) {
+              examples.push(payload[0]);
               reshapedExamples = true;
             } else {
-              prevExampleSchemas.push({ example: currentExample.value });
+              prevExampleSchemas.push({ example: payload });
             }
           }
         });

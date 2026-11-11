@@ -40,6 +40,71 @@ describe('.getResponseAsJSONSchema()', () => {
     expect(createOasForOperation({ responses: {} }).operation('/', 'get').getResponseAsJSONSchema('200')).toBeNull();
   });
 
+  it('should resolve an OpenAPI 3.2 response content `$ref`', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'media types', version: '1.0.0' },
+      paths: {
+        '/files': {
+          get: {
+            responses: {
+              '200': {
+                description: 'OK',
+                content: {
+                  'application/json': { $ref: '#/components/mediaTypes/File' },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        mediaTypes: {
+          File: { schema: { type: 'object', properties: { id: { type: 'string' } } } },
+        },
+      },
+    });
+
+    expect(oas.operation('/files', 'get').getResponseAsJSONSchema('200')).toMatchObject([
+      {
+        description: 'OK',
+        type: 'object',
+        schema: { type: 'object', properties: { id: { type: 'string' } } },
+      },
+    ]);
+  });
+
+  it('should describe an OpenAPI 3.2 sequential response with `itemSchema`', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { title: 'jsonl', version: '1.0.0' },
+      paths: {
+        '/events': {
+          get: {
+            responses: {
+              '200': {
+                description: 'A stream of events',
+                content: {
+                  'application/jsonl': {
+                    itemSchema: { type: 'object', properties: { id: { type: 'string' } } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/events', 'get').getResponseAsJSONSchema('200')).toMatchObject([
+      {
+        description: 'A stream of events',
+        type: 'object',
+        schema: { type: 'object', properties: { id: { type: 'string' } } },
+      },
+    ]);
+  });
+
   it('should return with null if there is empty content', () => {
     const oas = createOasForOperation({
       responses: {

@@ -188,6 +188,12 @@ export function stripOrphanedIds(schema: unknown): void {
   visit(schema, true);
 }
 
+function fixServerList(servers: readonly unknown[], filePath: string): void {
+  servers.forEach(server => {
+    if (server && typeof server === 'object') fixServers(server, filePath);
+  });
+}
+
 /**
  * This function takes in a `ServerObject`, checks if it has relative path and then fixes it as per
  * the path URL.
@@ -249,7 +255,8 @@ export function fixOasRelativeServers(schema: APIDocument, filePath?: string): v
 }
 
 /**
- * Path items and webhook path items share a server list at the path and at each operation.
+ * Path items and webhook path items share a server list at the path, at each fixed-method
+ * operation (including the OpenAPI 3.2 `query` method), and within `additionalOperations`.
  */
 function fixServersInPathItems(schemaElement: object | undefined, filePath: string): void {
   if (!schemaElement) return;
@@ -268,9 +275,7 @@ function fixServersInPathItems(schemaElement: object | undefined, filePath: stri
        * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
        */
       if (opItem === 'servers' && Array.isArray(pathItemElement)) {
-        pathItemElement.forEach(server => {
-          if (server && typeof server === 'object') fixServers(server, filePath);
-        });
+        fixServerList(pathItemElement, filePath);
         return;
       }
 
@@ -287,10 +292,24 @@ function fixServersInPathItems(schemaElement: object | undefined, filePath: stri
         'servers' in pathItemElement &&
         Array.isArray(pathItemElement.servers)
       ) {
-        pathItemElement.servers.forEach(server => {
-          if (server && typeof server === 'object') fixServers(server, filePath);
-        });
+        fixServerList(pathItemElement.servers, filePath);
+        return;
       }
+
+      /**
+       * Servers are at the `OperationObject` level within an OpenAPI 3.2 `additionalOperations` map.
+       *
+       * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+       */
+      if (opItem !== 'additionalOperations' || typeof pathItemElement !== 'object') {
+        return;
+      }
+
+      Object.values(pathItemElement).forEach(operation => {
+        if (operation && typeof operation === 'object' && 'servers' in operation && Array.isArray(operation.servers)) {
+          fixServerList(operation.servers, filePath);
+        }
+      });
     });
   });
 }

@@ -86,6 +86,79 @@ describe('analyzer queries (OpenAPI)', () => {
       expect(analyzeCallbacks(readmeLegacy as OASDocument)).toHaveLength(0);
     });
 
+    it('should discover callbacks on webhook operations, including OpenAPI 3.2 `additionalOperations`', () => {
+      const definition = {
+        openapi: '3.2.0',
+        info: { title: 'Webhook callbacks', version: '1.0.0' },
+        webhooks: {
+          fileCopied: {
+            post: {
+              callbacks: {
+                onPosted: {
+                  '{$request.body#/callbackUrl}': {
+                    post: { responses: { '200': { description: 'OK' } } },
+                  },
+                },
+              },
+              responses: { '200': { description: 'OK' } },
+            },
+            additionalOperations: {
+              NOTIFY: {
+                callbacks: {
+                  onNotified: {
+                    '{$request.body#/callbackUrl}': {
+                      post: { responses: { '200': { description: 'OK' } } },
+                    },
+                  },
+                },
+                responses: { '202': { description: 'Accepted' } },
+              },
+            },
+          },
+        },
+      } as OASDocument;
+
+      expect(analyzeCallbacks(definition)).toStrictEqual([
+        '#/webhooks/fileCopied/additionalOperations/NOTIFY/callbacks',
+        '#/webhooks/fileCopied/post/callbacks',
+      ]);
+    });
+
+    it.each(['3.0.3', '3.1.0'])('should ignore `additionalOperations` callbacks on OpenAPI %s', version => {
+      const definition = {
+        openapi: version,
+        info: { title: 'Callbacks', version: '1.0.0' },
+        paths: {
+          '/files': {
+            post: {
+              callbacks: {
+                onPosted: {
+                  '{$request.body#/callbackUrl}': {
+                    post: { responses: { '200': { description: 'OK' } } },
+                  },
+                },
+              },
+              responses: { '200': { description: 'OK' } },
+            },
+            additionalOperations: {
+              COPY: {
+                callbacks: {
+                  onCopied: {
+                    '{$request.body#/callbackUrl}': {
+                      post: { responses: { '200': { description: 'OK' } } },
+                    },
+                  },
+                },
+                responses: { '202': { description: 'Accepted' } },
+              },
+            },
+          },
+        },
+      } as OASDocument;
+
+      expect(analyzeCallbacks(definition)).toStrictEqual(['#/paths/~1files/post/callbacks']);
+    });
+
     it('should not flag schema properties named `callbacks` as a callback', () => {
       expect(
         readme.paths['/branches/{branch}/reference'].post.requestBody.content['application/json'].schema.properties.api
@@ -316,6 +389,125 @@ describe('analyzer queries (OpenAPI)', () => {
   describe('#analyzeTotalOperations()', () => {
     it('should count the total operations used within a definition', () => {
       expect(analyzeTotalOperations(readme as unknown as OASDocument)).toBe(54);
+    });
+
+    it('should count each method inside an OpenAPI 3.2 `additionalOperations` map', () => {
+      const definition = {
+        openapi: '3.2.0',
+        info: { title: 'Additional operations', version: '1.0.0' },
+        paths: {
+          '/files/{id}': {
+            summary: 'Files',
+            parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+            get: { responses: { '200': { description: 'OK' } } },
+            additionalOperations: {
+              COPY: { responses: { '201': { description: 'Created' } } },
+              LOCK: { responses: { '200': { description: 'OK' } } },
+            },
+          },
+        },
+      } as OASDocument;
+
+      // `summary` and `parameters` are Path Item metadata. `COPY` and `LOCK` each count.
+      expect(analyzeTotalOperations(definition)).toBe(3);
+    });
+
+    it('should count operations on a referenced OpenAPI 3.2 Path Item', () => {
+      const definition = {
+        openapi: '3.2.0',
+        info: { title: 'referenced path items', version: '1.0.0' },
+        paths: {
+          '/pets': { $ref: '#/components/pathItems/Pets' },
+          '/pets/{id}': {
+            $ref: '#/components/pathItems/Pet',
+            get: { responses: { '200': { description: 'Local get' } } },
+            delete: { responses: { '204': { description: 'Deleted' } } },
+          },
+          '/files/{id}': { $ref: '#/components/pathItems/FileAlias' },
+          '/spaced': { $ref: '#/components/pathItems/pet%20ById' },
+          '/external': {
+            $ref: './other.yaml#/paths/~1pets',
+            post: { responses: { '201': { description: 'Created' } } },
+          },
+        },
+        components: {
+          pathItems: {
+            Pets: {
+              get: { responses: { '200': { description: 'OK' } } },
+              post: { responses: { '201': { description: 'Created' } } },
+            },
+            Pet: {
+              get: { responses: { '200': { description: 'OK' } } },
+              put: { responses: { '200': { description: 'Updated' } } },
+            },
+            FileAlias: {
+              $ref: '#/components/pathItems/File',
+              head: { responses: { '200': { description: 'OK' } } },
+            },
+            File: {
+              get: { responses: { '200': { description: 'OK' } } },
+              additionalOperations: {
+                COPY: { responses: { '201': { description: 'Created' } } },
+              },
+            },
+            'pet ById': {
+              get: { responses: { '200': { description: 'OK' } } },
+            },
+          },
+        },
+      } as OASDocument;
+
+      // `/pets` contributes `get` and `post`. `/pets/{id}` contributes `put` from the target plus
+      // local `get` and `delete` (`get` is shared, so it counts once). `/files/{id}` contributes
+      // `head` from the alias and `get` plus `COPY` from the terminal Path Item. `/spaced` follows
+      // the percent-encoded pointer. `/external` keeps its local `post`; the external ref is not
+      // followed.
+      expect(analyzeTotalOperations(definition)).toBe(10);
+    });
+
+    it('should count each path when OpenAPI 3.2 Path Item `$ref`s cycle', () => {
+      const definition = {
+        openapi: '3.2.0',
+        info: { title: 'cycled path items', version: '1.0.0' },
+        paths: {
+          '/a': {
+            $ref: '#/paths/~1b',
+            get: { responses: { '200': { description: 'OK' } } },
+          },
+          '/b': {
+            $ref: '#/paths/~1a',
+            post: { responses: { '201': { description: 'Created' } } },
+          },
+        },
+      } as OASDocument;
+
+      // Each path keeps its own method and picks up the other path's method through the `$ref`.
+      expect(analyzeTotalOperations(definition)).toBe(4);
+    });
+
+    it.each(['3.0.3', '3.1.0'])('should keep the historical path-item key count for OpenAPI %s', version => {
+      const definition = {
+        openapi: version,
+        info: { title: 'historical count', version: '1.0.0' },
+        paths: {
+          '/shared': {
+            summary: 'Shared',
+            parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+            post: { responses: { '201': { description: 'Created' } } },
+            get: { responses: { '200': { description: 'OK' } } },
+          },
+          '/pets': {
+            $ref: '#/paths/~1shared',
+            delete: { responses: { '204': { description: 'Deleted' } } },
+          },
+          '/alias': {
+            $ref: '#/paths/~1shared',
+          },
+        },
+      } as OASDocument;
+
+      // `summary`, `parameters`, `post`, `get`, `$ref`, `delete`, `$ref`.
+      expect(analyzeTotalOperations(definition)).toBe(7);
     });
   });
 

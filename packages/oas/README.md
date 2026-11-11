@@ -78,10 +78,10 @@ Because this library has full TypeScript types and docblocks this README is not 
 | :--- | :--- |
 | `.getDefinition()` | Retrieve the OpenAPI definition that was fed into the `Oas` constructor. |
 | `.getTags()` | Retrieve an array of all tags that exist within the API definition and are set on operations. |
-| `.getPaths()` | Retrieve every operation that exists within the API definition. This returns an array of instances of the `Operation` class. |
+| `.getPaths()` | Retrieve every operation on `paths`, keyed by path and method. OpenAPI 3.2 [`additionalOperations`](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) entries (eg. `COPY`) are included next to the fixed method fields. Each value is an `Operation`. |
 | `.getSecurityScheme()` | Retrieve a security scheme from the API definition. |
 | `.getVersion()` | Retrieve the OpenAPI version that this API definition is targeted for. |
-| `.getWebhooks()` | Retrieve every webhook operation that exists within the API definition. This returns an array of instances of the `Webhook` class. |
+| `.getWebhooks()` | Retrieve every webhook operation, keyed by webhook name and method. OpenAPI 3.2 [`additionalOperations`](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) entries are included. Each value is a `Webhook`. |
 | `.hasSecurityScheme()` | Determine if a security scheme exists within the API definition. |
 | `#init()` | An alternative for `new Oas()` that you can use if the typing on the `Oas` constructor gives you trouble. Typing OpenAPI definitions is hard! |
 <!-- prettier-ignore-end -->
@@ -95,7 +95,7 @@ Because this library has full TypeScript types and docblocks this README is not 
 | `.findOperationWithoutMethod()` | Like `.findOperation()` but without supplying an HTTP method. |
 | `.getOperation()` | Same as `.findOperation()` but this returns an instance of the `Operation` class. |
 | `.getOperationById()` | Retrieve an operation in an OpenAPI definition by an `operationId`. |
-| `.operation()` | Retrieve an instance of the `Operation` or `Webhook` classes for a given path and HTTP method. |
+| `.operation()` | Retrieve an instance of the `Operation` or `Webhook` classes for a given path and HTTP method. For OpenAPI 3.2 definitions this can also retrieve operations defined within [`additionalOperations`](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) by supplying the custom HTTP method they were defined under (eg. `COPY`). |
 <!-- prettier-ignore-end -->
 
 #### Servers

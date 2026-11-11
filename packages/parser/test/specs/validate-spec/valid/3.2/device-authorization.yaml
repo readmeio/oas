@@ -1,0 +1,29 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Valid API
+paths:
+  /pets:
+    get:
+      security:
+        - OAuth2:
+            - read:pets
+      responses:
+        '200':
+          description: OK
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      oauth2MetadataUrl: https://example.com/.well-known/oauth-authorization-server
+      flows:
+        deviceAuthorization:
+          deviceAuthorizationUrl: https://example.com/device
+          tokenUrl: https://example.com/token
+          scopes:
+            read:pets: Read pets
+    LegacyKey:
+      type: apiKey
+      name: X-API-Key
+      in: header
+      deprecated: true
