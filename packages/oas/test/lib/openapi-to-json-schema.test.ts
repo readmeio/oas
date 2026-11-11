@@ -597,6 +597,43 @@ describe('toJSONSchema()', () => {
         });
       });
 
+      it('should retain property ref annotations under allOf in OpenAPI 3.1', () => {
+        const annotations = {
+          default: false,
+          deprecated: true,
+          description: 'Local description',
+          examples: [false],
+          readOnly: true,
+        };
+        const result = toJSONSchema(
+          { allOf: [{ $ref: '#/components/schemas/Wrapper' }] },
+          {
+            definition: {
+              ...definition,
+              components: {
+                schemas: {
+                  Flag: { type: 'boolean', description: 'Shared description', default: true },
+                  Name: { type: 'string' },
+                  Wrapper: {
+                    type: 'object',
+                    properties: {
+                      flag: { $ref: '#/components/schemas/Flag', ...annotations },
+                      name: { $ref: '#/components/schemas/Name', format: 'password', writeOnly: true },
+                    },
+                  },
+                },
+              },
+            } as OASDocument,
+            usedSchemas: new Map(),
+          },
+        );
+
+        expect(result.properties).toMatchObject({
+          flag: { type: 'boolean', ...annotations },
+          name: { type: 'string', format: 'password', writeOnly: true },
+        });
+      });
+
       it('should inline a bare `$ref` when the same component was already converted in this pass', () => {
         const usedSchemas = new Map();
         const result = toJSONSchema(
