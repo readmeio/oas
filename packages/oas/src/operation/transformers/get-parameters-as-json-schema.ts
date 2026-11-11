@@ -8,7 +8,7 @@ import { cloneObject } from '../../lib/clone-object.js';
 import { exampleValue } from '../../lib/example-value.js';
 import { getParameterContentType } from '../../lib/get-parameter-content-type.js';
 import { isPrimitive } from '../../lib/helpers.js';
-import { resolveMediaType } from '../../lib/media-type.js';
+import { mediaTypeSchema, resolveMediaType } from '../../lib/media-type.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
 import {
   collectRefsInSchema,
@@ -241,8 +241,9 @@ export function getParametersAsJSONSchema(
             if (contentKeys.length) {
               const contentType = getParameterContentType(contentKeys);
               const mediaType = contentType ? resolveMediaType(current.content[contentType], operation.api) : undefined;
-              if (mediaType && 'schema' in mediaType && mediaType.schema && typeof mediaType.schema === 'object') {
-                const currentSchema = schemaObject(cloneObject(mediaType.schema));
+              const mediaSchema = mediaType && mediaTypeSchema(mediaType);
+              if (mediaSchema && typeof mediaSchema === 'object') {
+                const currentSchema = schemaObject(cloneObject(mediaSchema));
 
                 if (current.example !== undefined) {
                   // `example` can be present outside of the `schema` block so if it's there we

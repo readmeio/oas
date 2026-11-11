@@ -17,19 +17,6 @@ import { decodePointer, encodePointer } from '../refs.js';
 
 import { OperationSelection } from './operation-selection.js';
 
-/**
- * An HTTP operation on a Path Item along with a way to remove it from that Path Item.
- */
-interface PathItemOperation {
-  /**
-   * The HTTP method the operation was declared under: a fixed Path Item field like `get` or, for an
-   * OpenAPI 3.2 `additionalOperations` entry, the custom method like `COPY`.
-   */
-  method: string;
-  operation: OperationObject;
-  remove: () => void;
-}
-
 interface OpenAPITransformerOptions {
   /** Whether selected paths, operations, and webhooks should be retained or removed. */
   mode: 'prune' | 'reduce';
@@ -669,31 +656,7 @@ export class OpenAPITransformer {
 
   /** Determine whether a path item contains at least one HTTP operation. */
   private hasOperations(pathItem: PathItemObject | undefined): boolean {
-    return this.getPathItemOperations(pathItem).length > 0;
-  }
-
-  /**
-   * Collect every HTTP operation on a Path Item: those under the fixed HTTP method fields and, for
-   * OpenAPI 3.2 definitions, those within its `additionalOperations` map. Each entry knows how to
-   * remove itself from the Path Item so callers can filter operations without caring where they
-   * were declared.
-   *
-   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
-   */
-  private getPathItemOperations(pathItem: PathItemObject | undefined): PathItemOperation[] {
-    // A Path Item that is a `$ref` can still declare its own operations for any fields the
-    // referenced Path Item does not define, so those are walked too rather than bailing early.
-    if (!pathItem) {
-      return [];
-    }
-
-    return listPathItemOperations(pathItem, this.definition).map(entry => ({
-      method: entry.method,
-      operation: entry.operation,
-      remove: () => {
-        removePathItemOperation(pathItem, entry);
-      },
-    }));
+    return listPathItemOperations(pathItem, this.definition).length > 0;
   }
 
   /**
@@ -759,7 +722,7 @@ export class OpenAPITransformer {
 
       // Only operations are processed here; common path-level properties like `parameters`,
       // `servers`, `summary`, etc. are retained as-is.
-      this.getPathItemOperations(pathItem).forEach(({ method, operation }) => {
+      listPathItemOperations(pathItem, this.definition).forEach(({ method, operation }) => {
         // If this operation isn't part of our resulting API definition then ignore it. We'll
         // remove it later.
         if (!this.shouldRetainOperation(this.pathSelection, path, method, operation)) {
@@ -834,7 +797,7 @@ export class OpenAPITransformer {
 
       // Only operations are processed here; common path-level properties like `parameters`,
       // `servers`, `summary`, etc. are retained as-is.
-      this.getPathItemOperations(webhook).forEach(({ method, operation }) => {
+      listPathItemOperations(webhook, this.definition).forEach(({ method, operation }) => {
         // If this operation isn't part of our resulting API definition then ignore it. We'll
         // remove it later.
         if (!this.shouldRetainOperation(this.webhookSelection, webhookName, method, operation)) {
@@ -905,37 +868,40 @@ export class OpenAPITransformer {
       // Only operations are processed here; common path-level properties like `parameters`,
       // `servers`, `summary`, etc. are retained as-is.
       let removedOperation = false;
-      this.getPathItemOperations(pathItem).forEach(({ method, operation, remove }) => {
-        const retainedByRef = this.isPathOperationRetainedByRef(pathLC, method.toLowerCase());
+      if (pathItem) {
+        listPathItemOperations(pathItem, this.definition).forEach(entry => {
+          const { method, operation } = entry;
+          const retainedByRef = this.isPathOperationRetainedByRef(pathLC, method.toLowerCase());
 
-        if (excludePathItem || !this.shouldRetainOperation(this.pathSelection, path, method, operation)) {
-          if (this.mode === 'prune' && retainedByRef) {
-            throw new Error(`Cannot remove operation \`${method.toUpperCase()} ${path}\` because it is referenced.`);
+          if (excludePathItem || !this.shouldRetainOperation(this.pathSelection, path, method, operation)) {
+            if (this.mode === 'prune' && retainedByRef) {
+              throw new Error(`Cannot remove operation \`${method.toUpperCase()} ${path}\` because it is referenced.`);
+            }
+
+            if (!retainedByRef) {
+              removePathItemOperation(pathItem, entry);
+              removedOperation = true;
+              return;
+            }
           }
 
-          if (!retainedByRef) {
-            remove();
-            removedOperation = true;
-            return;
+          // This operation remains in the transformed definition, so retain any components
+          // referenced by its common Path Item parameters.
+          this.accumulateParameterRefs(pathItem.parameters);
+
+          // Accumulate a list of used tags so we can filter out any ones that we don't need later.
+          if ('tags' in operation) {
+            operation.tags?.forEach((tag: string) => {
+              this.usedTags.add(tag);
+            });
           }
-        }
 
-        // This operation remains in the transformed definition, so retain any components
-        // referenced by its common Path Item parameters.
-        this.accumulateParameterRefs(pathItem?.parameters);
-
-        // Accumulate a list of used tags so we can filter out any ones that we don't need later.
-        if ('tags' in operation) {
-          operation.tags?.forEach((tag: string) => {
-            this.usedTags.add(tag);
-          });
-        }
-
-        // Accumulate any used operation-level security schemas that we need to retain.
-        if ('security' in operation) {
-          this.retainSecurityRequirements(operation.security);
-        }
-      });
+          // Accumulate any used operation-level security schemas that we need to retain.
+          if ('security' in operation) {
+            this.retainSecurityRequirements(operation.security);
+          }
+        });
+      }
 
       // If filtering removed every operation from this path then remove its path-level properties
       // as well. We leave path items that were authored without operations untouched.
@@ -1005,7 +971,8 @@ export class OpenAPITransformer {
       }
 
       let removedOperation = false;
-      this.getPathItemOperations(webhook).forEach(({ method, operation, remove }) => {
+      listPathItemOperations(webhook, this.definition).forEach(entry => {
+        const { method, operation } = entry;
         const retainedByRef = this.isWebhookOperationRetainedByRef(nameLC, method.toLowerCase());
         if (excludeWebhook || !this.shouldRetainOperation(this.webhookSelection, webhookName, method, operation)) {
           if (this.mode === 'prune' && retainedByRef) {
@@ -1015,7 +982,7 @@ export class OpenAPITransformer {
           }
 
           if (!retainedByRef) {
-            remove();
+            removePathItemOperation(webhook, entry);
             removedOperation = true;
             return;
           }

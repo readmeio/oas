@@ -283,6 +283,20 @@ describe('getMediaTypeExamples()', () => {
       expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([]);
     });
 
+    it('should not use `itemSchema` when `schema` is false', () => {
+      const media = {
+        schema: false,
+        itemSchema: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', examples: ['evt_1'] },
+          },
+        },
+      } as MediaTypeObject;
+
+      expect(getMediaTypeExamples('application/jsonl', media, definition)).toStrictEqual([]);
+    });
+
     it('should generate an example from `itemSchema` when there is no `schema`', () => {
       const media: MediaTypeObject = {
         itemSchema: {

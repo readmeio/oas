@@ -3,6 +3,7 @@ import type { ExampleObject as OpenAPI32ExampleObject } from '@scalar/openapi-ty
 
 import { exampleValue } from '../../lib/example-value.js';
 import matchesMimeType from '../../lib/matches-mimetype.js';
+import { mediaTypeSchema } from '../../lib/media-type.js';
 import { collectRefsInSchema, dereferenceRef, dereferenceRefDeep } from '../../lib/refs.js';
 import sampleFromSchema from '../../samples/index.js';
 import { isRef, schemaObject } from '../../types.js';
@@ -136,13 +137,13 @@ export function getMediaTypeExamples(
     }
   }
 
-  // OpenAPI 3.2 sequential media types (eg. JSON Lines or Server-Sent Events) describe each item
-  // in their stream with `itemSchema` instead of `schema`, so when there's no `schema` we generate
-  // an example of a single item.
-  const schema = mediaTypeObject.schema || ('itemSchema' in mediaTypeObject ? mediaTypeObject.itemSchema : undefined);
-  if (schema) {
+  // `schema` describes the whole payload. OpenAPI 3.2 sequential media types describe each item
+  // with `itemSchema` when `schema` is absent. A boolean `schema` of `false` is present, so it
+  // does not fall through to `itemSchema`.
+  const schema = mediaTypeSchema(mediaTypeObject);
+  if (schema !== undefined) {
     // We do not fully support XML so we shouldn't generate XML samples for XML schemas.
-    if (!matchesMimeType.xml(mediaType)) {
+    if (schema !== false && !matchesMimeType.xml(mediaType)) {
       return [
         {
           value: sampleFromSchema(typeof schema === 'object' ? schemaObject(schema) : {}, {

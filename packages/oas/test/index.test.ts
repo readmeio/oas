@@ -3033,30 +3033,20 @@ describe('Oas', () => {
         $ref: '#/components/pathItems/singlePet',
       });
     });
-  });
 
-  describe('.getAdditionalOperations()', () => {
-    it('should return all OpenAPI 3.2 `additionalOperations` that are present', () => {
-      const additionalOperations = openapi32Features.getAdditionalOperations();
+    it('should include OpenAPI 3.2 `additionalOperations` alongside fixed methods', () => {
+      const operations = openapi32Features.getPaths()['/anything/files/{id}'];
 
-      expect(additionalOperations).toStrictEqual({
-        '/anything/files/{id}': {
-          COPY: expect.any(Operation),
-          LOCK: expect.any(Operation),
-        },
-      });
-
-      expect(additionalOperations['/anything/files/{id}'].LOCK.method).toBe('LOCK');
-      expect(additionalOperations['/anything/files/{id}'].LOCK.getOperationId()).toBe('lockFile');
-    });
-
-    it('should not include `additionalOperations` within `getPaths()`', () => {
-      expect(openapi32Features.getPaths()['/anything/files/{id}']).toStrictEqual({
+      expect(operations).toStrictEqual({
         get: expect.any(Operation),
+        COPY: expect.any(Operation),
+        LOCK: expect.any(Operation),
       });
+      expect(operations.LOCK.method).toBe('LOCK');
+      expect(operations.LOCK.getOperationId()).toBe('lockFile');
     });
 
-    it('should ignore methods that already have a fixed field on the path item', () => {
+    it('should ignore `additionalOperations` keys that repeat a fixed method', () => {
       const oas = Oas.init({
         openapi: '3.2.0',
         info: { version: '1.0.0', title: 'Invalid `additionalOperations`' },
@@ -3070,14 +3060,14 @@ describe('Oas', () => {
         },
       } as OASDocument);
 
-      expect(oas.getAdditionalOperations()).toStrictEqual({
+      expect(oas.getPaths()).toStrictEqual({
         '/files': {
           COPY: expect.any(Operation),
         },
       });
     });
 
-    it('should not modify `Object.prototype` when given a `__proto__` path', () => {
+    it('should not modify `Object.prototype` when a path or method is `__proto__`', () => {
       // `__proto__` in an object literal sets the prototype rather than creating a key so, like a
       // user-supplied document would, this has to come in through `JSON.parse()`.
       const oas = Oas.init(
@@ -3087,30 +3077,27 @@ describe('Oas', () => {
           "paths": {
             "__proto__": {
               "additionalOperations": {
-                "COPY": { "operationId": "copy", "responses": { "201": { "description": "Created" } } }
+                "__proto__": { "operationId": "copy", "responses": { "201": { "description": "Created" } } }
               }
             }
           }
         }`),
       );
 
-      const additionalOperations = oas.getAdditionalOperations();
+      const paths = oas.getPaths();
+      const operations = Object.getOwnPropertyDescriptor(paths, '__proto__')?.value;
+      const operation = Object.getOwnPropertyDescriptor(operations, '__proto__')?.value;
 
-      expect(Object.hasOwn(additionalOperations, '__proto__')).toBe(true);
-      expect(Object.getPrototypeOf(additionalOperations)).toBe(Object.prototype);
-      expect(Object.getOwnPropertyDescriptor(additionalOperations, '__proto__')?.value).toStrictEqual({
-        COPY: expect.any(Operation),
-      });
-      expect({}).not.toHaveProperty('COPY');
+      expect(Object.hasOwn(paths, '__proto__')).toBe(true);
+      expect(Object.getPrototypeOf(paths)).toBe(Object.prototype);
+      expect(Object.hasOwn(operations, '__proto__')).toBe(true);
+      expect(Object.getPrototypeOf(operations)).toBe(Object.prototype);
+      expect(operation.getOperationId()).toBe('copy');
+      expect({}).not.toHaveProperty('copy');
       expect(oas.getTags(true)).toStrictEqual(['__proto__']);
     });
 
-    it('should return an empty object if no `additionalOperations` are present', () => {
-      expect(petstore.getAdditionalOperations()).toStrictEqual({});
-      expect(Oas.init(structuredClone(webhooksSpec)).getAdditionalOperations()).toStrictEqual({});
-    });
-
-    it('should return an empty object for a non-OpenAPI 3.2 definition', () => {
+    it('should ignore `additionalOperations` on definitions that are not OpenAPI 3.2', () => {
       const oas = Oas.init({
         openapi: '3.1.0',
         info: { version: '1.0.0', title: '`additionalOperations` in OpenAPI 3.1' },
@@ -3123,25 +3110,12 @@ describe('Oas', () => {
         },
       } as OASDocument);
 
-      expect(oas.getAdditionalOperations()).toStrictEqual({});
-    });
-  });
-
-  describe('.getAdditionalWebhooks()', () => {
-    it('should return all OpenAPI 3.2 webhook `additionalOperations` that are present', () => {
-      const additionalWebhooks = additionalOps.getAdditionalWebhooks();
-
-      expect(additionalWebhooks).toStrictEqual({
-        fileCopied: {
-          NOTIFY: expect.any(Webhook),
-        },
+      expect(oas.getPaths()).toStrictEqual({
+        '/files': {},
       });
-
-      expect(additionalWebhooks.fileCopied.NOTIFY.method).toBe('NOTIFY');
-      expect(additionalWebhooks.fileCopied.NOTIFY.getOperationId()).toBe('fileCopiedNotification');
     });
 
-    it('should keep webhook names that start with `x-` and skip path extensions', () => {
+    it('should skip `x-` path extensions and keep webhook names that start with `x-`', () => {
       const oas = Oas.init({
         openapi: '3.2.0',
         info: { version: '1.0.0', title: 'x- names' },
@@ -3161,41 +3135,13 @@ describe('Oas', () => {
         },
       });
 
-      expect(oas.getAdditionalOperations()).toStrictEqual({});
-      expect(oas.getAdditionalWebhooks()).toStrictEqual({
+      expect(oas.getPaths()).toStrictEqual({});
+      expect(oas.getWebhooks()).toStrictEqual({
         'x-fileCopied': {
           NOTIFY: expect.any(Webhook),
         },
       });
-      expect(oas.getAdditionalWebhooks()['x-fileCopied'].NOTIFY.getOperationId()).toBe('fileCopiedNotification');
-    });
-
-    it('should not include `additionalOperations` within `getWebhooks()`', () => {
-      expect(additionalOps.getWebhooks()).toStrictEqual({
-        fileCopied: {},
-      });
-    });
-
-    it('should return an empty object if no webhook `additionalOperations` are present', () => {
-      expect(petstore.getAdditionalWebhooks()).toStrictEqual({});
-      expect(webhooks.getAdditionalWebhooks()).toStrictEqual({});
-      expect(openapi32Features.getAdditionalWebhooks()).toStrictEqual({});
-    });
-
-    it('should return an empty object for a non-OpenAPI 3.2 definition', () => {
-      const oas = Oas.init({
-        openapi: '3.1.0',
-        info: { version: '1.0.0', title: '`additionalOperations` in OpenAPI 3.1' },
-        webhooks: {
-          fileCopied: {
-            additionalOperations: {
-              NOTIFY: { operationId: 'fileCopiedNotification', responses: { 200: { description: 'OK' } } },
-            },
-          },
-        },
-      } as OASDocument);
-
-      expect(oas.getAdditionalWebhooks()).toStrictEqual({});
+      expect(oas.getWebhooks()['x-fileCopied'].NOTIFY.getOperationId()).toBe('fileCopiedNotification');
     });
   });
 
@@ -3217,6 +3163,36 @@ describe('Oas', () => {
         fileCopied: {
           post: expect.any(Webhook),
         },
+      });
+    });
+
+    it('should include OpenAPI 3.2 webhook `additionalOperations`', () => {
+      const hooks = additionalOps.getWebhooks();
+
+      expect(hooks).toStrictEqual({
+        fileCopied: {
+          NOTIFY: expect.any(Webhook),
+        },
+      });
+      expect(hooks.fileCopied.NOTIFY.method).toBe('NOTIFY');
+      expect(hooks.fileCopied.NOTIFY.getOperationId()).toBe('fileCopiedNotification');
+    });
+
+    it('should ignore webhook `additionalOperations` on definitions that are not OpenAPI 3.2', () => {
+      const oas = Oas.init({
+        openapi: '3.1.0',
+        info: { version: '1.0.0', title: '`additionalOperations` in OpenAPI 3.1' },
+        webhooks: {
+          fileCopied: {
+            additionalOperations: {
+              NOTIFY: { operationId: 'fileCopiedNotification', responses: { 200: { description: 'OK' } } },
+            },
+          },
+        },
+      } as OASDocument);
+
+      expect(oas.getWebhooks()).toStrictEqual({
+        fileCopied: {},
       });
     });
 

@@ -2,7 +2,6 @@ import type { Extensions } from './extensions.js';
 import type { OperationMatch, PathItemMatch, SplitUrlResult } from './lib/urls.js';
 import type {
   AuthForHAR,
-  HttpMethods,
   OASDocument,
   OperationMethod,
   OperationObject,
@@ -604,7 +603,7 @@ export default class Oas {
    * @param id The `operationId` to look up.
    */
   getOperationById(id: string): Operation | Webhook | undefined {
-    for (const collection of this.operationCollections()) {
+    for (const collection of [this.getPaths(), this.getWebhooks()]) {
       for (const operations of Object.values(collection)) {
         const found = Object.values(operations).find(operation => operation.getOperationId() === id);
         if (found) {
@@ -614,15 +613,6 @@ export default class Oas {
     }
 
     return undefined;
-  }
-
-  /**
-   * Every operation this definition exposes, in lookup order: fixed path methods, OpenAPI 3.2
-   * `additionalOperations`, webhook methods, then webhook `additionalOperations`.
-   *
-   */
-  private operationCollections(): Record<string, Record<string, Operation>>[] {
-    return [this.getPaths(), this.getAdditionalOperations(), this.getWebhooks(), this.getAdditionalWebhooks()];
   }
 
   /**
@@ -681,179 +671,90 @@ export default class Oas {
   }
 
   /**
-   * Returns the `paths` object that exists in this API definition but with every `method` mapped
-   * to an instance of the `Operation` class.
+   * Returns the `paths` object with every operation mapped to an instance of the `Operation`
+   * class, keyed by path and then by the method it was declared under.
+   *
+   * OpenAPI 3.2 definitions with paths that contain `additionalOperations` entries will be
+   * automatically included in this returned dataset.
    *
    * @see {@link https://spec.openapis.org/oas/v3.0.0.html#openapi-object}
    * @see {@link https://spec.openapis.org/oas/v3.1.0.html#openapi-object}
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
-   */
-  getPaths(): Record<string, Record<HttpMethods, Operation | Webhook>> {
-    const paths: Record<string, Record<HttpMethods, Operation | Webhook>> = {};
-    if (!this.api.paths) {
-      return paths;
-    }
-
-    Object.keys(this.api.paths).forEach(path => {
-      // If this is a specification extension then we should ignore it.
-      if (path.startsWith('x-')) {
-        return;
-      }
-
-      paths[path] = {} as Record<HttpMethods, Operation | Webhook>;
-
-      let pathItem = this.api.paths![path];
-      if (!pathItem) {
-        return;
-      } else if (isRef(pathItem)) {
-        // Resolve Path Item `$ref`s for this accessor only. Do not write the target back into
-        // `this.api.paths` — callers (and `getDefinition()`) still need the authored `$ref`.
-        pathItem = dereferenceRef(pathItem, this.api);
-        if (!pathItem || isRef(pathItem)) {
-          return;
-        }
-      }
-
-      listPathItemOperations(pathItem, this.api, 'fixed').forEach(entry => {
-        const resolved = dereferenceRef(entry.operation, this.api);
-        if (!resolved) {
-          return;
-        }
-
-        paths[path][entry.method as HttpMethods] = new Operation(this, path, entry.method, resolved);
-      });
-    });
-
-    return paths;
-  }
-
-  /**
-   * Returns every operation that is defined within an OpenAPI 3.2 `additionalOperations` map,
-   * keyed by path and then by the HTTP method that it was defined under (eg. `COPY`), with each
-   * mapped to an instance of the `Operation` class.
-   *
-   * Operations defined under the fixed HTTP method fields of a Path Item are **not** included here
-   * and should instead be retrieved with `getPaths()`. For API definitions that are not OpenAPI
-   * 3.2 an empty object will be returned.
-   *
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    */
-  getAdditionalOperations(): Record<string, Record<string, Operation>> {
-    if (!this.api.paths) {
+  getPaths(): Record<string, Record<string, Operation>> {
+    const { paths } = this.api;
+    if (!paths) {
       return {};
     }
 
-    return this.collectAdditionalOperations(
-      this.api.paths,
+    return this.collectOperations(
+      Object.keys(paths).filter(path => !path.startsWith('x-')),
+      path => paths[path],
       (path, method, operation) => new Operation(this, path, method, operation),
-      { skipExtensions: true },
     );
   }
 
   /**
-   * Retrieve every webhook operation that is defined within an OpenAPI 3.2 `additionalOperations`
-   * map, keyed by webhook name and then by the HTTP method that it was defined under (eg.
-   * `NOTIFY`), with each mapped to an instance of the `Webhook` class.
+   * Returns the `webhooks` object with every operation mapped to an instance of the `Webhook`
+   * class, keyed by webhook name and then by the method it was declared under.
    *
-   * Webhook operations defined under the fixed HTTP method fields of a Path Item are **not**
-   * included here and should instead be retrieved with `getWebhooks()`. For API definitions that
-   * are not OpenAPI 3.2 an empty object will be returned.
+   * OpenAPI 3.2 definitions with paths that contain `additionalOperations` entries will be
+   * automatically included in this returned dataset.
    *
+   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#openapi-object}
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    */
-  getAdditionalWebhooks(): Record<string, Record<string, Webhook>> {
+  getWebhooks(): Record<string, Record<string, Webhook>> {
     if (!hasWebhooks(this.api)) {
       return {};
     }
 
-    return this.collectAdditionalOperations(this.api.webhooks, (id, method, operation) => {
-      return new Webhook(this, id, method, operation);
-    });
-  }
-
-  /**
-   * Walk a `paths` or `webhooks` map and collect every operation that is declared within an
-   * OpenAPI 3.2 Path Item's `additionalOperations` map.
-   *
-   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
-   */
-  private collectAdditionalOperations<T extends Operation>(
-    container: Record<string, PathItemObject | undefined>,
-    create: (key: string, method: string, operation: OperationObject) => T,
-    { skipExtensions = false }: { skipExtensions?: boolean } = {},
-  ): Record<string, Record<string, T>> {
-    // Keys and methods come straight out of a user-supplied document so they're collected into
-    // `Map`s first and only converted into plain objects at the end. Assigning a key like
-    // `__proto__` directly onto a plain object would modify its prototype instead.
-    const additionalOperations = new Map<string, Map<string, T>>();
-
-    Object.keys(container).forEach(key => {
-      // Path maps use `x-` keys for specification extensions. Webhook names are free-form and may
-      // start with `x-`, so that skip only applies when walking `paths`.
-      if (skipExtensions && key.startsWith('x-')) {
-        return;
-      }
-
-      const pathItem = dereferenceRef(container[key], this.api);
-      if (!pathItem || isRef(pathItem)) {
-        return;
-      }
-
-      listPathItemOperations(pathItem, this.api, 'additional').forEach(entry => {
-        const operation = dereferenceRef(entry.operation, this.api);
-        if (!operation) {
-          return;
-        }
-
-        let operations = additionalOperations.get(key);
-        if (!operations) {
-          operations = new Map();
-          additionalOperations.set(key, operations);
-        }
-
-        operations.set(entry.method, create(key, entry.method, operation));
-      });
-    });
-
-    return Object.fromEntries(
-      Array.from(additionalOperations, ([key, operations]) => [key, Object.fromEntries(operations)]),
+    const webhooks = this.api.webhooks;
+    return this.collectOperations(
+      Object.keys(webhooks),
+      id => webhooks[id],
+      (id, method, operation) => new Webhook(this, id, method, operation),
     );
   }
 
   /**
-   * Returns the `webhooks` object that exists in this API definition but with every `method`
-   * mapped to an instance of the `Webhook` class.
+   * Walk path or webhook names and collect every operation on each Path Item.
    *
-   * @see {@link https://spec.openapis.org/oas/v3.0.0.html#openapi-object}
-   * @see {@link https://spec.openapis.org/oas/v3.1.0.html#openapi-object}
-   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
+   * Names and methods come straight out of a user-supplied document, so they're collected into
+   * `Map`s and only converted into plain objects at the end. Assigning a key like `__proto__`
+   * directly onto a plain object would modify its prototype instead.
+   *
+   * Path Item `$ref`s are resolved for this accessor only. The target is not written back into
+   * the definition — callers (and `getDefinition()`) still need the authored `$ref`.
+   *
    */
-  getWebhooks(): Record<string, Record<HttpMethods, Webhook>> {
-    const webhooks: Record<string, Record<HttpMethods, Webhook>> = {};
-    const api = this.api;
-    if (!hasWebhooks(api)) {
-      return webhooks;
-    }
+  private collectOperations<T extends Operation>(
+    keys: string[],
+    pathItemAt: (key: string) => PathItemObject | undefined,
+    create: (key: string, method: string, operation: OperationObject) => T,
+  ): Record<string, Record<string, T>> {
+    const collected = new Map<string, Map<string, T>>();
 
-    const webhookMap = api.webhooks;
-
-    Object.keys(webhookMap).forEach(id => {
-      webhooks[id] = {} as Record<HttpMethods, Webhook>;
-
-      const webhookPath = dereferenceRef(webhookMap[id], api);
-      if (webhookPath && !isRef(webhookPath)) {
-        listPathItemOperations(webhookPath, this.api, 'fixed').forEach(entry => {
+    keys.forEach(key => {
+      const operations = new Map<string, T>();
+      const pathItem = dereferenceRef(pathItemAt(key), this.api);
+      if (pathItem && !isRef(pathItem)) {
+        listPathItemOperations(pathItem, this.api).forEach(entry => {
           const operation = dereferenceRef(entry.operation, this.api);
           if (!operation) {
             return;
           }
 
-          webhooks[id][entry.method as HttpMethods] = new Webhook(this, id, entry.method, operation);
+          operations.set(entry.method, create(key, entry.method, operation));
         });
       }
+
+      collected.set(key, operations);
     });
 
-    return webhooks;
+    return Object.fromEntries(Array.from(collected, ([key, operations]) => [key, Object.fromEntries(operations)]));
   }
 
   /**
@@ -875,7 +776,7 @@ export default class Oas {
 
     const disableTagSorting = getExtension('disable-tag-sorting', this.api);
 
-    this.operationCollections().forEach(collection => {
+    [this.getPaths(), this.getWebhooks()].forEach(collection => {
       Object.entries(collection).forEach(([path, operations]) => {
         Object.values(operations).forEach(operation => {
           const tags = operation.getTags();

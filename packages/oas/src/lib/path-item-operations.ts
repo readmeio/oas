@@ -26,67 +26,66 @@ export function resolveKey(keys: string[], target: string): string | undefined {
 }
 
 /**
- * Where an operation sits on a Path Item. `fixed` is a method field (`get`, `query`). `additional`
- * is an OpenAPI 3.2 `additionalOperations` entry (`COPY`).
+ * An operation declared on a fixed Path Item method field (`get`, `query`).
  *
  */
-export type PathItemOperationLocation = 'additional' | 'fixed';
+export interface FixedPathItemOperation {
+  location: 'fixed';
+  method: HttpMethods;
+  operation: OperationObject;
+  /** Pointer segments relative to the Path Item, e.g. `['get']`. */
+  segments: readonly [HttpMethods];
+}
 
 /**
- * An operation declared on a Path Item.
+ * An operation declared in an OpenAPI 3.2 `additionalOperations` map (`COPY`).
  *
- * `segments` are the pointer segments relative to the Path Item: `['get']` for a fixed method
- * field, or `['additionalOperations', 'COPY']` for an OpenAPI 3.2 custom method. The method key
- * keeps the casing from the document. `location` is how callers tell those two apart.
+ */
+export interface AdditionalPathItemOperation {
+  location: 'additional';
+  method: string;
+  operation: OperationObject;
+  /** Pointer segments relative to the Path Item, e.g. `['additionalOperations', 'COPY']`. */
+  segments: readonly ['additionalOperations', string];
+}
+
+/**
+ * An operation declared on a Path Item. `location` distinguishes a fixed method field from an
+ * OpenAPI 3.2 `additionalOperations` entry, and `method` keeps the casing stored in the document.
  *
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
  */
-export interface PathItemOperationEntry {
-  location: PathItemOperationLocation;
-  method: string;
-  operation: OperationObject;
-  segments: readonly ['additionalOperations', string] | readonly [string];
-}
+export type PathItemOperationEntry = AdditionalPathItemOperation | FixedPathItemOperation;
 
 function isOperationEntry(value: unknown): value is OperationObject {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-function additionalOperationsOf(pathItem: object): Record<string, unknown> | undefined {
-  if (!('additionalOperations' in pathItem)) {
-    return undefined;
-  }
-
-  const additional = (pathItem as { additionalOperations?: unknown }).additionalOperations;
+function additionalOperationsOf(pathItem: PathItemObject): Record<string, OperationObject> | undefined {
+  const additional = pathItem.additionalOperations;
   if (!additional || typeof additional !== 'object' || Array.isArray(additional)) {
     return undefined;
   }
 
-  return additional as Record<string, unknown>;
+  return additional;
 }
 
-function pathItemOperation(
-  location: PathItemOperationLocation,
-  method: string,
-  operation: OperationObject,
-): PathItemOperationEntry {
+function fixedOperation(method: HttpMethods, operation: OperationObject): FixedPathItemOperation {
   return {
-    location,
+    location: 'fixed',
     method,
     operation,
-    segments: location === 'additional' ? (['additionalOperations', method] as const) : ([method] as const),
+    segments: [method],
   };
 }
 
-function filterByLocation(
-  operations: PathItemOperationEntry[],
-  location: PathItemOperationLocation | undefined,
-): PathItemOperationEntry[] {
-  if (!location) {
-    return operations;
-  }
-
-  return operations.filter(entry => entry.location === location);
+function additionalOperation(method: string, operation: OperationObject): AdditionalPathItemOperation {
+  return {
+    location: 'additional',
+    method,
+    operation,
+    segments: ['additionalOperations', method],
+  };
 }
 
 /**
@@ -102,7 +101,6 @@ function filterByLocation(
 export function listPathItemOperations(
   pathItem: PathItemObject | null | undefined,
   definition: OASDocument,
-  location?: PathItemOperationLocation,
 ): PathItemOperationEntry[] {
   if (!pathItem || typeof pathItem !== 'object') {
     return [];
@@ -120,16 +118,16 @@ export function listPathItemOperations(
       return;
     }
 
-    operations.push(pathItemOperation('fixed', method, operation));
+    operations.push(fixedOperation(method, operation));
   });
 
   if (!isOpenAPI32(definition)) {
-    return filterByLocation(operations, location);
+    return operations;
   }
 
   const additionalOperations = additionalOperationsOf(pathItem);
   if (!additionalOperations) {
-    return filterByLocation(operations, location);
+    return operations;
   }
 
   Object.keys(additionalOperations).forEach(method => {
@@ -142,10 +140,10 @@ export function listPathItemOperations(
       return;
     }
 
-    operations.push(pathItemOperation('additional', method, operation));
+    operations.push(additionalOperation(method, operation));
   });
 
-  return filterByLocation(operations, location);
+  return operations;
 }
 
 /**
@@ -183,7 +181,7 @@ export function clonePathItem(pathItem: PathItemObject): PathItemObject {
   const clone: PathItemObject = { ...pathItem };
   const additionalOperations = additionalOperationsOf(pathItem);
   if (additionalOperations) {
-    (clone as { additionalOperations?: Record<string, unknown> }).additionalOperations = { ...additionalOperations };
+    clone.additionalOperations = { ...additionalOperations };
   }
 
   return clone;
@@ -203,13 +201,13 @@ export function removePathItemOperation(pathItem: PathItemObject, entry: PathIte
 
     delete additionalOperations[entry.method];
     if (!Object.keys(additionalOperations).length) {
-      delete (pathItem as { additionalOperations?: unknown }).additionalOperations;
+      delete pathItem.additionalOperations;
     }
 
     return;
   }
 
-  delete pathItem[entry.method as HttpMethods];
+  delete pathItem[entry.method];
 }
 
 /**
@@ -225,9 +223,9 @@ export function assignPathItemOperation(
   if (entry.location === 'additional') {
     const additionalOperations = additionalOperationsOf(pathItem) ?? {};
     additionalOperations[entry.method] = operation;
-    (pathItem as { additionalOperations?: Record<string, unknown> }).additionalOperations = additionalOperations;
+    pathItem.additionalOperations = additionalOperations;
     return;
   }
 
-  pathItem[entry.method as HttpMethods] = operation;
+  pathItem[entry.method] = operation;
 }

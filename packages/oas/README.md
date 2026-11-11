@@ -76,14 +76,12 @@ Because this library has full TypeScript types and docblocks this README is not 
 <!-- prettier-ignore-start -->
 | Method | Description |
 | :--- | :--- |
-| `.getAdditionalOperations()` | Retrieve every operation that is defined within an OpenAPI 3.2 [`additionalOperations`](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) map, keyed by path and then the custom HTTP method they were defined under. This returns instances of the `Operation` class. |
-| `.getAdditionalWebhooks()` | Retrieve every webhook operation that is defined within an OpenAPI 3.2 [`additionalOperations`](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) map, keyed by webhook name and then the custom HTTP method they were defined under. This returns instances of the `Webhook` class. |
 | `.getDefinition()` | Retrieve the OpenAPI definition that was fed into the `Oas` constructor. |
 | `.getTags()` | Retrieve an array of all tags that exist within the API definition and are set on operations. |
-| `.getPaths()` | Retrieve every operation that exists within the API definition. This returns an array of instances of the `Operation` class. |
+| `.getPaths()` | Retrieve every operation on `paths`, keyed by path and method. OpenAPI 3.2 [`additionalOperations`](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) entries (eg. `COPY`) are included next to the fixed method fields. Each value is an `Operation`. |
 | `.getSecurityScheme()` | Retrieve a security scheme from the API definition. |
 | `.getVersion()` | Retrieve the OpenAPI version that this API definition is targeted for. |
-| `.getWebhooks()` | Retrieve every webhook operation that exists within the API definition. This returns an array of instances of the `Webhook` class. |
+| `.getWebhooks()` | Retrieve every webhook operation, keyed by webhook name and method. OpenAPI 3.2 [`additionalOperations`](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) entries are included. Each value is a `Webhook`. |
 | `.hasSecurityScheme()` | Determine if a security scheme exists within the API definition. |
 | `#init()` | An alternative for `new Oas()` that you can use if the typing on the `Oas` constructor gives you trouble. Typing OpenAPI definitions is hard! |
 <!-- prettier-ignore-end -->

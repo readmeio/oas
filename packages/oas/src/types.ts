@@ -208,6 +208,14 @@ export type PathsObject = OAS30.PathsObject | OAS31.PathsObject | OAS32.PathsObj
  */
 export type PathItemObject = (OAS30.PathItemObject | OAS31.PathItemObject | OAS32.PathItemObject) & {
   /**
+   * OpenAPI 3.2 custom methods (`COPY`, `LOCK`, …). 3.0 and 3.1 path items do not include it.
+   * Fixed method names are not valid keys here.
+   *
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+   */
+  additionalOperations?: Record<string, OperationObject>;
+
+  /**
    * OpenAPI 3.2 operation for the HTTP QUERY method. 3.0 and 3.1 path items do not include it.
    *
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}

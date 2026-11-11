@@ -1,10 +1,10 @@
-import type { OASDocument, PathItemObject } from '../../types.js';
+import type { OASDocument } from '../../types.js';
 import type { OperationScope } from '../scope.js';
 import type { JSONPathResult } from '../util.js';
 
 import { listPathItemOperations } from '../../lib/path-item-operations.js';
-import { dereferenceRef, toPointer } from '../../lib/refs.js';
-import { isRef } from '../../types.js';
+import { toPointer } from '../../lib/refs.js';
+import { isOpenAPI32 } from '../../types.js';
 import { dereferenceOas } from '../dereference.js';
 import { queryCached } from '../query-cache.js';
 import { isAncestorOfScope, isPointerInScope } from '../scope.js';
@@ -227,23 +227,29 @@ export function serverVariables(definition: OASDocument): string[] {
 /**
  * Determine how many operations are defined in a given API definition.
  *
+ * OpenAPI 3.0 and 3.1 keep the historical count of every key on each Path Item (`get`, `post`,
+ * `parameters`, `summary`, `servers`, `$ref`). Definitions that already stored this number keep
+ * the same result.
+ *
+ * OpenAPI 3.2 counts each HTTP operation, including every method inside `additionalOperations`.
+ *
  * @see {@link https://spec.openapis.org/oas/v3.0.0.html#operation-object}
  * @see {@link https://spec.openapis.org/oas/v3.1.0.html#operation-object}
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-object}
  */
 export function totalOperations(definition: OASDocument): number {
-  return queryCached(['$..paths[*]'], definition).reduce((count, res) => {
+  const results = queryCached(['$..paths[*]'], definition);
+  if (!isOpenAPI32(definition)) {
+    return results.flatMap(res => Object.keys(res.value)).length;
+  }
+
+  return results.reduce((count, res) => {
     const value = res.value;
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
       return count;
     }
 
-    const pathItem = isRef(value) ? dereferenceRef(value, definition) : value;
-    if (!pathItem || typeof pathItem !== 'object' || Array.isArray(pathItem) || isRef(pathItem)) {
-      return count;
-    }
-
-    return count + listPathItemOperations(pathItem as PathItemObject, definition).length;
+    return count + listPathItemOperations(value, definition).length;
   }, 0);
 }
 

@@ -362,6 +362,7 @@ describe('analyzer queries (OpenAPI)', () => {
         info: { title: 'Additional operations', version: '1.0.0' },
         paths: {
           '/files/{id}': {
+            summary: 'Files',
             parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
             get: { responses: { '200': { description: 'OK' } } },
             additionalOperations: {
@@ -372,7 +373,33 @@ describe('analyzer queries (OpenAPI)', () => {
         },
       } as OASDocument;
 
+      // `summary` and `parameters` are Path Item metadata. `COPY` and `LOCK` each count.
       expect(analyzeTotalOperations(definition)).toBe(3);
+    });
+
+    it.each(['3.0.3', '3.1.0'])('should keep the historical path-item key count for OpenAPI %s', version => {
+      const definition = {
+        openapi: version,
+        info: { title: 'historical count', version: '1.0.0' },
+        paths: {
+          '/shared': {
+            summary: 'Shared',
+            parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+            post: { responses: { '201': { description: 'Created' } } },
+            get: { responses: { '200': { description: 'OK' } } },
+          },
+          '/pets': {
+            $ref: '#/paths/~1shared',
+            delete: { responses: { '204': { description: 'Deleted' } } },
+          },
+          '/alias': {
+            $ref: '#/paths/~1shared',
+          },
+        },
+      } as OASDocument;
+
+      // `summary`, `parameters`, `post`, `get`, `$ref`, `delete`, `$ref`.
+      expect(analyzeTotalOperations(definition)).toBe(7);
     });
   });
 

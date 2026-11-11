@@ -6,7 +6,7 @@ import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discrimina
 import { cloneObject } from '../../lib/clone-object.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
-import { resolveMediaType } from '../../lib/media-type.js';
+import { mediaTypeSchema, resolveMediaType } from '../../lib/media-type.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
 import {
   collectRefsInSchema,
@@ -171,7 +171,10 @@ export function getResponseAsJSONSchema(
       return null;
     }
 
-    const schemaFor = (contentType: string) => schemaInput(resolveMediaType(content[contentType], api)?.schema);
+    const schemaFor = (contentType: string) => {
+      const mediaType = resolveMediaType(content[contentType], api);
+      return schemaInput(mediaType && mediaTypeSchema(mediaType));
+    };
 
     // If a specific content-type is requested, use it if it exists
     if (preferredContentType) {
