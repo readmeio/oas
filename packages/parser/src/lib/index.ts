@@ -13,8 +13,8 @@ import { isSwagger } from './assertions.js';
 export const pathParameterTemplateRegExp: RegExp = /\{([^/}]+)}/g;
 
 /**
- * List of HTTP verbs used for OperationItem as per the OpenAPI and Swagger specifications. OpenAPI
- * 3.2 added `query` for the HTTP QUERY method.
+ * List of HTTP verbs used for OperationItem as per the OpenAPI specifications. OpenAPI 3.2 added
+ * `query` for the HTTP QUERY method.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#path-item-object}
  * @see {@link https://spec.openapis.org/oas/v3.0.0.html#path-item-object}
@@ -32,6 +32,12 @@ export const supportedHTTPMethods = [
   'trace',
   'query',
 ] as const;
+
+/**
+ * List of HTTP verbs used for OperationItem as per Swagger specification.
+ *
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#path-item-object}
+ */
 export const swaggerHTTPMethods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'] as const;
 
 /**

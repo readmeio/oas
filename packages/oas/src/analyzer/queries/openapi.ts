@@ -40,28 +40,29 @@ export function additionalProperties(definition: OASDocument, scope?: OperationS
 /**
  * Determine if a given API definition utilizes `callbacks`.
  *
- * Callbacks hang off operations. Fixed HTTP methods are direct fields of a Path Item, while
- * OpenAPI 3.2 custom methods live one level deeper inside `additionalOperations`. The same shape
- * appears under both `paths` and `webhooks`.
+ * Callbacks hang off operations. Fixed HTTP methods are direct fields of a Path Item. OpenAPI 3.2
+ * custom methods live inside `additionalOperations`, so those queries run only for 3.2 definitions.
+ * The same shape appears under both `paths` and `webhooks`.
  *
  * @see {@link https://spec.openapis.org/oas/v3.0.0.html#callback-object}
  * @see {@link https://spec.openapis.org/oas/v3.1.0.html#callback-object}
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#callback-object}
  */
 export function callbacks(definition: OASDocument, scope?: OperationScope): string[] {
-  return filterByScope(
-    queryCached(
-      [
-        '$.components.callbacks',
-        '$.paths.*[?(@.callbacks)].callbacks',
-        '$.paths.*.additionalOperations[?(@.callbacks)].callbacks',
-        '$.webhooks.*[?(@.callbacks)].callbacks',
-        '$.webhooks.*.additionalOperations[?(@.callbacks)].callbacks',
-      ],
-      definition,
-    ),
-    scope,
-  ).map(res => refizePointer(res.pointer));
+  const queries = [
+    '$.components.callbacks',
+    '$.paths.*[?(@.callbacks)].callbacks',
+    '$.webhooks.*[?(@.callbacks)].callbacks',
+  ];
+
+  if (isOpenAPI32(definition)) {
+    queries.push(
+      '$.paths.*.additionalOperations[?(@.callbacks)].callbacks',
+      '$.webhooks.*.additionalOperations[?(@.callbacks)].callbacks',
+    );
+  }
+
+  return filterByScope(queryCached(queries, definition), scope).map(res => refizePointer(res.pointer));
 }
 
 /**

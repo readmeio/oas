@@ -19,6 +19,7 @@ describe('Better errors', () => {
         errors: [{ message: expect.stringContaining('invalid-x-extension is not expected to be here!') }],
       });
     });
+
     it('OpenAPI 3.2', async () => {
       await expect(relativePath('specs/better-errors/3.2/invalid-x-extension-root.yaml')).not.toValidate({
         errors: [{ message: expect.stringContaining('invalid-x-extension is not expected to be here!') }],
@@ -38,6 +39,7 @@ describe('Better errors', () => {
         errors: [{ message: expect.stringContaining('invalid-x-extension is not expected to be here!') }],
       });
     });
+
     it('OpenAPI 3.2', async () => {
       await expect(relativePath('specs/better-errors/3.2/invalid-x-extension-path.yaml')).not.toValidate({
         errors: [{ message: expect.stringContaining('invalid-x-extension is not expected to be here!') }],
@@ -70,6 +72,7 @@ describe('Better errors', () => {
         errors: [{ message: expect.stringContaining('must match pattern ^[a-zA-Z0-9._-]+$') }],
       });
     });
+
     it('OpenAPI 3.2', async () => {
       await expect(relativePath('specs/better-errors/3.2/invalid-component-name.yaml')).not.toValidate({
         errors: [{ message: expect.stringContaining('must match pattern ^[a-zA-Z0-9._-]+$') }],

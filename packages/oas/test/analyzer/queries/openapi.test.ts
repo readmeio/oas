@@ -124,6 +124,41 @@ describe('analyzer queries (OpenAPI)', () => {
       ]);
     });
 
+    it.each(['3.0.3', '3.1.0'])('should ignore `additionalOperations` callbacks on OpenAPI %s', version => {
+      const definition = {
+        openapi: version,
+        info: { title: 'Callbacks', version: '1.0.0' },
+        paths: {
+          '/files': {
+            post: {
+              callbacks: {
+                onPosted: {
+                  '{$request.body#/callbackUrl}': {
+                    post: { responses: { '200': { description: 'OK' } } },
+                  },
+                },
+              },
+              responses: { '200': { description: 'OK' } },
+            },
+            additionalOperations: {
+              COPY: {
+                callbacks: {
+                  onCopied: {
+                    '{$request.body#/callbackUrl}': {
+                      post: { responses: { '200': { description: 'OK' } } },
+                    },
+                  },
+                },
+                responses: { '202': { description: 'Accepted' } },
+              },
+            },
+          },
+        },
+      } as OASDocument;
+
+      expect(analyzeCallbacks(definition)).toStrictEqual(['#/paths/~1files/post/callbacks']);
+    });
+
     it('should not flag schema properties named `callbacks` as a callback', () => {
       expect(
         readme.paths['/branches/{branch}/reference'].post.requestBody.content['application/json'].schema.properties.api
