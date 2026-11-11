@@ -4,6 +4,7 @@ import type { ParserOptions as $RefParserOptions, ResolverOptions } from '@apide
 import { getJsonSchemaRefParserDefaultOptions } from '@apidevtools/json-schema-ref-parser';
 
 import { isOpenAPI } from './lib/assertions.js';
+import { createRootlessFileResolver, createSandboxedFileResolver, directoryOfSource } from './lib/file-root.js';
 import { fixOasRelativeServers } from './repair.js';
 
 type FileResolverOption = boolean | Partial<ResolverOptions> | undefined;
@@ -35,28 +36,41 @@ export function normalizeArguments<S extends APIDocument = APIDocument>(
 }
 
 /**
- * Convert our `resolve.file` option into something `@apidevtools/json-schema-ref-parser`
- * understands.
+ * Convert our `resolve.file` option into a resolver `@apidevtools/json-schema-ref-parser` can run.
  *
+ * `true` installs a resolver jailed to `fileRoot`, or to the source file's directory when the
+ * caller passed a filesystem path and no root. An inline schema with no root gets a resolver that
+ * refuses every filesystem read. A custom resolver object is left untouched.
  */
 function convertFileResolverOption(
   options: ParserOptions | undefined,
-  defaultFileResolver: FileResolverOption,
+  opts: {
+    allowFileResolution?: boolean;
+    sourcePath?: string;
+  },
 ): FileResolverOption {
-  if (!options?.resolve || !('file' in options.resolve)) {
+  const fileValue = options?.resolve && 'file' in options.resolve ? (options.resolve.file as unknown) : undefined;
+
+  if (isCustomFileResolver(fileValue)) {
+    return fileValue;
+  }
+
+  const explicitlySet = Boolean(options?.resolve && 'file' in options.resolve);
+  const enabled = fileValue === true || (Boolean(opts.allowFileResolution) && !explicitlySet);
+  if (!enabled) {
     return false;
   }
 
-  if (options.resolve.file === true) {
-    return defaultFileResolver;
+  const root = options?.resolve?.fileRoot || (opts.sourcePath ? directoryOfSource(opts.sourcePath) : undefined);
+  if (!root) {
+    return createRootlessFileResolver();
   }
 
-  if (options.resolve.file === false) {
-    return false;
-  }
+  return createSandboxedFileResolver(root);
+}
 
-  // Caller supplied a custom resolver object.
-  return options.resolve.file as FileResolverOption;
+function isCustomFileResolver(fileValue: unknown): fileValue is Partial<ResolverOptions> {
+  return typeof fileValue === 'object' && fileValue !== null;
 }
 
 /**
@@ -68,18 +82,19 @@ export function convertOptionsForParser(
   opts: {
     /**
      * When the caller passed a filesystem path as the API source, enable the file resolver unless
-     * they explicitly set `resolve.file`. This keeps local path loading working without re-opening
-     * `file://` LFI for object/URL sources
+     * they explicitly set `resolve.file`. The resolver is jailed to `resolve.fileRoot` or, when
+     * that is omitted, to the source file's directory.
      */
     allowFileResolution?: boolean;
+
+    /**
+     * Filesystem path of the API source. Used as the default jail when `resolve.fileRoot` is omitted.
+     */
+    sourcePath?: string;
   } = {},
 ): Partial<$RefParserOptions> {
   const parserOptions = getJsonSchemaRefParserDefaultOptions();
-
-  const fileOption =
-    opts.allowFileResolution && !(options?.resolve && 'file' in options.resolve)
-      ? parserOptions.resolve.file
-      : convertFileResolverOption(options, parserOptions.resolve.file);
+  const fileOption = convertFileResolverOption(options, opts);
 
   return {
     ...parserOptions,

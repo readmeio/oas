@@ -2,6 +2,7 @@
 import type { ParserOptions, OpenAPI30Document } from '@readme/openapi-parser';
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 import petstoreSwagger from '@readme/oas-examples/2.0/json/petstore.json' with { type: 'json' };
@@ -60,6 +61,29 @@ vi.mock(import('undici'), async importOriginal => {
 type ValidateOptions = Required<Parameters<OASNormalize['validate']>[0]>;
 
 const __dirname = import.meta.dirname;
+
+function specWithRef(ref: string) {
+  return {
+    openapi: '3.1.0',
+    info: { title: 'File root', version: '1.0.0' },
+    paths: {
+      '/pets': {
+        get: {
+          responses: {
+            '200': {
+              description: 'ok',
+              content: {
+                'application/json': {
+                  schema: { $ref: ref },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+}
 
 describe('OASNormalize', () => {
   describe('.load()', () => {
@@ -292,6 +316,17 @@ describe('OASNormalize', () => {
               'Unable to resolve $ref pointer "file:///etc/passwd"',
             );
           });
+
+          it('should not allow `pathsRoot` to re-enable filesystem `$ref`s when `enablePaths` is disabled', async () => {
+            const root = fs.mkdtempSync(path.join(os.tmpdir(), 'oas-normalize-root-'));
+
+            try {
+              const o = new OASNormalize(spec, { enablePaths: false, pathsRoot: root });
+              await expect(o.validate()).rejects.toThrow('Unable to resolve $ref pointer "file:///etc/passwd"');
+            } finally {
+              fs.rmSync(root, { recursive: true, force: true });
+            }
+          });
         });
       });
     });
@@ -323,23 +358,9 @@ describe('OASNormalize', () => {
   });
 
   describe('.bundle()', () => {
-    /**
-     * @note only tests that require `process.chdir()` should be in this block.
-     */
     describe('external schema', () => {
-      let originalCwd: string;
-
-      beforeEach(() => {
-        originalCwd = process.cwd();
-      });
-
-      afterEach(() => {
-        process.chdir(originalCwd);
-      });
-
       it('should bundle an external schema in', async () => {
         const contents = require.resolve('./__fixtures__/bundle/definition.json');
-        process.chdir(path.dirname(contents));
         const o = new OASNormalize(contents, { enablePaths: true });
         const bundled = (await o.bundle()) as OpenAPI30Document;
 
@@ -834,6 +855,178 @@ describe('OASNormalize', () => {
         specification: 'swagger',
         version: '2.0',
       });
+    });
+  });
+
+  describe('filesystem `$ref` root', () => {
+    const secretContents = 'SECRET_CONTENT_12345';
+    const directories: string[] = [];
+
+    function makeDir(): string {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'oas-normalize-root-'));
+      directories.push(dir);
+      return dir;
+    }
+
+    afterEach(() => {
+      for (const dir of directories) {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+
+      directories.length = 0;
+    });
+
+    it('should refuse filesystem `$ref`s from an inline definition when `pathsRoot` is omitted', async () => {
+      const o = new OASNormalize(specWithRef('/etc/passwd'), { enablePaths: true });
+
+      await expect(o.dereference()).rejects.toThrow(/filesystem references require a root directory/i);
+    });
+
+    it('should resolve a relative `$ref` from an inline definition against `pathsRoot`', async () => {
+      const root = makeDir();
+      const pet = { type: 'object', title: 'Pet' };
+      fs.writeFileSync(path.join(root, 'pet.json'), JSON.stringify(pet));
+
+      const dereferenced = await new OASNormalize(specWithRef('./pet.json'), {
+        enablePaths: true,
+        pathsRoot: root,
+      }).dereference();
+
+      expect(dereferenced).toMatchObject({
+        paths: { '/pets': { get: { responses: { '200': { content: { 'application/json': { schema: pet } } } } } } },
+      });
+    });
+
+    it('should keep the entry file and `pathsRoot` after the working directory changes', async () => {
+      const root = makeDir();
+      const pet = { type: 'object', title: 'Pet' };
+      fs.writeFileSync(path.join(root, 'pet.json'), JSON.stringify(pet));
+      fs.writeFileSync(path.join(root, 'openapi.json'), JSON.stringify(specWithRef('./pet.json')));
+
+      const elsewhere = makeDir();
+      fs.writeFileSync(path.join(elsewhere, 'openapi.json'), JSON.stringify(specWithRef('/etc/passwd')));
+      fs.writeFileSync(path.join(elsewhere, 'pet.json'), JSON.stringify({ title: secretContents }));
+
+      const previous = process.cwd();
+      try {
+        process.chdir(root);
+        const o = new OASNormalize('openapi.json', { enablePaths: true, pathsRoot: '.' });
+        process.chdir(elsewhere);
+
+        const dereferenced = await o.dereference();
+
+        expect(dereferenced).toMatchObject({
+          paths: { '/pets': { get: { responses: { '200': { content: { 'application/json': { schema: pet } } } } } } },
+        });
+        expect(JSON.stringify(dereferenced)).not.toContain(secretContents);
+      } finally {
+        process.chdir(previous);
+      }
+    });
+
+    it('should read a sibling `$ref` inside the entry file directory', async () => {
+      const root = makeDir();
+      const pet = { type: 'object', title: 'Pet' };
+      fs.writeFileSync(path.join(root, 'pet.json'), JSON.stringify(pet));
+      const spec = path.join(root, 'openapi.json');
+      fs.writeFileSync(spec, JSON.stringify(specWithRef('./pet.json')));
+
+      const dereferenced = await new OASNormalize(spec, { enablePaths: true }).dereference();
+
+      expect(dereferenced).toMatchObject({
+        paths: { '/pets': { get: { responses: { '200': { content: { 'application/json': { schema: pet } } } } } } },
+      });
+    });
+
+    it('should refuse absolute paths, file URLs, and relatives that leave `pathsRoot`', async () => {
+      const root = makeDir();
+      const outside = makeDir();
+      fs.writeFileSync(path.join(outside, 'secret.json'), JSON.stringify(secretContents));
+      fs.writeFileSync(path.join(root, 'pet.json'), JSON.stringify({ type: 'string', title: 'Pet' }));
+
+      const refs = [
+        '/etc/passwd',
+        'file:///etc/passwd',
+        path.join(outside, 'secret.json'),
+        `../${path.basename(outside)}/secret.json`,
+      ];
+
+      await Promise.all(
+        refs.map(ref =>
+          expect(new OASNormalize(specWithRef(ref), { enablePaths: true, pathsRoot: root }).bundle()).rejects.toThrow(
+            /outside the allowed directory/i,
+          ),
+        ),
+      );
+    });
+
+    it('should not let `validate({ parser })` widen `pathsRoot`', async () => {
+      const root = makeDir();
+      const outside = makeDir();
+      const secret = path.join(outside, 'secret.json');
+      fs.writeFileSync(secret, JSON.stringify(secretContents));
+
+      const o = new OASNormalize(specWithRef(secret), { enablePaths: true, pathsRoot: root });
+
+      await expect(o.validate({ parser: { resolve: { fileRoot: '/' } } })).rejects.toThrow(
+        /outside the allowed directory/i,
+      );
+    });
+
+    it('should allow a `$ref` above the entry file when `pathsRoot` contains it', async () => {
+      const root = makeDir();
+      const nested = path.join(root, 'specs');
+      fs.mkdirSync(nested);
+      const shared = { type: 'string', title: 'Shared' };
+      fs.writeFileSync(path.join(root, 'shared.json'), JSON.stringify(shared));
+      const spec = path.join(nested, 'openapi.json');
+      fs.writeFileSync(spec, JSON.stringify(specWithRef('../shared.json')));
+
+      await expect(new OASNormalize(spec, { enablePaths: true }).dereference()).rejects.toThrow(
+        /outside the allowed directory/i,
+      );
+
+      const dereferenced = await new OASNormalize(spec, { enablePaths: true, pathsRoot: root }).dereference();
+
+      expect(dereferenced).toMatchObject({
+        paths: { '/pets': { get: { responses: { '200': { content: { 'application/json': { schema: shared } } } } } } },
+      });
+    });
+
+    it('should reject an entry file outside `pathsRoot` before reading it', async () => {
+      const root = makeDir();
+      const outside = makeDir();
+      const secret = path.join(outside, 'secret.json');
+      fs.writeFileSync(secret, JSON.stringify({ openapi: '3.1.0', info: { title: secretContents, version: '1' } }));
+
+      const o = new OASNormalize(secret, { enablePaths: true, pathsRoot: root });
+
+      await expect(o.load()).rejects.toThrow(`File "${secret}" is outside the allowed directory.`);
+      await expect(o.load()).rejects.not.toThrow(secretContents);
+    });
+
+    it('should reject a symlink entry that realpaths outside `pathsRoot`', async () => {
+      const root = makeDir();
+      const outside = makeDir();
+      const secret = path.join(outside, 'secret.json');
+      fs.writeFileSync(secret, JSON.stringify(secretContents));
+      const link = path.join(root, 'openapi.json');
+      fs.symlinkSync(secret, link);
+
+      const o = new OASNormalize(link, { enablePaths: true, pathsRoot: root });
+
+      await expect(o.load()).rejects.toThrow(/outside the allowed directory/i);
+    });
+
+    it('should throw when `pathsRoot` is missing or is not a directory', () => {
+      expect(() => new OASNormalize('{}', { pathsRoot: path.join(os.tmpdir(), 'oas-normalize-missing-root') })).toThrow(
+        /not accessible/i,
+      );
+
+      const file = path.join(makeDir(), 'not-a-directory');
+      fs.writeFileSync(file, 'x');
+
+      expect(() => new OASNormalize('{}', { pathsRoot: file })).toThrow(/not a directory/i);
     });
   });
 });

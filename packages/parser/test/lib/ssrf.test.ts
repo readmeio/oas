@@ -79,8 +79,19 @@ describe('filesystem `$ref` guards', () => {
     ).rejects.toThrow(/unable to resolve \$ref pointer/i);
   });
 
-  it('should allow filesystem `$ref`s when `resolve.file` is explicitly enabled', async () => {
-    await expect(bundle(schemaWithRef(`file://${secretPath}`), { resolve: { file: true } })).resolves.toMatchObject({
+  it('should refuse filesystem `$ref`s when `resolve.file` is true and no root is set', async () => {
+    await expect(bundle(schemaWithRef(`file://${secretPath}`), { resolve: { file: true } })).rejects.toThrow(
+      /filesystem references require a root directory/i,
+    );
+    await expect(bundle(schemaWithRef(secretPath), { resolve: { file: true } })).rejects.toThrow(
+      /filesystem references require a root directory/i,
+    );
+  });
+
+  it('should allow filesystem `$ref`s that stay inside `resolve.fileRoot`', async () => {
+    await expect(
+      bundle(schemaWithRef(`file://${secretPath}`), { resolve: { file: true, fileRoot: secretDir } }),
+    ).resolves.toMatchObject({
       paths: {
         '/pets': {
           get: {
@@ -97,5 +108,17 @@ describe('filesystem `$ref` guards', () => {
         },
       },
     });
+  });
+
+  it('should refuse filesystem `$ref`s outside `resolve.fileRoot`', async () => {
+    const otherDir = fs.mkdtempSync(path.join(os.tmpdir(), 'oas-file-ref-other-'));
+
+    try {
+      await expect(
+        bundle(schemaWithRef(`file://${secretPath}`), { resolve: { file: true, fileRoot: otherDir } }),
+      ).rejects.toThrow(/outside the allowed directory/i);
+    } finally {
+      fs.rmSync(otherDir, { recursive: true, force: true });
+    }
   });
 });

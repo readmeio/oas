@@ -198,11 +198,30 @@ export interface ParserOptions {
      * Determines if local files (including `file://` URLs) are allowed to be resolved. Defaults to
      * `false` for security reasons.
      *
-     * Set to `true` to use the default filesystem resolver. When the API source itself is a
-     * filesystem path, file resolution is enabled automatically unless this option is explicitly
-     * set to `false`.
+     * Set to `true` to resolve filesystem `$ref`s inside `fileRoot`. When the API source itself is
+     * a filesystem path, file resolution is enabled automatically unless this option is explicitly
+     * set to `false`, and the jail defaults to that file's directory.
      */
     file?: boolean;
+
+    /**
+     * Directory that every filesystem `$ref` must resolve inside. Absolute paths, `file://` URLs,
+     * and `..` segments are allowed only when the real path stays in this directory. Symlinks are
+     * not followed.
+     *
+     * When the API source is a filesystem path and this is omitted, the source file's directory is
+     * used. An inline schema has no default: filesystem `$ref`s are rejected until this is set.
+     *
+     * Relative `$ref`s on an inline schema resolve against this directory (or against `fileBase`
+     * when that is set).
+     */
+    fileRoot?: string;
+
+    /**
+     * File used as the base URL for relative `$ref`s when the schema is an inline object.
+     * Ignored when the source is already a filesystem path or URL. Must stay inside `fileRoot`.
+     */
+    fileBase?: string;
 
     http?: {
       /**
