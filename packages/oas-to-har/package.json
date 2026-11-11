@@ -61,6 +61,6 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "jest-expect-har": "^11.0.0",
     "tsdown": "^0.23.5",
-    "vitest": "^5.0.0"
+    "vitest": "^5.1.0"
   }
 }

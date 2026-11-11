@@ -57,8 +57,8 @@ npm install oas
 `oas` offers a main `Oas` class, which will be your main entrypoint for using the library.
 
 ```js
-import Oas from 'oas';
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import Oas from 'oas';
 
 const petstore = new Oas(petstoreSpec);
 ```
@@ -140,8 +140,8 @@ Information about ReadMe's supported OpenAPI extensions at https://docs.readme.c
 For your convenience, the entrypoint into the `Operation` class should generally always be through `.operation()`. For example:
 
 ```js
-import Oas from 'oas';
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import Oas from 'oas';
 
 const petstore = new Oas(petstoreSpec);
 const operation = petstore.operation('/pet', 'post');

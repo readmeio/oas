@@ -74,6 +74,50 @@ function buildBody(style, explode) {
   } as unknown as OperationObject;
 }
 
+function assertFormStyle(operation, formData: DataForHAR, expected: PostDataParams['params']) {
+  return async () => {
+    const oas = createOas('/body', operation);
+    const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
+  };
+}
+
+function assertSpaceDelimitedStyle(operation, formData: DataForHAR, expected: PostDataParams['params']) {
+  return async () => {
+    const oas = createOas('/body', operation);
+    const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
+  };
+}
+
+function assertPipeDelimitedStyle(operation, formData: DataForHAR, expected: PostDataParams['params']) {
+  return async () => {
+    const oas = createOas('/body', operation);
+    const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
+  };
+}
+
+function assertDeepObjectStyle(operation, formData: DataForHAR, expected: PostDataParams['params']) {
+  return async () => {
+    const oas = createOas('/body', operation);
+    const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
+  };
+}
+
 describe('multipart/form-data parameters', () => {
   it('should return an empty array when provided a privitive request body', async () => {
     const oas = createOas('/body', buildBody('form', false));
@@ -87,17 +131,6 @@ describe('multipart/form-data parameters', () => {
   describe('form style', () => {
     const bodyNoExplode = buildBody('form', false);
     const bodyExplode = buildBody('form', true);
-
-    function assertFormStyle(operation, formData: DataForHAR, expected: PostDataParams['params']) {
-      return async () => {
-        const oas = createOas('/body', operation);
-        const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
-
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
-      };
-    }
 
     it(
       'should support form delimited multipart/form-data styles for non exploded empty input',
@@ -198,17 +231,6 @@ describe('multipart/form-data parameters', () => {
     const bodyNoExplode = buildBody('spaceDelimited', false);
     const bodyExplode = buildBody('spaceDelimited', true);
 
-    function assertSpaceDelimitedStyle(operation, formData: DataForHAR, expected: PostDataParams['params']) {
-      return async () => {
-        const oas = createOas('/body', operation);
-        const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
-
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
-      };
-    }
-
     it(
       'should NOT support space delimited multipart/form-data styles for non exploded empty input',
       assertSpaceDelimitedStyle(bodyNoExplode, { body: { primitive: emptyInput } }, []),
@@ -273,17 +295,6 @@ describe('multipart/form-data parameters', () => {
     const bodyNoExplode = buildBody('pipeDelimited', false);
     const bodyExplode = buildBody('pipeDelimited', true);
 
-    function assertPipeDelimitedStyle(operation, formData: DataForHAR, expected: PostDataParams['params']) {
-      return async () => {
-        const oas = createOas('/body', operation);
-        const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
-
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
-      };
-    }
-
     it(
       'should NOT support pipe delimited multipart/form-data styles for non exploded empty input',
       assertPipeDelimitedStyle(bodyNoExplode, { body: { primitive: emptyInput } }, []),
@@ -342,17 +353,6 @@ describe('multipart/form-data parameters', () => {
   describe('deepObject style', () => {
     const bodyNoExplode = buildBody('deepObject', false);
     const bodyExplode = buildBody('deepObject', true);
-
-    function assertDeepObjectStyle(operation, formData: DataForHAR, expected: PostDataParams['params']) {
-      return async () => {
-        const oas = createOas('/body', operation);
-        const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
-
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
-      };
-    }
 
     it(
       'should NOT support deepObject delimited multipart/form-data styles for non exploded empty input',

@@ -30,6 +30,138 @@ const semicolon = ';'; // %3B when encoded, which we don't want
 const equals = '='; // %3D when encoded, which we don't want
 const comma = ','; // %2C when encoded, which we don't want
 
+function assertMatrixPath(operation, formData: DataForHAR, expected: string) {
+  return async () => {
+    const oas = createOas('/style-path/{color}', operation);
+    const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.url).toBe(expected);
+  };
+}
+
+function assertLabelPath(operation, formData: DataForHAR, expected: string) {
+  return async () => {
+    const oas = createOas('/style-path/{color}', operation);
+    const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.url).toBe(expected);
+  };
+}
+
+function assertSimplePath(operation, formData: DataForHAR, expected: string) {
+  return async () => {
+    const oas = createOas('/style-path/{color}', operation);
+    const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.url).toBe(expected);
+  };
+}
+
+function assertFormStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
+  return async () => {
+    const oas = createOas('/query', operation);
+    const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+  };
+}
+
+function assertSpaceDelimitedStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
+  return async () => {
+    const oas = createOas('/query', operation);
+    const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+  };
+}
+
+function assertPipeDelimitedStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
+  return async () => {
+    const oas = createOas('/query', operation);
+    const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+  };
+}
+
+function assertDeepObjectStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
+  return async () => {
+    const oas = createOas('/query', operation);
+    const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+  };
+}
+
+function assertContentBasedStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
+  return async () => {
+    const oas = createOas('/query', operation);
+    const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+  };
+}
+
+function assertCookies(operation, formData: DataForHAR, expected: Request['cookies']) {
+  return async () => {
+    const oas = createOas('/cookies', operation);
+    const har = oasToHar(oas, oas.operation('/cookies', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.cookies).toStrictEqual(expected);
+  };
+}
+
+function assertHeaders(operation, formData: DataForHAR, expected: Request['headers']) {
+  return async () => {
+    const oas = createOas('/header', operation);
+    const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.headers).toStrictEqual(expected);
+  };
+}
+
+function assertContentBasedHeaders(operation, formData: DataForHAR, expected: Request['headers']) {
+  return async () => {
+    const oas = createOas('/header', operation);
+    const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.headers).toStrictEqual(expected);
+  };
+}
+
+function assertSchemaBasedHeaders(operation, formData: DataForHAR, expected: Request['headers']) {
+  return async () => {
+    const oas = createOas('/header', operation);
+    const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.headers).toStrictEqual(expected);
+  };
+}
+
 describe('style formatting', () => {
   it('should not crash on uri decoding errors', async () => {
     const oas = createOas('/query', {
@@ -117,17 +249,6 @@ describe('style formatting', () => {
           },
         ],
       };
-
-      function assertMatrixPath(operation, formData: DataForHAR, expected: string) {
-        return async () => {
-          const oas = createOas('/style-path/{color}', operation);
-          const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.url).toBe(expected);
-        };
-      }
 
       it(
         'should support matrix path styles non exploded empty input',
@@ -279,17 +400,6 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertLabelPath(operation, formData: DataForHAR, expected: string) {
-        return async () => {
-          const oas = createOas('/style-path/{color}', operation);
-          const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.url).toBe(expected);
-        };
-      }
-
       it(
         'should support label path styles non exploded empty input',
         assertLabelPath(paramNoExplode, { path: { color: emptyInput } }, 'https://example.com/style-path/.'),
@@ -369,17 +479,6 @@ describe('style formatting', () => {
           },
         ],
       };
-
-      function assertSimplePath(operation, formData: DataForHAR, expected: string) {
-        return async () => {
-          const oas = createOas('/style-path/{color}', operation);
-          const har = oasToHar(oas, oas.operation('/style-path/{color}', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.url).toBe(expected);
-        };
-      }
 
       it(
         'should NOT support simple path styles non exploded empty input',
@@ -488,17 +587,6 @@ describe('style formatting', () => {
           },
         ],
       };
-
-      function assertFormStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
-        return async () => {
-          const oas = createOas('/query', operation);
-          const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-        };
-      }
 
       it(
         'should support form delimited query styles for non exploded empty input',
@@ -628,17 +716,6 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertSpaceDelimitedStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
-        return async () => {
-          const oas = createOas('/query', operation);
-          const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-        };
-      }
-
       it(
         'should NOT support space delimited query styles for non exploded empty input',
         assertSpaceDelimitedStyle(paramNoExplode, { query: { color: emptyInput } }, []),
@@ -713,17 +790,6 @@ describe('style formatting', () => {
           },
         ],
       };
-
-      function assertPipeDelimitedStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
-        return async () => {
-          const oas = createOas('/query', operation);
-          const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-        };
-      }
 
       it(
         'should NOT support pipe delimited query styles for non exploded empty input',
@@ -833,17 +899,6 @@ describe('style formatting', () => {
           },
         ],
       };
-
-      function assertDeepObjectStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
-        return async () => {
-          const oas = createOas('/query', operation);
-          const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-        };
-      }
 
       it(
         'should NOT support deepObject delimited query styles for non exploded empty input',
@@ -1105,17 +1160,6 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertContentBasedStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
-        return async () => {
-          const oas = createOas('/query', operation);
-          const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-        };
-      }
-
       it(
         'should JSON-encode object input and ignore style/explode settings',
         assertContentBasedStyle(paramContentJson, { query: { color: objectInput } }, [
@@ -1339,17 +1383,6 @@ describe('style formatting', () => {
       ],
     };
 
-    function assertCookies(operation, formData: DataForHAR, expected: Request['cookies']) {
-      return async () => {
-        const oas = createOas('/cookies', operation);
-        const har = oasToHar(oas, oas.operation('/cookies', 'get'), formData);
-
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.cookies).toStrictEqual(expected);
-      };
-    }
-
     it(
       'should support form delimited cookie styles for non exploded empty input',
       assertCookies(paramNoExplode, { cookie: { color: emptyInput } }, [{ name: 'color', value: '' }]),
@@ -1451,17 +1484,6 @@ describe('style formatting', () => {
         },
       ],
     };
-
-    function assertHeaders(operation, formData: DataForHAR, expected: Request['headers']) {
-      return async () => {
-        const oas = createOas('/header', operation);
-        const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
-
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.headers).toStrictEqual(expected);
-      };
-    }
 
     it(
       'should NOT support simple header styles for non exploded empty input',
@@ -1616,17 +1638,6 @@ describe('style formatting', () => {
         ],
       };
 
-      function assertContentBasedHeaders(operation, formData: DataForHAR, expected: Request['headers']) {
-        return async () => {
-          const oas = createOas('/header', operation);
-          const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.headers).toStrictEqual(expected);
-        };
-      }
-
       it(
         'should JSON-encode object input',
         assertContentBasedHeaders(paramContentJson, { header: { color: objectInput } }, [
@@ -1674,17 +1685,6 @@ describe('style formatting', () => {
     });
 
     describe('schema-based parameters (without content property)', () => {
-      function assertSchemaBasedHeaders(operation, formData: DataForHAR, expected: Request['headers']) {
-        return async () => {
-          const oas = createOas('/header', operation);
-          const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
-
-          await expect(har).toBeAValidHAR();
-
-          expect(har.log.entries[0].request.headers).toStrictEqual(expected);
-        };
-      }
-
       it(
         'should not URL-encode schema-based string header values',
         assertSchemaBasedHeaders(

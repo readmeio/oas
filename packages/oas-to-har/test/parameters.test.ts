@@ -13,6 +13,78 @@ import commonParameters from './__datasets__/common-parameters.json' with { type
 // oxlint-disable-next-line vitest/require-hook
 expect.extend({ toBeAValidHAR });
 
+function assertPath(operation: OperationObject, formData: DataForHAR, expected: string) {
+  return async () => {
+    const spec = Oas.init({
+      paths: {
+        '/path-param/{id}': {
+          get: operation,
+        },
+      },
+    });
+
+    const har = oasToHar(spec, spec.operation('/path-param/{id}', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.url).toBe(expected);
+  };
+}
+
+function assertQueryParams(operation: OperationObject, formData: DataForHAR, expected: Request['queryString']) {
+  return async () => {
+    const spec = Oas.init({
+      paths: {
+        '/query': {
+          get: operation,
+        },
+      },
+    });
+
+    const har = oasToHar(spec, spec.operation('/query', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+  };
+}
+
+function assertCookies(operation: OperationObject, formData: DataForHAR, expected: Request['cookies']) {
+  return async () => {
+    const spec = Oas.init({
+      paths: {
+        '/cookie': {
+          get: operation,
+        },
+      },
+    });
+
+    const har = oasToHar(spec, spec.operation('/cookie', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.cookies).toStrictEqual(expected);
+  };
+}
+
+function assertHeaders(operation: OperationObject, formData: DataForHAR, expected: Request['headers']) {
+  return async () => {
+    const spec = Oas.init({
+      paths: {
+        '/header': {
+          post: operation,
+        },
+      },
+    });
+
+    const har = oasToHar(spec, spec.operation('/header', 'post'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.headers).toStrictEqual(expected);
+  };
+}
+
 describe('parameter handling', () => {
   describe('path', () => {
     it('should pass through unknown path params', () => {
@@ -41,24 +113,6 @@ describe('parameter handling', () => {
         'https://example.com/path-param/id',
       );
     });
-
-    function assertPath(operation: OperationObject, formData: DataForHAR, expected: string) {
-      return async () => {
-        const spec = Oas.init({
-          paths: {
-            '/path-param/{id}': {
-              get: operation,
-            },
-          },
-        });
-
-        const har = oasToHar(spec, spec.operation('/path-param/{id}', 'get'), formData);
-
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.url).toBe(expected);
-      };
-    }
 
     it(
       'should not error if empty object passed in for values',
@@ -173,24 +227,6 @@ describe('parameter handling', () => {
   });
 
   describe('query', () => {
-    function assertQueryParams(operation: OperationObject, formData: DataForHAR, expected: Request['queryString']) {
-      return async () => {
-        const spec = Oas.init({
-          paths: {
-            '/query': {
-              get: operation,
-            },
-          },
-        });
-
-        const har = oasToHar(spec, spec.operation('/query', 'get'), formData);
-
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-      };
-    }
-
     it(
       'should not add on empty unrequired values',
       assertQueryParams({ parameters: [{ name: 'a', in: 'query' }] }, {}, []),
@@ -715,24 +751,6 @@ describe('parameter handling', () => {
   });
 
   describe('cookie', () => {
-    function assertCookies(operation: OperationObject, formData: DataForHAR, expected: Request['cookies']) {
-      return async () => {
-        const spec = Oas.init({
-          paths: {
-            '/cookie': {
-              get: operation,
-            },
-          },
-        });
-
-        const har = oasToHar(spec, spec.operation('/cookie', 'get'), formData);
-
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.cookies).toStrictEqual(expected);
-      };
-    }
-
     it(
       'should not add on empty unrequired values',
       assertCookies({ parameters: [{ name: 'a', in: 'cookie' }] }, {}, []),
@@ -806,24 +824,6 @@ describe('parameter handling', () => {
   });
 
   describe('header', () => {
-    function assertHeaders(operation: OperationObject, formData: DataForHAR, expected: Request['headers']) {
-      return async () => {
-        const spec = Oas.init({
-          paths: {
-            '/header': {
-              post: operation,
-            },
-          },
-        });
-
-        const har = oasToHar(spec, spec.operation('/header', 'post'), formData);
-
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.headers).toStrictEqual(expected);
-      };
-    }
-
     it(
       'should not add on empty unrequired values',
       assertHeaders({ parameters: [{ name: 'a', in: 'header' }] }, {}, []),
