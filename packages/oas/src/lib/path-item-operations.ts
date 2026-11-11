@@ -29,7 +29,7 @@ export function resolveKey(keys: string[], target: string): string | undefined {
  * An operation declared on a fixed Path Item method field (`get`, `query`).
  *
  */
-export interface FixedPathItemOperation {
+interface FixedPathItemOperation {
   location: 'fixed';
   method: HttpMethods;
   operation: OperationObject;
@@ -41,7 +41,7 @@ export interface FixedPathItemOperation {
  * An operation declared in an OpenAPI 3.2 `additionalOperations` map (`COPY`).
  *
  */
-export interface AdditionalPathItemOperation {
+interface AdditionalPathItemOperation {
   location: 'additional';
   method: string;
   operation: OperationObject;
