@@ -4,11 +4,15 @@
  * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/test/unit/core/plugins/samples/fn.js}
  */
-import type { SchemaObject } from '../../src/types.js';
+import type { OASDocument, SchemaObject } from '../../src/types.js';
 
 import { describe, expect, it } from 'vitest';
 
 import sampleFromSchema from '../../src/samples/index.js';
+
+function withSchemas(schemas: Record<string, SchemaObject>): OASDocument {
+  return { openapi: '3.1.0', info: { title: 'test', version: '1.0' }, paths: {}, components: { schemas } };
+}
 
 describe('sampleFromSchema', () => {
   it('returns object with no readonly fields for parameter', () => {
@@ -640,6 +644,194 @@ describe('sampleFromSchema', () => {
       };
 
       expect(sampleFromSchema(definition)).toStrictEqual(expected);
+    });
+  });
+
+  describe('JSON-encoded string examples', () => {
+    it.each<[string, SchemaObject, unknown]>([
+      ['an array', { type: 'array', items: { type: 'integer' }, example: '[1]' }, [1]],
+      ['an object', { type: 'object', example: '{"a": 1}' }, { a: 1 }],
+      ['a nullable array', { type: ['array', 'null'], example: '["a"]' }, ['a']],
+      ['an array with no `type`', { items: { type: 'string' }, example: '["a"]' }, ['a']],
+    ])('parses the example for %s', (_, definition, expected) => {
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+    });
+
+    it.each<[string, SchemaObject]>([
+      ['a string', { type: 'string', example: '{ "some_key": "1" }' }],
+      ['a string or object', { type: ['string', 'object'], example: '{"a": 1}' }],
+      ['an array whose example parses to an object', { type: 'array', example: '{"a": 1}' }],
+      ['an object whose example parses to an array', { type: 'object', example: '["a"]' }],
+      ['an array whose example parses to a primitive', { type: 'array', example: '1' }],
+      ['a schema with no type', { example: '["a"]' }],
+      [
+        'an `anyOf` that allows a string',
+        { properties: {}, anyOf: [{ type: 'string' }, { type: 'object' }], example: '{"a": 1}' },
+      ],
+      [
+        'a `oneOf` that allows a string',
+        { type: 'object', oneOf: [{ type: 'string' }, { type: 'object' }], example: '{"a": 1}' },
+      ],
+      ['an `allOf` branch that allows a string', { allOf: [{ type: 'array' }, { type: 'string' }], example: '["a"]' }],
+      [
+        'an `allOf` branch with a `oneOf`',
+        { allOf: [{ oneOf: [{ type: 'string' }, { type: 'array' }] }], example: '["a"]' },
+      ],
+    ])('keeps the example as a string for %s', (_, definition) => {
+      expect(sampleFromSchema(definition)).toStrictEqual(definition.example);
+    });
+
+    it('parses the first `examples` entry of a property', () => {
+      const definition: SchemaObject = {
+        type: 'object',
+        properties: {
+          tags: { type: 'array', items: { type: 'string' }, examples: ['["a", "b"]'] },
+          note: { type: 'string', examples: ['["a", "b"]'] },
+        },
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual({ tags: ['a', 'b'], note: '["a", "b"]' });
+    });
+
+    it('parses examples on `$ref` schemas', () => {
+      const definition = withSchemas({
+        Tags: { type: 'array', items: { type: 'string' }, example: '["a", "b"]' },
+        Note: { type: 'string', example: '["a", "b"]' },
+      });
+
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          tags: { $ref: '#/components/schemas/Tags' },
+          note: { $ref: '#/components/schemas/Note' },
+        },
+        additionalProperties: { $ref: '#/components/schemas/Tags' },
+      };
+
+      expect(sampleFromSchema(schema, { definition })).toStrictEqual({
+        tags: ['a', 'b'],
+        note: '["a", "b"]',
+        additionalProp: ['a', 'b'],
+      });
+    });
+
+    it('parses examples whose type comes from another `allOf` branch', () => {
+      const definition: SchemaObject = {
+        allOf: [{ type: 'array', items: { type: 'string' } }, { example: '["a", "b"]' }],
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(['a', 'b']);
+    });
+
+    it('parses examples on a schema whose type comes from its `allOf` branches', () => {
+      const definition = withSchemas({
+        Tags: { type: 'array', items: { type: 'string' } },
+        // Refers back to itself through `allOf`.
+        Loop: { allOf: [{ $ref: '#/components/schemas/Loop' }, { type: 'array' }] },
+      });
+
+      expect(sampleFromSchema({ allOf: [{ type: 'array' }], example: '["a"]' })).toStrictEqual(['a']);
+      expect(
+        sampleFromSchema({ allOf: [{ $ref: '#/components/schemas/Tags' }], example: '["a"]' }, { definition }),
+      ).toStrictEqual(['a']);
+      expect(
+        sampleFromSchema({ allOf: [{ $ref: '#/components/schemas/Loop' }], example: '["a"]' }, { definition }),
+      ).toStrictEqual(['a']);
+    });
+
+    it('parses `examples` set alongside a `$ref`', () => {
+      const definition = withSchemas({ Tags: { type: 'array', items: { type: 'string' } } });
+
+      expect(
+        sampleFromSchema(
+          { type: 'object', properties: { tags: { $ref: '#/components/schemas/Tags', examples: ['["a"]'] } } },
+          { definition },
+        ),
+      ).toStrictEqual({ tags: ['a'] });
+    });
+
+    it('parses examples whose `anyOf`/`oneOf` variants are all arrays or objects', () => {
+      const definition = withSchemas({
+        Base: { type: 'object', properties: { id: { type: 'integer' } } },
+        Cat: { allOf: [{ $ref: '#/components/schemas/Base' }, { properties: { meows: { type: 'boolean' } } }] },
+        Dog: { allOf: [{ $ref: '#/components/schemas/Base' }, { properties: { barks: { type: 'boolean' } } }] },
+      });
+
+      expect(
+        sampleFromSchema(
+          { oneOf: [{ $ref: '#/components/schemas/Cat' }, { $ref: '#/components/schemas/Dog' }], example: '{"id": 1}' },
+          { definition },
+        ),
+      ).toStrictEqual({ id: 1 });
+      expect(sampleFromSchema({ anyOf: [{ type: 'array' }, { items: {} }], example: '["a"]' })).toStrictEqual(['a']);
+    });
+
+    it('keeps the example as a string when an `anyOf`/`oneOf` variant declares no type', () => {
+      expect(sampleFromSchema({ oneOf: [{ type: 'object' }, {}], example: '{"a": 1}' })).toBe('{"a": 1}');
+    });
+
+    describe('deep schemas', () => {
+      const chainLength = 200;
+      const chainedDefinition = withSchemas(
+        Object.fromEntries(
+          Array.from({ length: chainLength }, (_, i) => [
+            `Link${i}`,
+            i === chainLength - 1 ? { type: 'array' } : { allOf: [{ $ref: `#/components/schemas/Link${i + 1}` }] },
+          ]),
+        ),
+      );
+
+      it('resolves a type declared at the end of a long `allOf` chain', () => {
+        expect(
+          sampleFromSchema(
+            { allOf: [{ $ref: '#/components/schemas/Link0' }], example: '["a"]' },
+            {
+              definition: chainedDefinition,
+            },
+          ),
+        ).toStrictEqual(['a']);
+      });
+
+      it('terminates on `allOf` branches that refer to each other', () => {
+        const definition = withSchemas({
+          A: { allOf: [{ $ref: '#/components/schemas/B' }] },
+          B: { allOf: [{ $ref: '#/components/schemas/A' }, { type: 'object' }] },
+        });
+
+        expect(
+          sampleFromSchema({ allOf: [{ $ref: '#/components/schemas/A' }], example: '{"a": 1}' }, { definition }),
+        ).toStrictEqual({ a: 1 });
+      });
+
+      it('does not resolve `allOf` branches for examples that cannot be an array or object', () => {
+        let reads = 0;
+        const definition = new Proxy(chainedDefinition, {
+          get: (target, key, receiver) => {
+            reads += 1;
+            return Reflect.get(target, key, receiver);
+          },
+        });
+
+        ['plain text', '1', 'true', '[not json'].forEach(example => {
+          expect(sampleFromSchema({ allOf: [{ $ref: '#/components/schemas/Link0' }], example }, { definition })).toBe(
+            example,
+          );
+        });
+
+        expect(reads).toBe(0);
+      });
+
+      it('parses examples at every level of a deeply nested schema', () => {
+        const depth = 300;
+        let schema: SchemaObject = { type: 'array', example: '["leaf"]' };
+        let expected: unknown = ['leaf'];
+        for (let i = 0; i < depth; i += 1) {
+          schema = { type: 'object', properties: { child: schema, tags: { type: 'array', example: '["a"]' } } };
+          expected = { child: expected, tags: ['a'] };
+        }
+
+        expect(sampleFromSchema(schema)).toStrictEqual(expected);
+      });
     });
   });
 

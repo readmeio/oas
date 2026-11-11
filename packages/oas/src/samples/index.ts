@@ -73,6 +73,56 @@ const primitive = (schema: SchemaObject) => {
 };
 
 /**
+ * Collect the types a schema declares, following `$ref`s and `allOf`/`anyOf`/`oneOf` branches.
+ *
+ * Returns `undefined` when an `anyOf`/`oneOf` branch declares no type, since the value could then
+ * be anything.
+ */
+function getDeclaredTypes(
+  schema: unknown,
+  definition?: OASDocument,
+  seenRefs = new Set<string>(),
+): string[] | undefined {
+  const resolved = objectify(dereferenceRef(schema, definition, seenRefs));
+  const inferredType = resolved.properties || resolved.additionalProperties ? 'object' : resolved.items ? 'array' : [];
+  const types: string[] = [resolved.type ?? inferredType].flat();
+
+  for (const key of ['allOf', 'anyOf', 'oneOf'] as const) {
+    for (const branch of resolved[key] ?? []) {
+      const branchTypes = getDeclaredTypes(branch, definition, seenRefs);
+      if (!branchTypes || (key !== 'allOf' && !branchTypes.length)) {
+        return undefined;
+      }
+
+      types.push(...branchTypes);
+    }
+  }
+
+  return types;
+}
+
+/**
+ * Parse a schema-level example that was written as a JSON-encoded string when the schema says the
+ * value is meant to be an array or object.
+ */
+function parseStringifiedExample(example: unknown, schema: unknown, definition?: OASDocument) {
+  if (typeof example !== 'string' || !/^\s*[[{]/.test(example)) {
+    return example;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(example);
+  } catch {
+    return example;
+  }
+
+  const types = getDeclaredTypes(schema, definition);
+  const kind = Array.isArray(parsed) ? 'array' : 'object';
+  return types && !types.includes('string') && types.includes(kind) ? parsed : example;
+}
+
+/**
  * Generate a piece of sample data from a JSON Schema object. If `example` declarations are present
  * they will be utilized, but generally this will generate fake data for the information present in
  * the schema.
@@ -156,7 +206,7 @@ function sampleFromResolvedSchema(
     // Schema-level examples are explicit authored data, so they should win before we try to merge
     // polymorphic schemas. Merged allOf schemas can retain a `$ref` alongside sibling metadata,
     // which would otherwise be dereferenced as a plain ref and drop this example.
-    return dereferenceRefDeep(example, opts.definition, seenRefs);
+    return dereferenceRefDeep(parseStringifiedExample(example, schema, opts.definition), opts.definition, seenRefs);
   }
 
   const hasPolymorphism = usesPolymorphism(schema);
@@ -242,7 +292,7 @@ function sampleFromResolvedSchema(
       }
 
       if (props[name].examples?.length) {
-        obj[name] = props[name].examples[0];
+        obj[name] = parseStringifiedExample(props[name].examples[0], props[name], opts.definition);
         continue;
       }
 
