@@ -20,6 +20,10 @@ const config: KnipConfig = {
       // Mocked in tests via the repo-root install (see vitest.config.mts alias); not a package dep.
       ignoreDependencies: ['undici'],
     },
+    'packages/parser': {
+      // The file-root test creates a POSIX FIFO. `mkfifo` is a system utility, not an npm package.
+      ignoreBinaries: ['mkfifo'],
+    },
   },
 };
 
