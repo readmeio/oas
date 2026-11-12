@@ -123,6 +123,28 @@ describe('filesystem `$ref` root', () => {
     await expect(dereference(escaped)).rejects.toThrow(/outside the allowed directory/i);
   });
 
+  it('should keep a hash or percent-encoded directory name inside the jail', async () => {
+    const parent = makeDir('oas-file-root-');
+    fs.writeFileSync(path.join(parent, 'secret.json'), JSON.stringify(secretContents));
+
+    for (const name of ['specs#v1', '%2e%2e']) {
+      const dir = path.join(parent, name);
+      fs.mkdirSync(dir);
+      const pet = { type: 'object', title: name };
+      fs.writeFileSync(path.join(dir, 'pet.json'), JSON.stringify(pet));
+
+      const sibling = writeSpec(dir, './pet.json');
+      // oxlint-disable-next-line no-await-in-loop -- each directory is a separate jail case
+      await expect(dereference(sibling)).resolves.toMatchObject({
+        paths: { '/pets': { get: { responses: { '200': { content: { 'application/json': { schema: pet } } } } } } },
+      });
+
+      const escaped = writeSpec(dir, '../secret.json', 'escape.json');
+      // oxlint-disable-next-line no-await-in-loop -- each directory is a separate jail case
+      await expect(dereference(escaped)).rejects.toThrow(/outside the allowed directory/i);
+    }
+  });
+
   it('should fail a missing file inside the root as an open error', async () => {
     const root = makeDir('oas-file-root-');
     const spec = writeSpec(root, './missing/nested/pet.json');

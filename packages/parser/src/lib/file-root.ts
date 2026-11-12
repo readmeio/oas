@@ -18,6 +18,7 @@ const EXTRA_DECODE: readonly (readonly [RegExp, string])[] = [
 
 interface NodeFS {
   constants: {
+    O_DIRECTORY?: number;
     O_NOFOLLOW?: number;
     O_RDONLY: number;
   };
@@ -75,7 +76,19 @@ export function isInsideRoot(rootReal: string, candidate: string): boolean {
  * `file:///etc/passwd` is jailed to `/etc`, not to a bogus `file:` directory.
  */
 export function directoryOfSource(sourcePath: string): string {
-  return path.dirname(toLocalPath(sourcePath));
+  return path.dirname(toRawPath(sourcePath));
+}
+
+/**
+ * Caller-supplied filesystem path. `#` and `%2e%2e` are literal characters here, unlike a
+ * resolver URL. `file://` inputs are still converted with `fileURLToPath`.
+ */
+function toRawPath(input: string): string {
+  if (PROTOCOL.test(input) && isFilesystemReference(input)) {
+    return path.resolve(fileURLToPath(input));
+  }
+
+  return path.resolve(input);
 }
 
 /**
@@ -153,7 +166,7 @@ async function assertPathInsideRoot(candidate: string, root: string): Promise<vo
 
   let absolute: string;
   try {
-    absolute = toLocalPath(candidate);
+    absolute = toRawPath(candidate);
   } catch {
     throw new Error(`Resolution base "${candidate}" is outside the allowed directory.`);
   }
@@ -188,9 +201,10 @@ export function createRootlessFileResolver(): ResolverOptions {
 /**
  * Filesystem resolver that reads a file only when its real path stays inside `root`.
  *
- * Symlinks are not followed. `O_NOFOLLOW` covers a swap between the `lstat` check and the read.
- * The root directory is `realpath`'d on first read and reused for every `$ref` in the document,
- * including nested files and `$id` re-bases.
+ * Symlinks are not followed. Each path component is opened from the previous directory
+ * descriptor, so replacing a directory with a symlink after the containment check cannot
+ * redirect the read. The root directory is `realpath`'d on first read and reused for every
+ * `$ref` in the document, including nested files and `$id` re-bases.
  */
 export function createSandboxedFileResolver(root: string): ResolverOptions {
   let rootRealPromise: Promise<string> | undefined;
@@ -222,33 +236,25 @@ export function createSandboxedFileResolver(root: string): ResolverOptions {
         throw outsideDirectory(label);
       }
 
-      let stat: Stats;
-      try {
-        stat = await fs.promises.lstat(located);
-      } catch (err) {
-        if (isEnoent(err)) {
-          throw new ResolverError(new Error(`Error opening file ${absolute}: ${(err as Error).message}`), label);
-        }
-
-        throw err;
-      }
-
-      if (stat.isSymbolicLink()) {
-        throw outsideDirectory(label);
-      }
-
-      if (!stat.isFile()) {
-        throw new ResolverError(new Error(`Error opening file ${absolute}: not a file`), label);
-      }
-
-      // oxlint-disable-next-line no-bitwise -- `O_NOFOLLOW` is an open flag. `O_RDONLY` is not a logic operator.
-      const flags = fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0);
       let handle: FileHandle;
       try {
-        handle = await fs.promises.open(located, flags);
+        handle = (await canPinDirectories(fs))
+          ? await openInsideRoot(rootReal, located, fs)
+          : await openFinalComponent(located, fs);
       } catch (err) {
-        if (isCode(err, 'ELOOP')) {
+        if (isCode(err, 'ELOOP') || isCode(err, 'ENOTDIR')) {
           throw outsideDirectory(label);
+        }
+
+        if (isEnoent(err)) {
+          const detail = (err as Error).message.includes('/proc/')
+            ? 'ENOENT: no such file or directory'
+            : (err as Error).message;
+          throw new ResolverError(new Error(`Error opening file ${absolute}: ${detail}`), label);
+        }
+
+        if (isCode(err, 'ENOTFILE')) {
+          throw new ResolverError(new Error(`Error opening file ${absolute}: not a file`), label);
         }
 
         throw err;
@@ -261,6 +267,91 @@ export function createSandboxedFileResolver(root: string): ResolverOptions {
       }
     },
   };
+}
+
+let pinDirectories: Promise<boolean> | undefined;
+
+/**
+ * Linux can open a path component from a directory descriptor via `/proc/self/fd`. That pins the
+ * directory inode, so `O_NOFOLLOW` applies to every component and not only the final one.
+ */
+function canPinDirectories(fs: NodeFS): Promise<boolean> {
+  pinDirectories ??= fs.promises.stat('/proc/self/fd').then(
+    stat => stat.isDirectory(),
+    () => false,
+  );
+  return pinDirectories;
+}
+
+/**
+ * Open `located` by walking from `rootReal` through directory descriptors.
+ *
+ * A symlink at any component fails closed, including one created after the containment check.
+ */
+async function openInsideRoot(rootReal: string, located: string, fs: NodeFS): Promise<FileHandle> {
+  const relative = path.relative(rootReal, located);
+  const parts = relative === '' ? [] : relative.split(path.sep);
+  if (!isInsideRoot(rootReal, located) || parts.some(part => part === '' || part === '.' || part === '..')) {
+    throw codedError('ELOOP', 'outside');
+  }
+
+  let current: FileHandle | undefined;
+  try {
+    current = await fs.promises.open(rootReal, openFlags(fs, true));
+
+    for (const [index, part] of parts.entries()) {
+      const last = index === parts.length - 1;
+      // oxlint-disable-next-line no-await-in-loop -- the next component has to be opened from this directory descriptor
+      const next = await fs.promises.open(`/proc/self/fd/${current.fd}/${part}`, openFlags(fs, !last));
+      const previous = current;
+      current = next;
+      // oxlint-disable-next-line no-await-in-loop -- the previous descriptor is closed only after the child open succeeds
+      await previous.close();
+    }
+
+    const stat = await current.stat();
+    if (!stat.isFile()) {
+      throw codedError('ENOTFILE', 'not a file');
+    }
+
+    const opened = current;
+    current = undefined;
+    return opened;
+  } finally {
+    await current?.close();
+  }
+}
+
+/**
+ * Last-component `O_NOFOLLOW` open for systems without `/proc/self/fd`.
+ */
+async function openFinalComponent(located: string, fs: NodeFS): Promise<FileHandle> {
+  const stat = await fs.promises.lstat(located);
+  if (stat.isSymbolicLink()) {
+    throw codedError('ELOOP', 'symlink');
+  }
+
+  if (!stat.isFile()) {
+    throw codedError('ENOTFILE', 'not a file');
+  }
+
+  return fs.promises.open(located, openFlags(fs, false));
+}
+
+function openFlags(fs: NodeFS, directory: boolean): number {
+  // oxlint-disable-next-line no-bitwise -- `O_NOFOLLOW` and `O_DIRECTORY` are open(2) flags.
+  const flags = fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0);
+  if (!directory) {
+    return flags;
+  }
+
+  // oxlint-disable-next-line no-bitwise -- `O_DIRECTORY` is an open(2) flag.
+  return flags | (fs.constants.O_DIRECTORY ?? 0);
+}
+
+function codedError(code: string, message: string): Error {
+  const err = new Error(message);
+  return Object.assign(err, { code });
 }
 
 function refLabel(file: FileInfo): string {

@@ -924,6 +924,26 @@ describe('OASNormalize', () => {
       }
     });
 
+    it('should load a spec whose directory name contains a hash or a percent escape', async () => {
+      const parent = makeDir();
+
+      for (const name of ['specs#v1', '%2e%2e']) {
+        const dir = path.join(parent, name);
+        fs.mkdirSync(dir);
+        const pet = { type: 'object', title: name };
+        fs.writeFileSync(path.join(dir, 'pet.json'), JSON.stringify(pet));
+        const spec = path.join(dir, 'openapi.json');
+        fs.writeFileSync(spec, JSON.stringify(specWithRef('./pet.json')));
+
+        // oxlint-disable-next-line no-await-in-loop -- each directory name is a separate case
+        const dereferenced = await new OASNormalize(spec, { enablePaths: true }).dereference();
+
+        expect(dereferenced).toMatchObject({
+          paths: { '/pets': { get: { responses: { '200': { content: { 'application/json': { schema: pet } } } } } } },
+        });
+      }
+    });
+
     it('should read a sibling `$ref` inside the entry file directory', async () => {
       const root = makeDir();
       const pet = { type: 'object', title: 'Pet' };
