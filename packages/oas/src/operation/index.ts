@@ -2,11 +2,12 @@ import type { Extensions } from '../extensions.js';
 import type Oas from '../index.js';
 import type { SplitUrlResult } from '../lib/urls.js';
 import type {
-  HttpMethods,
   KeyedSecuritySchemeObject,
   MediaTypeObject,
   OAS31Document,
+  OAS32Document,
   OASDocument,
+  OperationMethod,
   OperationObject,
   ParameterObject,
   PathItemObject,
@@ -33,10 +34,11 @@ import type { ResponseSchemaObject } from './transformers/get-response-as-json-s
 import { normalizeURL } from '@readme/openapi-parser/lib/urls';
 
 import matchesMimeType from '../lib/matches-mimetype.js';
+import { resolveMediaType } from '../lib/media-type.js';
+import { findPathItemOperation, listPathItemOperations } from '../lib/path-item-operations.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef } from '../lib/refs.js';
 import { defaultVariablesFromServers, splitUrlFromServers, variablesFromServers } from '../lib/urls.js';
 import { isRef, parameterObject } from '../types.js';
-import { supportedMethods } from '../utils.js';
 
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
 import { getCallbackExamples } from './lib/get-callback-examples.js';
@@ -73,8 +75,11 @@ export class Operation {
 
   /**
    * HTTP Method that this operation is targeted towards.
+   *
+   * For operations defined within an OpenAPI 3.2 `additionalOperations` map this will be the
+   * method as it was declared there (eg. `COPY`).
    */
-  method: HttpMethods;
+  method: OperationMethod;
 
   /**
    * The primary Content Type that this operation accepts.
@@ -109,7 +114,7 @@ export class Operation {
     response: string[];
   };
 
-  constructor(oas: Oas, path: string, method: HttpMethods, operation: OperationObject) {
+  constructor(oas: Oas, path: string, method: OperationMethod, operation: OperationObject) {
     this.oas = oas;
     this.schema = operation;
     this.api = oas.api;
@@ -943,9 +948,14 @@ export class Operation {
         return false;
       }
 
+      const mediaTypeObject = resolveMediaType(content[mediaType], this.api);
+      if (!mediaTypeObject) {
+        return false;
+      }
+
       return {
         mediaType,
-        mediaTypeObject: content[mediaType],
+        mediaTypeObject,
         description: requestBody.description,
       };
     }
@@ -969,9 +979,14 @@ export class Operation {
     }
 
     if (availableMediaType) {
+      const mediaTypeObject = resolveMediaType(content[availableMediaType], this.api);
+      if (!mediaTypeObject) {
+        return false;
+      }
+
       return {
         mediaType: availableMediaType,
-        mediaTypeObject: content[availableMediaType],
+        mediaTypeObject,
         description: requestBody.description,
       };
     }
@@ -1060,7 +1075,7 @@ export class Operation {
    * @param expression Callback expression to look for.
    * @param method HTTP Method on the callback to look for.
    */
-  getCallback(identifier: string, expression: string, method: HttpMethods): Callback | false {
+  getCallback(identifier: string, expression: string, method: OperationMethod): Callback | false {
     if (!this.schema.callbacks) return false;
 
     let callbackObj = this.schema.callbacks[identifier];
@@ -1083,14 +1098,17 @@ export class Operation {
       }
     }
 
-    // `PathItemObject` also describes the OpenAPI 3.2 `query` operation.
-    const callbackPathItem: PathItemObject = callback;
-    if (!callbackPathItem[method]) {
+    const found = findPathItemOperation(callback, this.api, method);
+    if (!found) {
       return false;
     }
 
-    const callbackOperation = dereferenceRef(callbackPathItem[method], this.api);
-    return new Callback(this.oas, expression, method, callbackOperation, identifier, callback);
+    const resolvedOperation = dereferenceRef(found.operation, this.api);
+    if (!resolvedOperation || isRef(resolvedOperation)) {
+      return false;
+    }
+
+    return new Callback(this.oas, expression, method, resolvedOperation, identifier, callback);
   }
 
   /**
@@ -1126,10 +1144,8 @@ export class Operation {
           }
         }
 
-        Object.keys(callbackPath).forEach(method => {
-          if (!supportedMethods.includes(method as HttpMethods)) return;
-
-          const found = this.getCallback(callback, expression, method as HttpMethods);
+        listPathItemOperations(callbackPath, this.api).forEach(({ method }) => {
+          const found = this.getCallback(callback, expression, method);
           if (found) {
             callbacks.push(found);
           }
@@ -1223,7 +1239,7 @@ export class Callback extends Operation {
   constructor(
     oas: Oas,
     path: string,
-    method: HttpMethods,
+    method: OperationMethod,
     operation: OperationObject,
     identifier: string,
     parentPathItem: PathItemObject,
@@ -1302,7 +1318,7 @@ export class Webhook extends Operation {
   /**
    * OpenAPI API Definition that this webhook originated from.
    */
-  declare api: OAS31Document;
+  declare api: OAS31Document | OAS32Document;
 
   /**
    * Webhook Path Item that supplies common parameters. `$ref` pointers are resolved so parameters

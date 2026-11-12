@@ -69,12 +69,15 @@ export function decodePointer(str: string): string {
 }
 
 /**
- * Lookup a reference pointer within an a JSON object and return the schema that it resolves to.
+ * Lookup a reference pointer within a JSON object and return the value it resolves to.
+ *
+ * An empty pointer returns `false`. An external `$ref`, a pointer that does not exist, or a
+ * fragment that cannot be decoded throws.
  *
  * @param $ref Reference to look up a schema for.
  * @param definition OpenAPI definition to look for the `$ref` pointer in.
  */
-function findRef($ref: string, definition: OASDocument | SchemaObject): any {
+export function findRef($ref: string, definition: OASDocument | SchemaObject): any {
   let currRef = $ref.trim();
   if (currRef === '') {
     // If this ref is empty, don't bother trying to look for it.

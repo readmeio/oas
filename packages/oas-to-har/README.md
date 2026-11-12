@@ -21,8 +21,8 @@ npm install --save @readme/oas-to-har
 ## Usage
 
 ```js
-import Oas from 'oas';
 import oasToHar from '@readme/oas-to-har';
+import Oas from 'oas';
 
 import petstore from './petstore.json';
 

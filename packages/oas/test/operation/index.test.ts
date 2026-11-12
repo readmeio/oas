@@ -21,6 +21,37 @@ import responsesRefExtensionSpec from '../__datasets__/responses-ref-extension.j
 import schemaDeprecatedSpec from '../__datasets__/schema-deprecated.json' with { type: 'json' };
 import { createOasForPaths } from '../__fixtures__/create-oas.js';
 
+function callbackIdentifierRefOas() {
+  return Oas.init({
+    openapi: '3.1.0',
+    info: { title: 'Callback identifier refs', version: '1.0.0' },
+    paths: {
+      '/events': {
+        post: {
+          callbacks: {
+            onEvent: {
+              $ref: '#/components/callbacks/onEvent',
+            },
+          },
+          responses: { 200: { description: 'ok' } },
+        },
+      },
+    },
+    components: {
+      callbacks: {
+        onEvent: {
+          '{$request.body#/callbackUrl}': {
+            post: {
+              operationId: 'notifyEvent',
+              responses: { 200: { description: 'ok' } },
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
 let petstore: Oas;
 let callbackSchema: Oas;
 let multipleSecurities: Oas;
@@ -2102,6 +2133,58 @@ describe('#getRequestBody()', () => {
       });
     });
 
+    it('should resolve an OpenAPI 3.2 request body content `$ref`', () => {
+      const oas = Oas.init({
+        openapi: '3.2.0',
+        info: { title: 'media types', version: '1.0.0' },
+        paths: {
+          '/files': {
+            post: {
+              requestBody: {
+                description: 'A file',
+                content: {
+                  'application/json': { $ref: '#/components/mediaTypes/File' },
+                },
+              },
+              responses: { '201': { description: 'Created' } },
+            },
+          },
+        },
+        components: {
+          mediaTypes: {
+            File: { schema: { $ref: '#/components/schemas/File' } },
+          },
+        },
+      });
+
+      expect(oas.operation('/files', 'post').getRequestBody('application/json')).toStrictEqual({
+        description: 'A file',
+        mediaType: 'application/json',
+        mediaTypeObject: { schema: { $ref: '#/components/schemas/File' } },
+      });
+    });
+
+    it('should return false when a request body content `$ref` does not resolve', () => {
+      const oas = Oas.init({
+        openapi: '3.2.0',
+        info: { title: 'media types', version: '1.0.0' },
+        paths: {
+          '/files': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': { $ref: '#/components/mediaTypes/Missing' },
+                },
+              },
+              responses: { '201': { description: 'Created' } },
+            },
+          },
+        },
+      });
+
+      expect(oas.operation('/files', 'post').getRequestBody('application/json')).toBe(false);
+    });
+
     it('should omit the description when not present', () => {
       const oas = Oas.init(petstore.getDefinition());
       const op = new Operation(oas, '/no-desc', 'post', {
@@ -2311,6 +2394,39 @@ describe('#getCallback()', () => {
     expect(callback.method).toBe('query');
     expect(callback.getOperationId()).toBe('searchCallback');
   });
+
+  it('should return a callback under an OpenAPI 3.2 `additionalOperations` method', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { version: '1.0.0', title: 'custom method callbacks' },
+      paths: {
+        '/events': {
+          post: {
+            callbacks: {
+              onNotify: {
+                '{$request.body#/url}': {
+                  additionalOperations: {
+                    NOTIFY: {
+                      operationId: 'notifyCallback',
+                      responses: { 200: { description: 'OK' } },
+                    },
+                  },
+                },
+              },
+            },
+            responses: { 200: { description: 'ok' } },
+          },
+        },
+      },
+    });
+
+    const operation = oas.operation('/events', 'post');
+    const callback = operation.getCallback('onNotify', '{$request.body#/url}', 'NOTIFY') as Callback;
+
+    expect(callback).toBeInstanceOf(Callback);
+    expect(callback.method).toBe('NOTIFY');
+    expect(callback.getOperationId()).toBe('notifyCallback');
+  });
 });
 
 describe('#getCallbacks()', () => {
@@ -2359,36 +2475,38 @@ describe('#getCallbacks()', () => {
     expect(callbacks[0].getOperationId()).toBe('searchCallback');
   });
 
-  function callbackIdentifierRefOas() {
-    return Oas.init({
-      openapi: '3.1.0',
-      info: { title: 'Callback identifier refs', version: '1.0.0' },
+  it('should include callbacks under an OpenAPI 3.2 `additionalOperations` method', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { version: '1.0.0', title: 'custom method callbacks' },
       paths: {
         '/events': {
           post: {
             callbacks: {
-              onEvent: {
-                $ref: '#/components/callbacks/onEvent',
+              onNotify: {
+                '{$request.body#/url}': {
+                  additionalOperations: {
+                    NOTIFY: {
+                      operationId: 'notifyCallback',
+                      responses: { 200: { description: 'OK' } },
+                    },
+                  },
+                },
               },
             },
             responses: { 200: { description: 'ok' } },
           },
         },
       },
-      components: {
-        callbacks: {
-          onEvent: {
-            '{$request.body#/callbackUrl}': {
-              post: {
-                operationId: 'notifyEvent',
-                responses: { 200: { description: 'ok' } },
-              },
-            },
-          },
-        },
-      },
     });
-  }
+
+    const callbacks = oas.operation('/events', 'post').getCallbacks();
+
+    expect(callbacks).toHaveLength(1);
+    expect(callbacks[0]).toBeInstanceOf(Callback);
+    expect(callbacks[0].method).toBe('NOTIFY');
+    expect(callbacks[0].getOperationId()).toBe('notifyCallback');
+  });
 
   it('should dereference a callback identifier `$ref` in getCallback()', () => {
     const callback = callbackIdentifierRefOas()

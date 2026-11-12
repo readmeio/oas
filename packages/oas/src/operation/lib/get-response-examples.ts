@@ -1,6 +1,7 @@
 import type { OASDocument, OperationObject } from '../../types.js';
 import type { MediaTypeExample } from './get-mediatype-examples.js';
 
+import { resolveMediaType } from '../../lib/media-type.js';
 import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
@@ -33,7 +34,7 @@ export function getResponseExamples(operation: OperationObject, definition: OASD
       (response?.content ? Object.keys(response.content) : []).forEach(mediaType => {
         if (!mediaType) return;
 
-        const mediaTypeObject = response.content?.[mediaType];
+        const mediaTypeObject = resolveMediaType(response.content?.[mediaType], definition);
         if (!mediaTypeObject) return;
 
         const examples = getMediaTypeExamples(mediaType, mediaTypeObject, definition, {

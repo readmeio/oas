@@ -1,5 +1,6 @@
 import type { Document as OpenAPI30Document } from '@scalar/openapi-types/3.0';
 import type { Document as OpenAPI31Document } from '@scalar/openapi-types/3.1';
+import type { Document as OpenAPI32Document } from '@scalar/openapi-types/3.2';
 import type { MockInstance } from 'vitest';
 
 import { $RefParser } from '@apidevtools/json-schema-ref-parser';
@@ -104,6 +105,42 @@ describe('Servers with relative paths in OpenAPI v3 files', () => {
 
     expect(apiJson.webhooks.newPet.servers[0].url).toBe('https://foo.my.cloud:8443/hooks/v1');
     expect(apiJson.webhooks.newPet.post.servers[0].url).toBe('https://foo.my.cloud:8443/hooks/v2');
+  });
+
+  it('should fix relative servers on OpenAPI 3.2 `additionalOperations`', () => {
+    const schema = {
+      openapi: '3.2.0',
+      info: { title: 't', version: '1' },
+      paths: {
+        '/files': {
+          additionalOperations: {
+            COPY: {
+              responses: { '200': { description: 'OK' } },
+              servers: [{ url: '/files/v1' }],
+            },
+          },
+        },
+      },
+      webhooks: {
+        fileCopied: {
+          additionalOperations: {
+            NOTIFY: {
+              responses: { '200': { description: 'OK' } },
+              servers: [{ url: '/hooks/v1' }],
+            },
+          },
+        },
+      },
+    } as OpenAPI32Document;
+
+    fixOasRelativeServers(schema, 'https://example.com/openapi.json');
+
+    expect(schema.paths?.['/files']?.additionalOperations?.COPY?.servers?.[0]?.url).toBe(
+      'https://example.com/files/v1',
+    );
+    expect(schema.webhooks?.fileCopied?.additionalOperations?.NOTIFY?.servers?.[0]?.url).toBe(
+      'https://example.com/hooks/v1',
+    );
   });
 
   it('should leave relative servers unchanged when the source URL is not a valid URL', () => {

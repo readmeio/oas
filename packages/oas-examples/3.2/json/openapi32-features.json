@@ -1,0 +1,350 @@
+{
+  "openapi": "3.2.0",
+  "$self": "https://example.com/openapi.json",
+  "info": {
+    "title": "OpenAPI 3.2 features",
+    "description": "A showcase of the features that were introduced in OpenAPI 3.2.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "name": "Production",
+      "url": "https://httpbin.org"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Files",
+      "summary": "File operations",
+      "kind": "nav"
+    },
+    {
+      "name": "Documents",
+      "parent": "Files"
+    },
+    {
+      "name": "Events",
+      "kind": "nav"
+    },
+    {
+      "name": "Webhooks",
+      "kind": "nav"
+    }
+  ],
+  "paths": {
+    "/anything/documents": {
+      "query": {
+        "tags": ["Documents"],
+        "summary": "Search documents with the HTTP QUERY method",
+        "operationId": "queryDocuments",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filter": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "summary": "Matching documents",
+            "description": "A list of documents that match the supplied filter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Document"
+                  }
+                },
+                "examples": {
+                  "dataValue": {
+                    "summary": "An example using `dataValue`",
+                    "dataValue": [
+                      {
+                        "id": "doc_1",
+                        "name": "Quarterly report"
+                      }
+                    ]
+                  },
+                  "serializedValue": {
+                    "summary": "An example using `serializedValue`",
+                    "serializedValue": "[{\"id\":\"doc_1\",\"name\":\"Quarterly report\"}]"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/anything/documents/search": {
+      "get": {
+        "tags": ["Documents"],
+        "summary": "Search documents with a `querystring` parameter",
+        "operationId": "searchDocuments",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "querystring",
+            "description": "The entire query string, described as a single object.",
+            "content": {
+              "application/x-www-form-urlencoded": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "term": {
+                      "type": "string"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Document"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/anything/files/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": ["Files"],
+        "summary": "Retrieve a file",
+        "operationId": "getFile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "$ref": "#/components/mediaTypes/File"
+              }
+            }
+          }
+        }
+      },
+      "additionalOperations": {
+        "COPY": {
+          "tags": ["Files"],
+          "summary": "Copy a file with the WebDAV COPY method",
+          "operationId": "copyFile",
+          "parameters": [
+            {
+              "name": "Destination",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Created"
+            }
+          }
+        },
+        "LOCK": {
+          "tags": ["Files"],
+          "summary": "Lock a file with the WebDAV LOCK method",
+          "operationId": "lockFile",
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      }
+    },
+    "/anything/events": {
+      "get": {
+        "tags": ["Events"],
+        "summary": "Stream events as JSON Lines",
+        "operationId": "streamEvents",
+        "responses": {
+          "200": {
+            "description": "A stream of events, one per line.",
+            "content": {
+              "application/jsonl": {
+                "itemSchema": {
+                  "$ref": "#/components/schemas/Event"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Events"],
+        "summary": "Upload a batch of events",
+        "operationId": "uploadEvents",
+        "requestBody": {
+          "content": {
+            "multipart/mixed": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "prefixEncoding": [
+                {
+                  "contentType": "text/plain"
+                }
+              ],
+              "itemEncoding": {
+                "contentType": "application/json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "fileCopied": {
+      "post": {
+        "tags": ["Webhooks"],
+        "summary": "A file was copied",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Event"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return a 200 status to indicate that the data was received successfully."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "mediaTypes": {
+      "File": {
+        "schema": {
+          "$ref": "#/components/schemas/File"
+        }
+      }
+    },
+    "schemas": {
+      "Document": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "nodeType": "element"
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "payload": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Document"
+              },
+              {
+                "$ref": "#/components/schemas/File"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "kind",
+              "defaultMapping": "#/components/schemas/Document",
+              "mapping": {
+                "document": "#/components/schemas/Document",
+                "file": "#/components/schemas/File"
+              }
+            }
+          }
+        }
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "oauth2MetadataUrl": "https://example.com/.well-known/oauth-authorization-server",
+        "flows": {
+          "deviceAuthorization": {
+            "deviceAuthorizationUrl": "https://example.com/oauth/device",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {
+              "read:files": "Read files",
+              "write:files": "Write files"
+            }
+          }
+        }
+      },
+      "LegacyApiKey": {
+        "type": "apiKey",
+        "name": "X-API-Key",
+        "in": "header",
+        "deprecated": true
+      }
+    }
+  }
+}

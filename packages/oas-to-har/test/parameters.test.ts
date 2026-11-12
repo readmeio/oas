@@ -1,10 +1,11 @@
+// oxlint-disable vitest/expect-expect -- assertions live in the helpers below
 import type { DataForHAR } from '../src/lib/types.js';
 import type { Request } from 'har-format';
 import type { OperationObject } from 'oas/types';
 
 import toBeAValidHAR from 'jest-expect-har';
 import Oas from 'oas';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import oasToHar from '../src/index.js';
 
@@ -12,6 +13,78 @@ import commonParameters from './__datasets__/common-parameters.json' with { type
 
 // oxlint-disable-next-line vitest/require-hook
 expect.extend({ toBeAValidHAR });
+
+// oxlint-disable vitest/no-standalone-expect -- these run when a test calls the helper
+const assertPath = vi.defineHelper(async (operation: OperationObject, formData: DataForHAR, expected: string) => {
+  const spec = Oas.init({
+    paths: {
+      '/path-param/{id}': {
+        get: operation,
+      },
+    },
+  });
+
+  const har = oasToHar(spec, spec.operation('/path-param/{id}', 'get'), formData);
+
+  await expect(har).toBeAValidHAR();
+
+  expect(har.log.entries[0].request.url).toBe(expected);
+});
+
+const assertQueryParams = vi.defineHelper(
+  async (operation: OperationObject, formData: DataForHAR, expected: Request['queryString']) => {
+    const spec = Oas.init({
+      paths: {
+        '/query': {
+          get: operation,
+        },
+      },
+    });
+
+    const har = oasToHar(spec, spec.operation('/query', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+  },
+);
+
+const assertCookies = vi.defineHelper(
+  async (operation: OperationObject, formData: DataForHAR, expected: Request['cookies']) => {
+    const spec = Oas.init({
+      paths: {
+        '/cookie': {
+          get: operation,
+        },
+      },
+    });
+
+    const har = oasToHar(spec, spec.operation('/cookie', 'get'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.cookies).toStrictEqual(expected);
+  },
+);
+
+const assertHeaders = vi.defineHelper(
+  async (operation: OperationObject, formData: DataForHAR, expected: Request['headers']) => {
+    const spec = Oas.init({
+      paths: {
+        '/header': {
+          post: operation,
+        },
+      },
+    });
+
+    const har = oasToHar(spec, spec.operation('/header', 'post'), formData);
+
+    await expect(har).toBeAValidHAR();
+
+    expect(har.log.entries[0].request.headers).toStrictEqual(expected);
+  },
+);
+// oxlint-enable vitest/no-standalone-expect
 
 describe('parameter handling', () => {
   describe('path', () => {
@@ -42,56 +115,35 @@ describe('parameter handling', () => {
       );
     });
 
-    function assertPath(operation: OperationObject, formData: DataForHAR, expected: string) {
-      return async () => {
-        const spec = Oas.init({
-          paths: {
-            '/path-param/{id}': {
-              get: operation,
-            },
-          },
-        });
-
-        const har = oasToHar(spec, spec.operation('/path-param/{id}', 'get'), formData);
-
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.url).toBe(expected);
-      };
-    }
-
-    it(
-      'should not error if empty object passed in for values',
-      assertPath(
+    it('should not error if empty object passed in for values', async () => {
+      await assertPath(
         {
           parameters: [{ name: 'id', in: 'path', required: true }],
         },
         {},
         'https://example.com/path-param/id',
-      ),
-    );
+      );
+    });
 
-    it(
-      'should use default if no value',
-      assertPath(
+    it('should use default if no value', async () => {
+      await assertPath(
         {
           parameters: [{ name: 'id', in: 'path', required: true, schema: { default: '123' } }],
         },
         {},
         'https://example.com/path-param/123',
-      ),
-    );
+      );
+    });
 
-    it(
-      'should use the parameter name when a required schema has no default',
-      assertPath(
+    it('should use the parameter name when a required schema has no default', async () => {
+      await assertPath(
         {
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         },
         {},
         'https://example.com/path-param/id',
-      ),
-    );
+      );
+    });
 
     it('should use the parameter name when a required `$ref` schema has no default', async () => {
       const spec = Oas.init({
@@ -149,68 +201,45 @@ describe('parameter handling', () => {
       expect(har.log.entries[0].request.url).toBe('https://example.com/path-param/99');
     });
 
-    it(
-      'should add path values to the url',
-      assertPath(
+    it('should add path values to the url', async () => {
+      await assertPath(
         {
           parameters: [{ name: 'id', in: 'path', required: true }],
         },
         { path: { id: '456' } },
         'https://example.com/path-param/456',
-      ),
-    );
+      );
+    });
 
-    it(
-      'should add falsy values to the url',
-      assertPath(
+    it('should add falsy values to the url', async () => {
+      await assertPath(
         {
           parameters: [{ name: 'id', in: 'path', required: true }],
         },
         { path: { id: 0 } },
         'https://example.com/path-param/0',
-      ),
-    );
+      );
+    });
   });
 
   describe('query', () => {
-    function assertQueryParams(operation: OperationObject, formData: DataForHAR, expected: Request['queryString']) {
-      return async () => {
-        const spec = Oas.init({
-          paths: {
-            '/query': {
-              get: operation,
-            },
-          },
-        });
+    it('should not add on empty unrequired values', async () => {
+      await assertQueryParams({ parameters: [{ name: 'a', in: 'query' }] }, {}, []);
+    });
 
-        const har = oasToHar(spec, spec.operation('/query', 'get'), formData);
+    it('should not add the parameter name as a value if required but missing', async () => {
+      await assertQueryParams({ parameters: [{ name: 'a', in: 'query', required: true }] }, {}, []);
+    });
 
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
-      };
-    }
-
-    it(
-      'should not add on empty unrequired values',
-      assertQueryParams({ parameters: [{ name: 'a', in: 'query' }] }, {}, []),
-    );
-
-    it(
-      'should not add the parameter name as a value if required but missing',
-      assertQueryParams({ parameters: [{ name: 'a', in: 'query', required: true }] }, {}, []),
-    );
-
-    it(
-      'should set defaults if no value provided but is required',
-      assertQueryParams(
+    it('should set defaults if no value provided but is required', async () => {
+      await assertQueryParams(
         {
           parameters: [{ name: 'a', in: 'query', required: true, schema: { default: 'value' } }],
         },
         {},
         [{ name: 'a', value: 'value' }],
-      ),
-    );
+      );
+    });
 
     it('should set defaults from a `$ref` schema when required', async () => {
       const spec = Oas.init({
@@ -240,53 +269,48 @@ describe('parameter handling', () => {
       expect(har.log.entries[0].request.queryString).toStrictEqual([{ name: 'limit', value: '25' }]);
     });
 
-    it(
-      'should pass in value if one is set and prioritize provided values',
-      assertQueryParams(
+    it('should pass in value if one is set and prioritize provided values', async () => {
+      await assertQueryParams(
         {
           parameters: [{ name: 'a', in: 'query', required: true, schema: { default: 'value' } }],
         },
         { query: { a: 'test' } },
         [{ name: 'a', value: 'test' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should add falsy values to the querystring',
-      assertQueryParams(
+    it('should add falsy values to the querystring', async () => {
+      await assertQueryParams(
         {
           parameters: [{ name: 'id', in: 'query' }],
         },
         { query: { id: 0 } },
         [{ name: 'id', value: '0' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should handle null array values',
-      assertQueryParams(
+    it('should handle null array values', async () => {
+      await assertQueryParams(
         {
           parameters: [{ name: 'id', in: 'query' }],
         },
         { query: { id: [null, null] } },
         [{ name: 'id', value: 'null&id=null' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should handle null values',
-      assertQueryParams(
+    it('should handle null values', async () => {
+      await assertQueryParams(
         {
           parameters: [{ name: 'id', in: 'query' }],
         },
         { query: { id: null } },
         [{ name: 'id', value: 'null' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should handle null default values',
-      assertQueryParams(
+    it('should handle null default values', async () => {
+      await assertQueryParams(
         {
           parameters: [
             {
@@ -305,30 +329,28 @@ describe('parameter handling', () => {
         },
         { query: {} },
         [{ name: 'id', value: 'null&id=null' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should handle mixed array with null, undefined, and normal values',
-      assertQueryParams(
+    it('should handle mixed array with null, undefined, and normal values', async () => {
+      await assertQueryParams(
         {
           parameters: [{ name: 'id', in: 'query' }],
         },
         { query: { id: [null, undefined, 'normal', null, 'test'] } },
         [{ name: 'id', value: 'null&id=&id=normal&id=null&id=test' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should handle array with only undefined values',
-      assertQueryParams(
+    it('should handle array with only undefined values', async () => {
+      await assertQueryParams(
         {
           parameters: [{ name: 'id', in: 'query' }],
         },
         { query: { id: [undefined, undefined] } },
         [{ name: 'id', value: '&id=' }],
-      ),
-    );
+      );
+    });
 
     describe('URI encoding', () => {
       let spec: Oas;
@@ -421,9 +443,8 @@ describe('parameter handling', () => {
     });
 
     describe('content-based parameters', () => {
-      it(
-        'should JSON-encode query parameters with content: application/json',
-        assertQueryParams(
+      it('should JSON-encode query parameters with content: application/json', async () => {
+        await assertQueryParams(
           {
             parameters: [
               {
@@ -449,12 +470,11 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'contentJson', value: encodeURIComponent('{"foo":"test","bar":123}') }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should handle empty object for content-based query parameters',
-        assertQueryParams(
+      it('should handle empty object for content-based query parameters', async () => {
+        await assertQueryParams(
           {
             parameters: [
               {
@@ -480,12 +500,11 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'contentJson', value: encodeURIComponent('{}') }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should ignore style and explode when content is present',
-        assertQueryParams(
+      it('should ignore style and explode when content is present', async () => {
+        await assertQueryParams(
           {
             parameters: [
               {
@@ -514,12 +533,11 @@ describe('parameter handling', () => {
           },
           // Should be JSON-encoded and URL-encoded, not form-encoded (style/explode should be ignored)
           [{ name: 'contentJson', value: encodeURIComponent('{"foo":"test","bar":123}') }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should use the first content type when multiple content types are present',
-        assertQueryParams(
+      it('should use the first content type when multiple content types are present', async () => {
+        await assertQueryParams(
           {
             parameters: [
               {
@@ -549,12 +567,11 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'contentJson', value: encodeURIComponent('{"foo":"test"}') }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should not add content-based parameter if value is undefined and not required',
-        assertQueryParams(
+      it('should not add content-based parameter if value is undefined and not required', async () => {
+        await assertQueryParams(
           {
             parameters: [
               {
@@ -575,12 +592,11 @@ describe('parameter handling', () => {
           },
           {},
           [],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should set defaults if no value provided but is required',
-        assertQueryParams(
+      it('should set defaults if no value provided but is required', async () => {
+        await assertQueryParams(
           {
             parameters: [
               {
@@ -604,8 +620,8 @@ describe('parameter handling', () => {
           },
           {},
           [{ name: 'contentJson', value: encodeURIComponent('{"foo":"default","bar":42}') }],
-        ),
-      );
+        );
+      });
 
       it('should set defaults from a content `$ref` schema when required', async () => {
         const spec = Oas.init({
@@ -648,9 +664,8 @@ describe('parameter handling', () => {
         ]);
       });
 
-      it(
-        'should handle arrays in content-based query parameters',
-        assertQueryParams(
+      it('should handle arrays in content-based query parameters', async () => {
+        await assertQueryParams(
           {
             parameters: [
               {
@@ -682,12 +697,11 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'contentJson', value: encodeURIComponent('[{"id":1,"name":"first"},{"id":2,"name":"second"}]') }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should serialize XML content type as string (for now)',
-        assertQueryParams(
+      it('should serialize XML content type as string (for now)', async () => {
+        await assertQueryParams(
           {
             parameters: [
               {
@@ -709,50 +723,29 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'contentXml', value: encodeURIComponent('<root><foo>test</foo><bar>123</bar></root>') }],
-        ),
-      );
+        );
+      });
     });
   });
 
   describe('cookie', () => {
-    function assertCookies(operation: OperationObject, formData: DataForHAR, expected: Request['cookies']) {
-      return async () => {
-        const spec = Oas.init({
-          paths: {
-            '/cookie': {
-              get: operation,
-            },
-          },
-        });
+    it('should not add on empty unrequired values', async () => {
+      await assertCookies({ parameters: [{ name: 'a', in: 'cookie' }] }, {}, []);
+    });
 
-        const har = oasToHar(spec, spec.operation('/cookie', 'get'), formData);
+    it('should not add the parameter name as a value if required but missing', async () => {
+      await assertCookies({ parameters: [{ name: 'a', in: 'cookie', required: true }] }, {}, []);
+    });
 
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.cookies).toStrictEqual(expected);
-      };
-    }
-
-    it(
-      'should not add on empty unrequired values',
-      assertCookies({ parameters: [{ name: 'a', in: 'cookie' }] }, {}, []),
-    );
-
-    it(
-      'should not add the parameter name as a value if required but missing',
-      assertCookies({ parameters: [{ name: 'a', in: 'cookie', required: true }] }, {}, []),
-    );
-
-    it(
-      'should set defaults if no value provided but is required',
-      assertCookies(
+    it('should set defaults if no value provided but is required', async () => {
+      await assertCookies(
         {
           parameters: [{ name: 'a', in: 'cookie', required: true, schema: { default: 'value' } }],
         },
         {},
         [{ name: 'a', value: 'value' }],
-      ),
-    );
+      );
+    });
 
     it('should set defaults from a `$ref` schema when required', async () => {
       const spec = Oas.init({
@@ -782,68 +775,45 @@ describe('parameter handling', () => {
       expect(har.log.entries[0].request.cookies).toStrictEqual([{ name: 'session', value: 'anon' }]);
     });
 
-    it(
-      'should pass in value if one is set and prioritize provided values',
-      assertCookies(
+    it('should pass in value if one is set and prioritize provided values', async () => {
+      await assertCookies(
         {
           parameters: [{ name: 'a', in: 'cookie', required: true, schema: { default: 'value' } }],
         },
         { cookie: { a: 'test' } },
         [{ name: 'a', value: 'test' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should add falsy values to the cookies',
-      assertCookies(
+    it('should add falsy values to the cookies', async () => {
+      await assertCookies(
         {
           parameters: [{ name: 'id', in: 'cookie' }],
         },
         { cookie: { id: 0 } },
         [{ name: 'id', value: '0' }],
-      ),
-    );
+      );
+    });
   });
 
   describe('header', () => {
-    function assertHeaders(operation: OperationObject, formData: DataForHAR, expected: Request['headers']) {
-      return async () => {
-        const spec = Oas.init({
-          paths: {
-            '/header': {
-              post: operation,
-            },
-          },
-        });
+    it('should not add on empty unrequired values', async () => {
+      await assertHeaders({ parameters: [{ name: 'a', in: 'header' }] }, {}, []);
+    });
 
-        const har = oasToHar(spec, spec.operation('/header', 'post'), formData);
+    it('should not add the parameter name as a value if required but missing', async () => {
+      await assertHeaders({ parameters: [{ name: 'a', in: 'header', required: true }] }, {}, []);
+    });
 
-        await expect(har).toBeAValidHAR();
-
-        expect(har.log.entries[0].request.headers).toStrictEqual(expected);
-      };
-    }
-
-    it(
-      'should not add on empty unrequired values',
-      assertHeaders({ parameters: [{ name: 'a', in: 'header' }] }, {}, []),
-    );
-
-    it(
-      'should not add the parameter name as a value if required but missing',
-      assertHeaders({ parameters: [{ name: 'a', in: 'header', required: true }] }, {}, []),
-    );
-
-    it(
-      'should set defaults if no value provided but is required',
-      assertHeaders(
+    it('should set defaults if no value provided but is required', async () => {
+      await assertHeaders(
         {
           parameters: [{ name: 'a', in: 'header', required: true, schema: { default: 'value' } }],
         },
         {},
         [{ name: 'a', value: 'value' }],
-      ),
-    );
+      );
+    });
 
     it('should set defaults from a `$ref` schema when required', async () => {
       const spec = Oas.init({
@@ -905,31 +875,28 @@ describe('parameter handling', () => {
       expect(har.log.entries[0].request.headers).toStrictEqual([{ name: 'X-Auth', value: 'secret-token' }]);
     });
 
-    it(
-      'should pass in value if one is set and prioritize provided values',
-      assertHeaders(
+    it('should pass in value if one is set and prioritize provided values', async () => {
+      await assertHeaders(
         {
           parameters: [{ name: 'a', in: 'header', required: true, schema: { default: 'value' } }],
         },
         { header: { a: 'test' } },
         [{ name: 'a', value: 'test' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should retain defined header casing',
-      assertHeaders(
+    it('should retain defined header casing', async () => {
+      await assertHeaders(
         {
           parameters: [{ name: 'reqKey', in: 'header', required: true, schema: { default: 'value' } }],
         },
         { header: { reqKey: 'test' } },
         [{ name: 'reqKey', value: 'test' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should match a header parameter case-insensitively against the supplied form data',
-      assertHeaders(
+    it('should match a header parameter case-insensitively against the supplied form data', async () => {
+      await assertHeaders(
         {
           parameters: [{ name: 'X-Customer-Code', in: 'header', schema: { type: 'string' } }],
         },
@@ -937,12 +904,11 @@ describe('parameter handling', () => {
         // them, so the form data key won't necessarily match the parameter's defined casing.
         { header: { 'x-customer-code': 'abc123' } },
         [{ name: 'X-Customer-Code', value: 'abc123' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should pass an `accept` header if endpoint expects a content back from response',
-      assertHeaders(
+    it('should pass an `accept` header if endpoint expects a content back from response', async () => {
+      await assertHeaders(
         {
           parameters: [{ name: 'a', in: 'header', required: true, schema: { default: 'value' } }],
           responses: {
@@ -960,12 +926,11 @@ describe('parameter handling', () => {
           { name: 'accept', value: 'application/xml' },
           { name: 'a', value: 'value' },
         ],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should pass an `accept` header if endpoint expects a content back from response, but prioritize JSON',
-      assertHeaders(
+    it('should pass an `accept` header if endpoint expects a content back from response, but prioritize JSON', async () => {
+      await assertHeaders(
         {
           parameters: [{ name: 'a', in: 'header', required: true, schema: { default: 'value' } }],
           responses: {
@@ -983,12 +948,11 @@ describe('parameter handling', () => {
           { name: 'accept', value: 'application/json' },
           { name: 'a', value: 'value' },
         ],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should only add one `accept` header when multiple responses are present',
-      assertHeaders(
+    it('should only add one `accept` header when multiple responses are present', async () => {
+      await assertHeaders(
         {
           responses: {
             200: {
@@ -1007,12 +971,11 @@ describe('parameter handling', () => {
         },
         {},
         [{ name: 'accept', value: 'application/xml' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should only receive one `accept` header if specified in values',
-      assertHeaders(
+    it('should only receive one `accept` header if specified in values', async () => {
+      await assertHeaders(
         {
           parameters: [{ name: 'accept', in: 'header' }],
           responses: {
@@ -1027,12 +990,11 @@ describe('parameter handling', () => {
         },
         { header: { accept: 'application/xml' } },
         [{ name: 'accept', value: 'application/xml' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should add `accept` header if specified in formdata',
-      assertHeaders(
+    it('should add `accept` header if specified in formdata', async () => {
+      await assertHeaders(
         {
           responses: {
             200: {
@@ -1046,12 +1008,11 @@ describe('parameter handling', () => {
         },
         { header: { accept: 'application/xml' } },
         [{ name: 'accept', value: 'application/xml' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should add `content-type` header if specified in formdata',
-      assertHeaders(
+    it('should add `content-type` header if specified in formdata', async () => {
+      await assertHeaders(
         {
           requestBody: {
             content: {
@@ -1066,24 +1027,22 @@ describe('parameter handling', () => {
         },
         { header: { 'content-type': 'application/x-www-form-urlencoded' } },
         [{ name: 'content-type', value: 'application/x-www-form-urlencoded' }],
-      ),
-    );
+      );
+    });
 
-    it(
-      'should add falsy values to the headers',
-      assertHeaders(
+    it('should add falsy values to the headers', async () => {
+      await assertHeaders(
         {
           parameters: [{ name: 'id', in: 'header' }],
         },
         { header: { id: 0 } },
         [{ name: 'id', value: '0' }],
-      ),
-    );
+      );
+    });
 
     describe('content-based parameters', () => {
-      it(
-        'should JSON-encode header parameters with content: application/json',
-        assertHeaders(
+      it('should JSON-encode header parameters with content: application/json', async () => {
+        await assertHeaders(
           {
             parameters: [
               {
@@ -1109,12 +1068,11 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'x-custom', value: '{"foo":"test","bar":123}' }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should handle empty object for content-based header parameters',
-        assertHeaders(
+      it('should handle empty object for content-based header parameters', async () => {
+        await assertHeaders(
           {
             parameters: [
               {
@@ -1139,12 +1097,11 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'x-custom', value: '{}' }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should JSON-encode array header parameters',
-        assertHeaders(
+      it('should JSON-encode array header parameters', async () => {
+        await assertHeaders(
           {
             parameters: [
               {
@@ -1167,12 +1124,11 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'x-custom', value: '["a","b","c"]' }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should not URL-encode content-based header values',
-        assertHeaders(
+      it('should not URL-encode content-based header values', async () => {
+        await assertHeaders(
           {
             parameters: [
               {
@@ -1197,12 +1153,11 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'x-custom', value: '{"key":"a&b=c"}' }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should ignore style and explode when content is present',
-        assertHeaders(
+      it('should ignore style and explode when content is present', async () => {
+        await assertHeaders(
           {
             parameters: [
               {
@@ -1230,14 +1185,13 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'x-custom', value: '{"foo":"test","bar":123}' }],
-        ),
-      );
+        );
+      });
     });
 
     describe('schema-based parameters', () => {
-      it(
-        'should not URL-encode schema-based header values',
-        assertHeaders(
+      it('should not URL-encode schema-based header values', async () => {
+        await assertHeaders(
           {
             parameters: [
               {
@@ -1255,12 +1209,11 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'x-custom', value: 'value with spaces & special=chars' }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should not URL-encode date-time header values (e.g. If-Modified-Since)',
-        assertHeaders(
+      it('should not URL-encode date-time header values (e.g. If-Modified-Since)', async () => {
+        await assertHeaders(
           {
             parameters: [
               {
@@ -1279,12 +1232,11 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'If-Modified-Since', value: 'Wed, 21 Oct 2015 07:28:00 GMT' }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should not URL-encode If-None-Match header values',
-        assertHeaders(
+      it('should not URL-encode If-None-Match header values', async () => {
+        await assertHeaders(
           {
             parameters: [
               {
@@ -1302,12 +1254,11 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'If-None-Match', value: '"abc123"' }],
-        ),
-      );
+        );
+      });
 
-      it(
-        'should pass through header values with commas unencoded',
-        assertHeaders(
+      it('should pass through header values with commas unencoded', async () => {
+        await assertHeaders(
           {
             parameters: [
               {
@@ -1325,8 +1276,8 @@ describe('parameter handling', () => {
             },
           },
           [{ name: 'x-list', value: 'item1, item2, item3' }],
-        ),
-      );
+        );
+      });
     });
   });
 

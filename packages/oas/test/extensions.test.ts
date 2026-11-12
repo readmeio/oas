@@ -1,8 +1,12 @@
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import * as extensions from '../src/extensions.js';
+import * as extensionNamespace from '../src/extensions.js';
 import Oas from '../src/index.js';
+
+// Copy the module namespace so tests can look extension constants up by name.
+// Computed access on the namespace itself is rejected by `import/namespace`.
+const extensions: typeof extensionNamespace = { ...extensionNamespace };
 
 describe('extension defaults', () => {
   it.each([
