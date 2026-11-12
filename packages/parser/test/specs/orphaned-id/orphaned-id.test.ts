@@ -339,6 +339,61 @@ describe('orphaned `$id` keywords', () => {
         properties: { id: { type: 'integer' } },
       });
     });
+
+    it('should not write the local file path into a repeat `$ref` under an external file `$id`', async () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orphaned-id-ext-'));
+      const spec = path.join(dir, 'spec.json');
+      writtenFiles.push(spec);
+
+      fs.mkdirSync(path.join(dir, 'schemas/requests'), { recursive: true });
+      fs.writeFileSync(
+        path.join(dir, 'schemas/requests/test.json'),
+        JSON.stringify({ type: 'object', properties: { name: { type: 'string' } } }),
+      );
+      fs.writeFileSync(
+        path.join(dir, 'schemas/requests/search.schema.json'),
+        JSON.stringify({
+          $id: 'requests/search.schema.json',
+          type: 'object',
+          properties: { test1: { $ref: '../test.json' }, test2: { $ref: '../test.json' } },
+        }),
+      );
+      fs.writeFileSync(
+        spec,
+        JSON.stringify({
+          openapi: '3.1.0',
+          info: { title: 't', version: '1' },
+          paths: {
+            '/pets': {
+              get: {
+                responses: {
+                  '200': {
+                    description: 'ok',
+                    content: { 'application/json': { schema: { $ref: 'schemas/requests/search.schema.json' } } },
+                  },
+                },
+              },
+            },
+          },
+        }),
+      );
+
+      const bundled = await bundle<ValidAPIDefinition>(spec);
+      const schema = bundled.paths['/pets'].get.responses['200'].content['application/json'].schema;
+
+      expect(schema.properties.test2).toStrictEqual({ $ref: '#/properties/test1' });
+
+      // The bundle must resolve on its own once the source files are gone.
+      fs.rmSync(dir, { recursive: true, force: true });
+      const api = await dereference<ValidAPIDefinition>(bundled);
+
+      expect(api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties.test2).toStrictEqual(
+        {
+          type: 'object',
+          properties: { name: { type: 'string' } },
+        },
+      );
+    });
   });
 
   describe('stripOrphanedIds()', () => {
