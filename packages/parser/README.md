@@ -247,3 +247,20 @@ const api = await parse(myAPI);
 
 console.log('API name: %s, Version: %s', api.info.title, api.info.version);
 ```
+
+### Filesystem `$ref`s
+
+Filesystem `$ref`s, including `file://` URLs, are off unless you opt in with `resolve.file: true` or pass a filesystem path as the API source. They are confined to `resolve.fileRoot`. A filesystem-path source defaults that root to the file's directory. An inline schema has no default, so set `fileRoot` before any local `$ref` is read:
+
+```ts
+import { bundle } from '@readme/openapi-parser';
+
+const api = await bundle(spec, {
+  resolve: {
+    file: true,
+    fileRoot: './specs',
+  },
+});
+```
+
+Absolute paths, `file://` URLs, and `..` segments resolve only when the file stays inside that directory. A symlink `$ref` is refused, including one whose target is inside the directory. `resolve.fileBase` sets the base URL for relative `$ref`s on an inline schema; it has to stay inside `fileRoot`. Filesystem reads need `/proc/self/fd` so each path component can be opened from the previous directory; without that, the read is refused.
