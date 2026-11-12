@@ -201,7 +201,7 @@ const oas = new OASNormalize('./specs/petstore.json', {
 });
 ```
 
-The entry file has to stay inside `pathsRoot`, and its real path is checked before the file is read. The directory is resolved when the instance is constructed, so a later working-directory change does not move it. A symlink `$ref` is refused.
+The entry file has to stay inside `pathsRoot`, and its real path is checked before the file is read. The directory is resolved when the instance is constructed, so a later working-directory change does not move it. A symlink `$ref` is refused. Filesystem reads need `/proc/self/fd` so each path component can be opened from the previous directory; without that, the read is refused.
 
 ##### Colorized errors
 

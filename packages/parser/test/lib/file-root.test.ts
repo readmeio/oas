@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { bundle, dereference } from '../../src/index.js';
-import { isInsideRoot } from '../../src/lib/file-root.js';
+import { isInsideRoot, pathOfDescriptor } from '../../src/lib/file-root.js';
 
 const secretContents = 'SECRET_CONTENT_12345';
 const directories: string[] = [];
@@ -143,6 +143,27 @@ describe('filesystem `$ref` root', () => {
       const escaped = writeSpec(dir, '../secret.json', 'escape.json');
       // oxlint-disable-next-line no-await-in-loop -- each directory is a separate jail case
       await expect(dereference(escaped)).rejects.toThrow(/outside the allowed directory/i);
+    }
+  });
+
+  it('should resolve a descriptor opened through a directory symlink to its target', async () => {
+    const root = makeDir('oas-file-root-');
+    const outside = makeDir('oas-file-root-outside-');
+    fs.writeFileSync(path.join(root, 'pet.json'), '{"inside":true}');
+    fs.writeFileSync(path.join(outside, 'secret.json'), '{"leak":true}');
+    fs.symlinkSync(outside, path.join(root, 'alias'));
+
+    const rootReal = await fs.promises.realpath(root);
+    const inside = await fs.promises.open(path.join(root, 'pet.json'), 'r');
+    const escaped = await fs.promises.open(path.join(root, 'alias', 'secret.json'), 'r');
+    try {
+      const insidePath = await pathOfDescriptor(inside.fd);
+      const escapedPath = await pathOfDescriptor(escaped.fd);
+      expect(insidePath && isInsideRoot(rootReal, insidePath)).toBe(true);
+      expect(escapedPath && isInsideRoot(rootReal, escapedPath)).toBe(false);
+    } finally {
+      await inside.close();
+      await escaped.close();
     }
   });
 

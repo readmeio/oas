@@ -24,8 +24,8 @@ interface NodeFS {
     O_RDONLY: number;
   };
   promises: {
-    lstat(path: PathLike): Promise<Stats>;
     open(path: PathLike, flags: number): Promise<FileHandle>;
+    readlink(path: PathLike): Promise<string>;
     realpath(path: PathLike): Promise<string>;
     stat(path: PathLike): Promise<Stats>;
   };
@@ -203,11 +203,13 @@ export function createRootlessFileResolver(): ResolverOptions {
  * Filesystem resolver that reads a file only when its real path stays inside `root`.
  *
  * Symlinks are not followed. Each path component is opened from the previous directory
- * descriptor, so replacing a directory with a symlink after the containment check cannot
- * redirect the read. The final component is opened nonblocking and checked with `fstat`
- * before any bytes are read, so a named pipe cannot stall the open. The root directory is
- * `realpath`'d on first read and reused for every `$ref` in the document, including nested
- * files and `$id` re-bases.
+ * descriptor, and the opened descriptor's kernel path is checked against the root before
+ * any bytes are read. Replacing a directory with a symlink cannot redirect the read.
+ * Platforms without `/proc/self/fd` refuse the read instead of opening by pathname. The
+ * final component is opened nonblocking and checked with `fstat` before any bytes are
+ * read, so a named pipe cannot stall the open. The root directory is `realpath`'d on
+ * first read and reused for every `$ref` in the document, including nested files and
+ * `$id` re-bases.
  */
 export function createSandboxedFileResolver(root: string): ResolverOptions {
   let rootRealPromise: Promise<string> | undefined;
@@ -239,11 +241,13 @@ export function createSandboxedFileResolver(root: string): ResolverOptions {
         throw outsideDirectory(label);
       }
 
+      if (!(await canPinDirectories(fs))) {
+        throw unverifiedDescriptor(label);
+      }
+
       let handle: FileHandle;
       try {
-        handle = (await canPinDirectories(fs))
-          ? await openInsideRoot(rootReal, located, fs)
-          : await openFinalComponent(located, fs);
+        handle = await openInsideRoot(rootReal, located, fs);
       } catch (err) {
         if (isCode(err, 'ELOOP') || isCode(err, 'ENOTDIR')) {
           throw outsideDirectory(label);
@@ -264,6 +268,11 @@ export function createSandboxedFileResolver(root: string): ResolverOptions {
       }
 
       try {
+        const openedAt = await pathOfDescriptor(handle.fd);
+        if (!openedAt || !isInsideRoot(rootReal, openedAt)) {
+          throw outsideDirectory(label);
+        }
+
         return await handle.readFile();
       } finally {
         await handle.close();
@@ -325,25 +334,21 @@ async function openInsideRoot(rootReal: string, located: string, fs: NodeFS): Pr
 }
 
 /**
- * Last-component `O_NOFOLLOW` open for systems without `/proc/self/fd`.
+ * Kernel path of an open descriptor. Only `/proc/self/fd` is trusted: it is the path the
+ * kernel opened, after directory symlinks. A missing procfs, or a path that is no longer
+ * linked, cannot be checked and must not be read.
  */
-async function openFinalComponent(located: string, fs: NodeFS): Promise<FileHandle> {
-  const stat = await fs.promises.lstat(located);
-  if (stat.isSymbolicLink()) {
-    throw codedError('ELOOP', 'symlink');
-  }
-
-  if (!stat.isFile()) {
-    throw codedError('ENOTFILE', 'not a file');
-  }
-
-  const handle = await fs.promises.open(located, openFlags(fs, false));
+export async function pathOfDescriptor(fd: number): Promise<string | undefined> {
+  const fs = await nodeFs();
   try {
-    await assertRegularFile(handle);
-    return handle;
-  } catch (err) {
-    await handle.close();
-    throw err;
+    const linked = await fs.promises.readlink(`/proc/self/fd/${fd}`);
+    if (!path.isAbsolute(linked) || linked.endsWith(' (deleted)')) {
+      return undefined;
+    }
+
+    return path.resolve(linked);
+  } catch {
+    return undefined;
   }
 }
 
@@ -380,6 +385,13 @@ function refLabel(file: FileInfo): string {
 function outsideDirectory(ref: string): ResolverError {
   return new ResolverError(
     new Error(`Unable to resolve $ref pointer "${ref}": path is outside the allowed directory`),
+    ref,
+  );
+}
+
+function unverifiedDescriptor(ref: string): ResolverError {
+  return new ResolverError(
+    new Error(`Unable to resolve $ref pointer "${ref}": filesystem references cannot be verified on this platform`),
     ref,
   );
 }

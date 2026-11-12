@@ -263,4 +263,4 @@ const api = await bundle(spec, {
 });
 ```
 
-Absolute paths, `file://` URLs, and `..` segments resolve only when the file stays inside that directory. A symlink `$ref` is refused, including one whose target is inside the directory. `resolve.fileBase` sets the base URL for relative `$ref`s on an inline schema; it has to stay inside `fileRoot`.
+Absolute paths, `file://` URLs, and `..` segments resolve only when the file stays inside that directory. A symlink `$ref` is refused, including one whose target is inside the directory. `resolve.fileBase` sets the base URL for relative `$ref`s on an inline schema; it has to stay inside `fileRoot`. Filesystem reads need `/proc/self/fd` so each path component can be opened from the previous directory; without that, the read is refused.
