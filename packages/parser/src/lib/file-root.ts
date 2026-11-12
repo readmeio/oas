@@ -20,6 +20,7 @@ interface NodeFS {
   constants: {
     O_DIRECTORY?: number;
     O_NOFOLLOW?: number;
+    O_NONBLOCK?: number;
     O_RDONLY: number;
   };
   promises: {
@@ -203,8 +204,10 @@ export function createRootlessFileResolver(): ResolverOptions {
  *
  * Symlinks are not followed. Each path component is opened from the previous directory
  * descriptor, so replacing a directory with a symlink after the containment check cannot
- * redirect the read. The root directory is `realpath`'d on first read and reused for every
- * `$ref` in the document, including nested files and `$id` re-bases.
+ * redirect the read. The final component is opened nonblocking and checked with `fstat`
+ * before any bytes are read, so a named pipe cannot stall the open. The root directory is
+ * `realpath`'d on first read and reused for every `$ref` in the document, including nested
+ * files and `$id` re-bases.
  */
 export function createSandboxedFileResolver(root: string): ResolverOptions {
   let rootRealPromise: Promise<string> | undefined;
@@ -287,6 +290,8 @@ function canPinDirectories(fs: NodeFS): Promise<boolean> {
  * Open `located` by walking from `rootReal` through directory descriptors.
  *
  * A symlink at any component fails closed, including one created after the containment check.
+ * The final component uses `O_NONBLOCK` so a named pipe returns immediately and is rejected
+ * by the file-type check instead of blocking the open.
  */
 async function openInsideRoot(rootReal: string, located: string, fs: NodeFS): Promise<FileHandle> {
   const relative = path.relative(rootReal, located);
@@ -309,10 +314,7 @@ async function openInsideRoot(rootReal: string, located: string, fs: NodeFS): Pr
       await previous.close();
     }
 
-    const stat = await current.stat();
-    if (!stat.isFile()) {
-      throw codedError('ENOTFILE', 'not a file');
-    }
+    await assertRegularFile(current);
 
     const opened = current;
     current = undefined;
@@ -335,18 +337,35 @@ async function openFinalComponent(located: string, fs: NodeFS): Promise<FileHand
     throw codedError('ENOTFILE', 'not a file');
   }
 
-  return fs.promises.open(located, openFlags(fs, false));
+  const handle = await fs.promises.open(located, openFlags(fs, false));
+  try {
+    await assertRegularFile(handle);
+    return handle;
+  } catch (err) {
+    await handle.close();
+    throw err;
+  }
+}
+
+async function assertRegularFile(handle: FileHandle): Promise<void> {
+  const stat = await handle.stat();
+  if (!stat.isFile()) {
+    throw codedError('ENOTFILE', 'not a file');
+  }
 }
 
 function openFlags(fs: NodeFS, directory: boolean): number {
-  // oxlint-disable-next-line no-bitwise -- `O_NOFOLLOW` and `O_DIRECTORY` are open(2) flags.
-  const flags = fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0);
-  if (!directory) {
+  // oxlint-disable-next-line no-bitwise -- `O_RDONLY` and `O_NOFOLLOW` are open(2) flags.
+  let flags = fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0);
+  if (directory) {
+    // oxlint-disable-next-line no-bitwise -- `O_DIRECTORY` is an open(2) flag.
+    flags |= fs.constants.O_DIRECTORY ?? 0;
     return flags;
   }
 
-  // oxlint-disable-next-line no-bitwise -- `O_DIRECTORY` is an open(2) flag.
-  return flags | (fs.constants.O_DIRECTORY ?? 0);
+  // oxlint-disable-next-line no-bitwise -- `O_NONBLOCK` keeps a named pipe from blocking the open.
+  flags |= fs.constants.O_NONBLOCK ?? 0;
+  return flags;
 }
 
 function codedError(code: string, message: string): Error {

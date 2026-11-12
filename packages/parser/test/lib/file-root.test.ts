@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -142,6 +143,23 @@ describe('filesystem `$ref` root', () => {
       const escaped = writeSpec(dir, '../secret.json', 'escape.json');
       // oxlint-disable-next-line no-await-in-loop -- each directory is a separate jail case
       await expect(dereference(escaped)).rejects.toThrow(/outside the allowed directory/i);
+    }
+  });
+
+  it('should reject a named pipe inside the root without blocking', async () => {
+    const root = makeDir('oas-file-root-');
+    execFileSync('mkfifo', [path.join(root, 'pipe.json')]);
+    const spec = writeSpec(root, './pipe.json');
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const blocked = new Promise((_resolve, reject) => {
+      timer = setTimeout(() => reject(new Error('named pipe open blocked')), 1000);
+    });
+
+    try {
+      await expect(Promise.race([dereference(spec), blocked])).rejects.toThrow(/not a file/i);
+    } finally {
+      clearTimeout(timer);
     }
   });
 
