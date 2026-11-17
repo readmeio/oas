@@ -379,12 +379,13 @@ describe('orphaned `$id` keywords', () => {
       );
 
       const bundled = await bundle<ValidAPIDefinition>(spec);
-      const schema = bundled.paths['/pets'].get.responses['200'].content['application/json'].schema;
-
-      expect(schema.properties.test2).toStrictEqual({ $ref: '#/properties/test1' });
 
       // The bundle must resolve on its own once the source files are gone.
       fs.rmSync(dir, { recursive: true, force: true });
+
+      const schema = bundled.paths['/pets'].get.responses['200'].content['application/json'].schema;
+      expect(schema.properties.test2).toStrictEqual({ $ref: '#/properties/test1' });
+
       const api = await dereference<ValidAPIDefinition>(bundled);
 
       expect(api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties.test2).toStrictEqual(
