@@ -25,7 +25,7 @@
   "module": "dist/index.js",
   "types": "dist/index.d.cts",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.19.0"
   },
   "files": [
     "dist"
@@ -65,7 +65,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^15.5.1",
+    "@apidevtools/json-schema-ref-parser": "^16.0.8",
     "@readme/better-ajv-errors": "^2.3.2",
     "@readme/openapi-schemas": "^4.0.0",
     "@types/json-schema": "^7.0.15",
