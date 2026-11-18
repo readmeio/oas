@@ -37,7 +37,7 @@ test('should export the OpenAPI v3 schema', () => {
 
 test('should export the OpenAPI v3.1 schema', () => {
   expect(openapi.v31).toSatisfy(isJsonSchemaDraft202012);
-  expect(openapi.v31.properties.openapi.pattern).toBe('^3\\.1\\.\\d+(-.+)?$');
+  expect(openapi.v31.properties.openapi.pattern).toBe('^3\\.1\\.[0-9]+(-.+)?$');
 });
 
 test('should export a legacy OpenAPI v3.1 schema without a `$dynamicRef` on `header.schema`', () => {
