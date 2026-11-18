@@ -1,0 +1,749 @@
+{
+  "openapi": "3.2.0",
+  "info": {
+    "title": "Bookstore API",
+    "summary": "A bookstore organized with OpenAPI 3.2 tag grouping.",
+    "description": "Operations are grouped with the OpenAPI 3.2 tag fields `parent`, `kind`, and `summary`.\n\n`parent` names another tag that this tag is nested under. Navigation tags (`kind: nav`)\nform two trees:\n\n- `storefront`\n  - `catalog`\n    - `books`\n    - `media`\n  - `checkout`\n    - `cart`\n    - `orders`\n- `account`\n  - `profile`\n  - `billing`\n\n`storefront`, `checkout`, and `account` only group other tags. No operation references\nthem. `catalog` is both a group and a section, because the catalog overview is tagged\nwith it directly. Tag order in this array is the display order. `summary` is the short\nlabel for that display; `name` is the value operations use.\n\n`kind` keeps other groupings off the navigation tree. Registered kinds used here:\n\n- `nav` groups operations into one documentation section. Each operation has one.\n- `badge` is a visible label. An operation may have several (`beta`, `preview`, `deprecated`).\n- `audience` names who the operation is for. Audience tags can nest too: `wholesale` has `parent: partner`.\n\nAn operation lists its navigation tag plus any badge and audience tags that apply.\nWalking `parent` from the navigation tag places the operation in the tree above.\n",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.bookstore.example/v1",
+      "description": "Production"
+    }
+  ],
+  "tags": [
+    {
+      "name": "storefront",
+      "summary": "Storefront",
+      "description": "Customer-facing catalog and checkout. Groups child tags and is not applied to operations.",
+      "kind": "nav"
+    },
+    {
+      "name": "catalog",
+      "summary": "Catalog",
+      "description": "What the store sells. Also used by the catalog overview.",
+      "parent": "storefront",
+      "kind": "nav"
+    },
+    {
+      "name": "books",
+      "summary": "Books",
+      "description": "Book catalog, including forthcoming titles.",
+      "parent": "catalog",
+      "kind": "nav",
+      "externalDocs": {
+        "description": "Book catalog guide",
+        "url": "https://docs.bookstore.example/catalog/books"
+      }
+    },
+    {
+      "name": "media",
+      "summary": "Audiobooks",
+      "description": "Audiobooks and other streamable media.",
+      "parent": "catalog",
+      "kind": "nav"
+    },
+    {
+      "name": "checkout",
+      "summary": "Checkout",
+      "description": "Cart and order placement. Groups child tags and is not applied to operations.",
+      "parent": "storefront",
+      "kind": "nav"
+    },
+    {
+      "name": "cart",
+      "summary": "Shopping cart",
+      "description": "Shopping cart contents.",
+      "parent": "checkout",
+      "kind": "nav"
+    },
+    {
+      "name": "orders",
+      "summary": "Orders",
+      "description": "Placed orders and their status.",
+      "parent": "checkout",
+      "kind": "nav"
+    },
+    {
+      "name": "account",
+      "summary": "Account",
+      "description": "Customer account settings. Groups child tags and is not applied to operations.",
+      "kind": "nav"
+    },
+    {
+      "name": "profile",
+      "summary": "Profile",
+      "description": "Customer profile.",
+      "parent": "account",
+      "kind": "nav"
+    },
+    {
+      "name": "billing",
+      "summary": "Billing",
+      "description": "Invoices for bookstore staff.",
+      "parent": "account",
+      "kind": "nav"
+    },
+    {
+      "name": "beta",
+      "summary": "Beta",
+      "description": "The operation is still in beta.",
+      "kind": "badge"
+    },
+    {
+      "name": "preview",
+      "summary": "Preview",
+      "description": "The behavior may change before general availability.",
+      "kind": "badge"
+    },
+    {
+      "name": "deprecated",
+      "summary": "Deprecated",
+      "description": "The operation is deprecated and will be removed.",
+      "kind": "badge"
+    },
+    {
+      "name": "public",
+      "summary": "Public",
+      "description": "Available to customers.",
+      "kind": "audience"
+    },
+    {
+      "name": "partner",
+      "summary": "Partners",
+      "description": "Available to partner organizations.",
+      "kind": "audience",
+      "externalDocs": {
+        "description": "Partner program",
+        "url": "https://docs.bookstore.example/partners"
+      }
+    },
+    {
+      "name": "wholesale",
+      "summary": "Wholesale",
+      "description": "Wholesale ordering for partner accounts. Nested under the partner audience.",
+      "parent": "partner",
+      "kind": "audience"
+    },
+    {
+      "name": "internal",
+      "summary": "Staff",
+      "description": "Available only to bookstore staff.",
+      "kind": "audience"
+    }
+  ],
+  "paths": {
+    "/catalog": {
+      "get": {
+        "tags": ["catalog", "public"],
+        "summary": "Get the catalog overview",
+        "description": "Tagged with the mid-level `catalog` navigation tag, which is also the parent of `books` and `media`.",
+        "operationId": "getCatalog",
+        "responses": {
+          "200": {
+            "description": "Counts of items currently in the catalog.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books": {
+      "get": {
+        "tags": ["books", "public"],
+        "summary": "List books",
+        "operationId": "listBooks",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Free-text search against title and author.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Books that match the query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Book"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["books", "partner"],
+        "summary": "Add a book to the catalog",
+        "description": "Partner accounts can add titles. The navigation section is still `books`.",
+        "operationId": "createBook",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Book"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The book was added.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/upcoming": {
+      "get": {
+        "tags": ["books", "preview", "public"],
+        "summary": "List forthcoming books",
+        "description": "Preview of titles that are not yet on sale.",
+        "operationId": "listUpcomingBooks",
+        "responses": {
+          "200": {
+            "description": "Forthcoming books.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Book"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/{bookId}": {
+      "get": {
+        "tags": ["books", "public"],
+        "summary": "Get a book",
+        "operationId": "getBook",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BookId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The book.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media": {
+      "get": {
+        "tags": ["media", "public"],
+        "summary": "List audiobooks",
+        "operationId": "listMedia",
+        "responses": {
+          "200": {
+            "description": "Media in the catalog.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media/{mediaId}/lyrics": {
+      "get": {
+        "tags": ["media", "beta", "preview", "public"],
+        "summary": "Get time-synced lyrics",
+        "description": "Carries two badge tags, `beta` and `preview`, alongside its navigation tag.",
+        "operationId": "getMediaLyrics",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MediaId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time-synced lyric lines.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LyricLine"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media/{mediaId}/stream": {
+      "get": {
+        "tags": ["media", "beta", "public"],
+        "summary": "Stream a media item",
+        "operationId": "streamMedia",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MediaId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A short-lived stream descriptor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stream"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cart": {
+      "get": {
+        "tags": ["cart", "public"],
+        "summary": "Get the cart",
+        "operationId": "getCart",
+        "responses": {
+          "200": {
+            "description": "The current cart.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cart/items": {
+      "post": {
+        "tags": ["cart", "public"],
+        "summary": "Add an item to the cart",
+        "operationId": "addCartItem",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated cart.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "get": {
+        "tags": ["orders", "deprecated", "public"],
+        "summary": "List orders",
+        "description": "Deprecated in favor of reading a single order. The `deprecated` badge is separate from the operation's `deprecated` flag.",
+        "operationId": "listOrders",
+        "deprecated": true,
+        "responses": {
+          "200": {
+            "description": "Recent orders for the current customer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Order"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["orders", "public"],
+        "summary": "Place an order",
+        "operationId": "createOrder",
+        "responses": {
+          "201": {
+            "description": "The placed order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{orderId}": {
+      "get": {
+        "tags": ["orders", "public"],
+        "summary": "Get an order",
+        "operationId": "getOrder",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "description": "Order identifier.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wholesale/orders": {
+      "post": {
+        "tags": ["orders", "wholesale"],
+        "summary": "Place a wholesale order",
+        "description": "Filed under the `orders` navigation tag. `wholesale` is an audience tag nested under `partner`, so the partner relationship comes from `parent` rather than a second audience tag on the operation.",
+        "operationId": "createWholesaleOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WholesaleOrder"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The wholesale order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/profile": {
+      "get": {
+        "tags": ["profile", "public"],
+        "summary": "Get the profile",
+        "operationId": "getProfile",
+        "responses": {
+          "200": {
+            "description": "The customer profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["profile", "public"],
+        "summary": "Update the profile",
+        "operationId": "updateProfile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Profile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/billing/invoices": {
+      "get": {
+        "tags": ["billing", "internal"],
+        "summary": "List invoices",
+        "description": "Staff-only billing view, nested under the `account` navigation group.",
+        "operationId": "listInvoices",
+        "responses": {
+          "200": {
+            "description": "Invoices.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Invoice"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "orderShipped": {
+      "post": {
+        "tags": ["orders"],
+        "summary": "An order was shipped",
+        "description": "Webhook operations use the same tags, so this event is grouped with order operations.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Order"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return a 200 status to indicate that the data was received successfully."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "BookId": {
+        "name": "bookId",
+        "in": "path",
+        "required": true,
+        "description": "Book identifier.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "MediaId": {
+        "name": "mediaId",
+        "in": "path",
+        "required": true,
+        "description": "Media identifier.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "Catalog": {
+        "type": "object",
+        "properties": {
+          "bookCount": {
+            "type": "integer"
+          },
+          "mediaCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "Book": {
+        "type": "object",
+        "required": ["id", "title"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaItem": {
+        "type": "object",
+        "required": ["id", "title"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "type": "integer"
+          }
+        }
+      },
+      "LyricLine": {
+        "type": "object",
+        "required": ["atSeconds", "text"],
+        "properties": {
+          "atSeconds": {
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "Stream": {
+        "type": "object",
+        "required": ["url", "expiresAt"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "required": ["sku", "quantity"],
+        "properties": {
+          "sku": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartItem"
+            }
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "required": ["id", "status"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["placed", "shipped", "delivered"]
+          }
+        }
+      },
+      "WholesaleOrder": {
+        "type": "object",
+        "required": ["sku", "quantity"],
+        "properties": {
+          "sku": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "purchaseOrder": {
+            "type": "string"
+          }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Invoice": {
+        "type": "object",
+        "required": ["id", "total"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "total": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      }
+    }
+  }
+}
