@@ -1434,6 +1434,54 @@ describe('style formatting', () => {
       );
     });
 
+    describe('without an explicit `style`', () => {
+      const paramNoStyle = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'header',
+          },
+        ],
+      };
+
+      const paramNoStyleExplode = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'header',
+            explode: true,
+          },
+        ],
+      };
+
+      it('should default to simple style for arrays', async () => {
+        await assertHeaders(paramNoStyle, { header: { color: arrayInput } }, [
+          { name: 'color', value: 'blue,black,brown' },
+        ]);
+      });
+
+      it('should default to simple style for non exploded objects', async () => {
+        await assertHeaders(paramNoStyle, { header: { color: objectInput } }, [
+          { name: 'color', value: 'R,100,G,200,B,150' },
+        ]);
+      });
+
+      it('should default to simple style for exploded objects', async () => {
+        await assertHeaders(paramNoStyleExplode, { header: { color: objectInput } }, [
+          { name: 'color', value: 'R=100,G=200,B=150' },
+        ]);
+      });
+
+      it('should encode array members the same as an explicit simple style', async () => {
+        await assertHeaders(paramNoStyle, { header: { color: ['a b', 'c'] } }, [{ name: 'color', value: 'a%20b,c' }]);
+        await assertHeaders(paramNoExplode, { header: { color: ['a b', 'c'] } }, [{ name: 'color', value: 'a%20b,c' }]);
+      });
+
+      it('should not encode primitive values', async () => {
+        await assertHeaders(paramNoStyle, { header: { color: 'a b/c' } }, [{ name: 'color', value: 'a b/c' }]);
+      });
+    });
+
     /**
      * Eventhough `accept`, `authorization`, and `content-type` headers can be defined as path
      * parameters, they should be completely ignored when it comes to serialization.

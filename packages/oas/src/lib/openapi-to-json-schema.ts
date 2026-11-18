@@ -26,13 +26,16 @@ const UNSUPPORTED_SCHEMA_PROPS = [
   'xml',
 ] as const;
 
-/**
- * Annotation-only keywords we preserve when they appear as siblings of `$ref` inside `allOf`
- * properties. Validation keywords (`type`, `properties`, `items`, etc.) are intentionally
- * excluded, they would conflict with the resolved schema. `x-` extensions are also preserved
- * (handled separately at the call site).
- */
 const METADATA_SIBLING_KEYS = new Set(['description', 'summary', 'title']);
+const SCHEMA_REF_SIBLING_KEYS = new Set([
+  ...METADATA_SIBLING_KEYS,
+  'default',
+  'deprecated',
+  'examples',
+  'format',
+  'readOnly',
+  'writeOnly',
+]);
 
 const mergeAllOfSchemasOptions: JSONSchemaMergeAllOfOptions = {
   ignoreAdditionalProperties: true,
@@ -300,6 +303,7 @@ function inlinePropertyRefsForMerge(
   schema: SchemaObject,
   usedSchemas: Map<string, SchemaObject>,
   refLogger: NonNullable<toJSONSchemaOptions['refLogger']>,
+  siblingKeys: ReadonlySet<string>,
   conflictPaths?: Set<string>,
   currentPath?: string,
 ): SchemaObject {
@@ -327,37 +331,23 @@ function inlinePropertyRefsForMerge(
         // otherwise the merge sees a surviving `$ref` and drops sibling properties.
         // NOTE: we only recurse down to the first non conflict path and not the full resolution
         const inlined: SchemaObject = isConflictPath
-          ? inlinePropertyRefsForMerge(structuredClone(resolved), usedSchemas, refLogger, conflictPaths, path)
+          ? inlinePropertyRefsForMerge(resolved, usedSchemas, refLogger, siblingKeys, conflictPaths, path)
           : structuredClone(resolved);
 
-        // Preserve metadata-only siblings (e.g. `description`, `title`) alongside a `$ref` so
-        // they survive `allOf` merging. Validation keywords (`properties`, `items`, `type`, etc.)
-        // are dropped.
+        // In OpenAPI 3.0, a ref in a schema slot is a Reference Object, and the spec says
+        // its siblings are ignored. For compatibility, this merge keeps its existing
+        // handling of description, summary, title, and x- extensions.
+        // https://spec.openapis.org/oas/v3.0.3.html#reference-object
         //
-        // The spec treats `{$ref: "..."}` in a schema slot differently across versions:
-        //
-        // - OAS 3.0: it becomes a Reference Object (the Schema Object section says "a Reference
-        //   Object can be used in its place"), and Reference Objects forbid siblings. So 3.0
-        //   strips everything.
-        //   https://spec.openapis.org/oas/v3.0.3.html#schema-object
-        //   https://spec.openapis.org/oas/v3.0.0.html#reference-object
-        //
-        // - OAS 3.1: it stays a Schema Object with `$ref` as a JSON Schema 2020-12 keyword. Per
-        //   JSON Schema 2020-12 §8.2.3.1, "$ref" is an applicator whose "results are the results
-        //   of the referenced schema", and the spec explicitly notes that "other keywords can
-        //   appear alongside of '$ref' in the same schema object". Those siblings are part of
-        //   the same schema; the spec doesn't say a `$ref` causes them to be dropped.
-        //   https://spec.openapis.org/oas/v3.1.1.html#schema-object
-        //   https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-8.2.3.1
-        //
-        // Since we flatten via spread instead of evaluating siblings alongside the resolved
-        // schema, validation keywords would silently overwrite the referenced schema's
-        // constraints. We drop them to avoid that; annotation-only siblings (and `x-` extensions)
-        // are safe to carry through. This is a deliberate, narrow deviation from the spec.
-
+        // In OpenAPI 3.1 and later, $ref in a Schema Object is a JSON Schema applicator.
+        // Siblings apply alongside the referenced schema. Here we preserve annotations
+        // and format for display. Structural keywords such as properties, items, and
+        // type would need to be composed with the target, since spreading them here
+        // would overwrite its constraints.
+        // https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.3.1
         const siblings: Record<string, unknown> = {};
         for (const siblingKey of Object.keys(val)) {
-          if (METADATA_SIBLING_KEYS.has(siblingKey) || siblingKey.startsWith('x-')) {
+          if (siblingKeys.has(siblingKey) || siblingKey.startsWith('x-')) {
             siblings[siblingKey] = (val as Record<string, unknown>)[siblingKey];
           }
         }
@@ -372,6 +362,7 @@ function inlinePropertyRefsForMerge(
           val as SchemaObject,
           usedSchemas,
           refLogger,
+          siblingKeys,
           conflictPaths,
           path,
         );
@@ -1084,7 +1075,10 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         // Find paths reached by 2+ branches, then inline each branch with deep recursion at
         // those conflict paths.
         const conflictPaths = collectConflictPaths(allOfSchemas, usedSchemas);
-        allOfSchemas = allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger, conflictPaths));
+        const siblingKeys = isOpenAPI30(definition) ? METADATA_SIBLING_KEYS : SCHEMA_REF_SIBLING_KEYS;
+        allOfSchemas = allOfSchemas.map(s =>
+          inlinePropertyRefsForMerge(s, usedSchemas, refLogger, siblingKeys, conflictPaths),
+        );
 
         if (addEnumsToDescriptions) {
           // Enum values are added to descriptions during response schema conversion. They are
