@@ -1,10 +1,9 @@
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { bundle, dereference } from '../../src/index.js';
 import { isInsideRoot, pathOfDescriptor } from '../../src/lib/file-root.js';
@@ -45,6 +44,51 @@ function writeSpec(dir: string, ref: string, name = 'openapi.json'): string {
   const spec = path.join(dir, name);
   fs.writeFileSync(spec, JSON.stringify(definitionWithRef(ref)));
   return spec;
+}
+
+/**
+ * Stand-in for a named pipe. Opening it without `O_NONBLOCK` never settles, matching a FIFO
+ * with no writer. Opening it with `O_NONBLOCK` returns a handle that is not a regular file.
+ * Every other path uses the real filesystem.
+ */
+function mockNamedPipe(root: string, fifoName: string) {
+  const realOpen = fs.promises.open.bind(fs.promises);
+  const fifoPath = path.join(root, fifoName);
+
+  return (file: fs.PathLike, flags?: fs.OpenMode | number | null): Promise<fs.promises.FileHandle> => {
+    const target = file instanceof URL ? file.pathname : String(file);
+    const isFifo = target === fifoPath || target.endsWith(`${path.sep}${fifoName}`);
+    if (!isFifo) {
+      return realOpen(file, flags ?? undefined);
+    }
+
+    if (!includesNonblock(flags)) {
+      return new Promise<fs.promises.FileHandle>(() => {});
+    }
+
+    return Promise.resolve({
+      fd: -1,
+      stat() {
+        return Promise.resolve({ isFile: () => false } as fs.Stats);
+      },
+      close() {
+        return Promise.resolve();
+      },
+      readFile() {
+        return Promise.reject(new Error('named pipe was read'));
+      },
+    } as unknown as fs.promises.FileHandle);
+  };
+}
+
+function includesNonblock(flags: fs.OpenMode | number | null | undefined): boolean {
+  const nonblock = fs.constants.O_NONBLOCK;
+  if (typeof flags !== 'number' || nonblock === undefined) {
+    return false;
+  }
+
+  // oxlint-disable-next-line no-bitwise -- `O_NONBLOCK` is an open(2) flag bit.
+  return (flags & nonblock) !== 0;
 }
 
 describe('isInsideRoot()', () => {
@@ -169,8 +213,10 @@ describe('filesystem `$ref` root', () => {
 
   it('should reject a named pipe inside the root without blocking', async () => {
     const root = makeDir('oas-file-root-');
-    execFileSync('mkfifo', [path.join(root, 'pipe.json')]);
-    const spec = writeSpec(root, './pipe.json');
+    const fifoName = 'pipe.json';
+    const spec = writeSpec(root, `./${fifoName}`);
+    const namedPipe = mockNamedPipe(root, fifoName);
+    const open = vi.spyOn(fs.promises, 'open').mockImplementation(namedPipe);
 
     let timer: ReturnType<typeof setTimeout> | undefined;
     const blocked = new Promise((_resolve, reject) => {
@@ -181,6 +227,7 @@ describe('filesystem `$ref` root', () => {
       await expect(Promise.race([dereference(spec), blocked])).rejects.toThrow(/not a file/i);
     } finally {
       clearTimeout(timer);
+      open.mockRestore();
     }
   });
 
