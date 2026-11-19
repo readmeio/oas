@@ -192,6 +192,17 @@ For security reasons, you need to opt into allowing fetching by a local path. To
 const oas = new OASNormalize('./petstore.json', { enablePaths: true });
 ```
 
+Filesystem `$ref` pointers are confined to a root directory. For a local file, that root is the file's directory, so `./pet.json` next to the entry file still resolves and `/etc/passwd`, `file:///etc/passwd`, and `../` that leave the directory do not. Set `pathsRoot` to choose a different directory, which is also required before an inline definition, string, buffer, or URL can read any local `$ref`:
+
+```ts
+const oas = new OASNormalize('./specs/petstore.json', {
+  enablePaths: true,
+  pathsRoot: './specs',
+});
+```
+
+The entry file has to stay inside `pathsRoot`, and its real path is checked before the file is read. The directory is resolved when the instance is constructed, so a later working-directory change does not move it. A symlink `$ref` is refused. Filesystem reads need `/proc/self/fd` so each path component can be opened from the previous directory; without that, the read is refused.
+
 ##### Colorized errors
 
 If you wish errors from `.validate()` to be styled and colorized, supply `colorizeErrors: true` to the class instance:

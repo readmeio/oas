@@ -1,5 +1,7 @@
 import type { ValidAPIDefinition } from '../../utils.js';
 
+import path from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import { bundle, dereference } from '../../../src/index.js';
@@ -8,9 +10,13 @@ import bundledAPI from './bundled.js';
 import dereferencedAPI from './dereferenced.js';
 import parsedAPI from './parsed.js';
 
+const fileRoot = path.resolve(import.meta.dirname, '../..');
+
 describe('Object sources (instead of file paths)', () => {
   it('should dereference an object that references external files', async () => {
-    const api = await dereference<ValidAPIDefinition>(structuredClone(parsedAPI.api), { resolve: { file: true } });
+    const api = await dereference<ValidAPIDefinition>(structuredClone(parsedAPI.api), {
+      resolve: { file: true, fileRoot },
+    });
 
     expect(api).toStrictEqual(dereferencedAPI);
     expect(api.paths['/people/{name}'].get.responses['200'].schema).toStrictEqual(api.definitions.name);
@@ -25,13 +31,17 @@ describe('Object sources (instead of file paths)', () => {
   });
 
   it('should bundle an object that references external files', async () => {
-    const api = await bundle<ValidAPIDefinition>(structuredClone(parsedAPI.api), { resolve: { file: true } });
+    const api = await bundle<ValidAPIDefinition>(structuredClone(parsedAPI.api), {
+      resolve: { file: true, fileRoot },
+    });
 
     expect(api).toStrictEqual(bundledAPI);
   });
 
   it('should validate an object that references external files', async () => {
-    const api = await dereference<ValidAPIDefinition>(structuredClone(parsedAPI.api), { resolve: { file: true } });
+    const api = await dereference<ValidAPIDefinition>(structuredClone(parsedAPI.api), {
+      resolve: { file: true, fileRoot },
+    });
 
     expect(api).toStrictEqual(dereferencedAPI);
     expect(api.paths['/people/{name}'].get.responses['200'].schema).toStrictEqual(api.definitions.name);

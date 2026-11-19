@@ -3,6 +3,7 @@ import type { APIDocument, ErrorDetails, ParserOptions, ValidationResult, Warnin
 import { $RefParser, dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
 
 import { isOpenAPI, isSwagger } from './lib/assertions.js';
+import { resolveCallerBasePath } from './lib/file-root.js';
 import { stripOrphanedIds } from './repair.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
 import { validateSchema } from './validators/schema.js';
@@ -13,8 +14,33 @@ export { ResolverError } from '@apidevtools/json-schema-ref-parser';
 export type { ErrorDetails, ParserOptions, ValidationResult, WarningDetails };
 export type { APIDocument, OpenAPIDocument, SwaggerDocument } from './types.js';
 
-function isFilesystemPathSource(api: unknown): boolean {
+function isFilesystemPathSource(api: unknown): api is string {
   return typeof api === 'string' && !/^https?:\/\//i.test(api);
+}
+
+/**
+ * Options and base path shared by `parse`, `bundle`, `dereference`, and `validate`.
+ *
+ * A filesystem-path source keeps that path as its base, so sibling `$ref`s stay next to the file.
+ * An inline schema uses `fileBase` or `fileRoot` instead of the process working directory.
+ */
+async function argumentsForParser<S extends APIDocument>(
+  api: S | string,
+  options?: ParserOptions,
+): Promise<{
+  path: string;
+  schema: S | undefined;
+  parserOptions: ReturnType<typeof convertOptionsForParser>;
+}> {
+  const args = normalizeArguments<S>(api);
+  const sourcePath = isFilesystemPathSource(api) ? api : undefined;
+  const parserOptions = convertOptionsForParser(options, {
+    allowFileResolution: sourcePath !== undefined,
+    sourcePath,
+  });
+  const path = await resolveCallerBasePath(api, args.path, options);
+
+  return { path, schema: args.schema, parserOptions };
 }
 
 /**
@@ -33,21 +59,18 @@ async function parseAndStripOrphanedIds<S extends APIDocument>(
   schema: S;
   parserOptions: ReturnType<typeof convertOptionsForParser>;
 }> {
-  const args = normalizeArguments<S>(api);
-  const parserOptions = convertOptionsForParser(options, {
-    allowFileResolution: isFilesystemPathSource(api),
-  });
+  const prepared = await argumentsForParser(api, options);
 
-  if (args.schema) {
-    stripOrphanedIds(args.schema);
-    return { path: args.path, schema: args.schema, parserOptions };
+  if (prepared.schema) {
+    stripOrphanedIds(prepared.schema);
+    return { path: prepared.path, schema: prepared.schema, parserOptions: prepared.parserOptions };
   }
 
   const parser = new $RefParser<S>();
-  const schema = await parser.parse(args.path, args.schema, parserOptions);
+  const schema = await parser.parse(prepared.path, prepared.schema, prepared.parserOptions);
   stripOrphanedIds(schema);
 
-  return { path: args.path, schema, parserOptions };
+  return { path: prepared.path, schema, parserOptions: prepared.parserOptions };
 }
 
 /**
@@ -59,16 +82,13 @@ async function parseAndStripOrphanedIds<S extends APIDocument>(
  * @param options
  */
 export async function parse<S extends APIDocument = APIDocument>(api: S | string, options?: ParserOptions): Promise<S> {
-  const args = normalizeArguments<S>(api);
-  const parserOptions = convertOptionsForParser(options, {
-    allowFileResolution: isFilesystemPathSource(api),
-  });
+  const prepared = await argumentsForParser(api, options);
 
   const parser = new $RefParser<S>();
-  const schema = await parser.parse(args.path, args.schema, parserOptions);
+  const schema = await parser.parse(prepared.path, prepared.schema, prepared.parserOptions);
 
   // If necessary, repair the schema of any anomalies and quirks.
-  repairSchema(schema, args.path);
+  repairSchema(schema, typeof api === 'string' ? api : prepared.path);
 
   return schema;
 }
