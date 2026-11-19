@@ -1,6 +1,6 @@
 ---
-"@readme/openapi-parser": minor
-"oas-normalize": minor
+"@readme/openapi-parser": major
+"oas-normalize": major
 ---
 
 Confine filesystem `$ref` resolution to a root directory.
