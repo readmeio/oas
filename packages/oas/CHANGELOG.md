@@ -1,5 +1,34 @@
 # oas
 
+## 40.0.0
+
+### Major Changes
+
+- 2c564b3: Add support for parsing and validating OpenAPI 3.2 API definitions.
+
+  `getPaths()` and `getWebhooks()` include operations declared in an `additionalOperations` map.
+
+  Alongside schema validation against the OpenAPI 3.2 JSON Schema this adds specification checks for `additionalOperations` (keys must not duplicate a fixed HTTP method field), `querystring` parameters (only one per operation, and not alongside `query` parameters -- including those inherited from the path item), the `deviceAuthorization` OAuth 2 flow, `oauth2MetadataUrl`, and the relaxed `paths` / `webhooks` / `components` requirement. `isOpenAPI32()` identifies these definitions. OpenAPI 3.2 TypeScript types come from `@scalar/openapi-types`.
+
+- 33d54d0: Replace `openapi-types` with `@scalar/openapi-types`, adding support for OpenAPI 3.2 typings in the process.
+- 5e4d36b: Dropping support for Node 20.
+
+### Patch Changes
+
+- 016054a: parse JSON-encoded string examples into arrays and objects when the schema declares that type
+- e134e74: Preserve property-level annotations and formats alongside schema references when merging `allOf` in OpenAPI 3.1 and later.
+- 4185f15: chore(deps): bump the minor-production-deps group with 5 updates
+- efe80cb: Moving TS compilation from `tsup` to `tsdown`.
+- b0c81cb: chore(deps-dev): upgrade oxlint, oxfmt, and vitest
+- Updated dependencies [a397858]
+- Updated dependencies [2c564b3]
+- Updated dependencies [4185f15]
+- Updated dependencies [33d54d0]
+- Updated dependencies [efe80cb]
+- Updated dependencies [b0c81cb]
+- Updated dependencies [5e4d36b]
+  - @readme/openapi-parser@11.0.0
+
 ## 39.0.1
 
 ### Patch Changes
