@@ -478,6 +478,14 @@ describe('style formatting', () => {
         );
       });
 
+      it('should not drop falsy array items for simple path styles', async () => {
+        await assertSimplePath(
+          paramNoExplode,
+          { path: { color: [0, 1, false, 2] } },
+          `https://example.com/style-path/0${comma}1${comma}false${comma}2`,
+        );
+      });
+
       it('should support simple path styles styles for non exploded object input', async () => {
         await assertSimplePath(
           paramNoExplode,

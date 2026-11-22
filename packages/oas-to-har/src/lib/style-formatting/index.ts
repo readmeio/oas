@@ -32,7 +32,7 @@ function removeUndefinedForPath(value: any) {
   }
 
   if (Array.isArray(finalValue)) {
-    finalValue = finalValue.filter(val => (val === undefined ? '' : val));
+    finalValue = finalValue.filter(val => val !== undefined);
 
     if (finalValue.length === 0) {
       finalValue = '';
