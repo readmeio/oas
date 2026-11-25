@@ -32,22 +32,31 @@ describe('convertOptionsForParser()', () => {
     expect(resolvedFile()).toBe(false);
   });
 
-  it('should enable the stock file resolver when the source is a filesystem path', () => {
-    expect(Boolean(resolvedFile({}, { allowFileResolution: true }))).toBe(true);
+  it('should install a jailed file resolver when the source is a filesystem path', () => {
+    expect(resolvedFile(undefined, { allowFileResolution: true, sourcePath: '/tmp/specs/api.yaml' })).toMatchObject({
+      order: 100,
+    });
   });
 
   it('should still honor an explicit `resolve.file: false` on a filesystem path source', () => {
-    expect(resolvedFile({ resolve: { file: false } }, { allowFileResolution: true })).toBe(false);
+    expect(
+      resolvedFile({ resolve: { file: false } }, { allowFileResolution: true, sourcePath: '/tmp/specs/api.yaml' }),
+    ).toBe(false);
   });
 
-  it('should enable the stock file resolver when `resolve.file` is explicitly true', () => {
-    expect(Boolean(resolvedFile({ resolve: { file: true } }))).toBe(true);
+  it('should install a file resolver when `resolve.file` is explicitly true', () => {
+    expect(resolvedFile({ resolve: { file: true } })).toMatchObject({ order: 100 });
+  });
+
+  it('should jail `resolve.file: true` to `fileRoot` instead of the stock resolver', () => {
+    expect(resolvedFile({ resolve: { file: true, fileRoot: '/tmp/specs' } })).toMatchObject({ order: 100 });
   });
 
   it('should pass through a custom file resolver object', () => {
     const file = { canRead: () => false };
 
     expect(resolvedFile({ resolve: { file: file as unknown as boolean } })).toBe(file);
+    expect(resolvedFile({ resolve: { file: file as unknown as boolean, fileRoot: '/tmp/specs' } })).toBe(file);
   });
 
   it('should not re-enable filesystem `$ref`s when only HTTP resolve options are supplied', () => {
@@ -55,7 +64,12 @@ describe('convertOptionsForParser()', () => {
   });
 
   it('should keep the file resolver enabled for a path source when only HTTP options are supplied', () => {
-    expect(Boolean(resolvedFile({ resolve: { http: { timeout: 1000 } } }, { allowFileResolution: true }))).toBe(true);
+    expect(
+      resolvedFile(
+        { resolve: { http: { timeout: 1000 } } },
+        { allowFileResolution: true, sourcePath: '/tmp/specs/api.yaml' },
+      ),
+    ).toMatchObject({ order: 100 });
   });
 
   it('should default the HTTP timeout to 5s and always force `safeUrlResolver`', () => {

@@ -10,7 +10,11 @@
     ],
 
     // TypeScript 7 enables `strict` by default but this package has not yet been migrated to it.
-    "strict": false
+    "strict": false,
+
+    // Required so the filesystem `$ref` jail's `node:` imports typecheck. This package does not
+    // pick up `@types/node` on its own.
+    "types": ["node"]
   },
   "include": ["./src/**/*"],
   "exclude": ["dist"]

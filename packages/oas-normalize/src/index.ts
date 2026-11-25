@@ -8,12 +8,14 @@ import type {
 } from '@readme/openapi-parser';
 
 import fs from 'node:fs';
+import path from 'node:path';
 
 import { parse, bundle, compileErrors, dereference, validate, ResolverError } from '@readme/openapi-parser';
 import postmanToOpenAPI from '@readme/postman-to-openapi';
 import converter from 'swagger2openapi';
 
 import { ValidationError } from './lib/errors.js';
+import { assertEntryInsideRoot, resolvePathsRoot } from './lib/file-root.js';
 import {
   getAPIDefinitionType,
   getType,
@@ -36,6 +38,17 @@ export default class OASNormalize {
 
   opts: Options;
 
+  /**
+   * Absolute path of a filesystem entry file, captured at construction so a later `chdir` does not
+   * move relative `$ref` resolution.
+   */
+  private entryPath?: string;
+
+  /**
+   * Real path of `pathsRoot`, captured at construction.
+   */
+  private resolvedPathsRoot?: string;
+
   type: ReturnType<typeof getType>;
 
   constructor(file: any, opts?: Options) {
@@ -55,6 +68,14 @@ export default class OASNormalize {
     };
 
     this.type = getType(this.file);
+
+    if (this.opts.pathsRoot) {
+      this.resolvedPathsRoot = resolvePathsRoot(this.opts.pathsRoot);
+    }
+
+    if (this.type === 'path' && typeof this.file === 'string') {
+      this.entryPath = path.resolve(this.file);
+    }
 
     this.cache = {
       load: false,
@@ -128,12 +149,22 @@ export default class OASNormalize {
       }
 
       case 'path': {
-        // Load a local file
+        // Load a local file. `entryPath` was resolved in the constructor, so a later `chdir`
+        // cannot point this read at a different file than the jail was built for.
         if (!this.opts.enablePaths) {
           throw new Error('Use `opts.enablePaths` to enable accessing local files.');
         }
 
-        const contents = fs.readFileSync(this.file).toString();
+        const entry = this.entryPath;
+        if (!entry) {
+          throw new Error('Could not load this file.');
+        }
+
+        if (this.resolvedPathsRoot) {
+          assertEntryInsideRoot(entry, this.resolvedPathsRoot);
+        }
+
+        const contents = fs.readFileSync(entry).toString();
         if (!contents.trim()) {
           throw new Error('No file contents found.');
         }
@@ -158,17 +189,37 @@ export default class OASNormalize {
    */
   private getParserOptions(overrides?: ParserOptions): ParserOptions {
     const base = this.opts.parser || {};
-    const merged: ParserOptions = {
-      ...base,
-      ...overrides,
-      resolve: {
-        ...base.resolve,
-        ...overrides?.resolve,
-        file: Boolean(this.opts.enablePaths),
-      },
+    const resolve: NonNullable<ParserOptions['resolve']> = {
+      ...base.resolve,
+      ...overrides?.resolve,
+      file: false,
     };
 
-    return merged;
+    if (this.opts.enablePaths) {
+      const fileRoot = this.resolvedPathsRoot ?? (this.entryPath ? path.dirname(this.entryPath) : undefined);
+      resolve.file = true;
+
+      if (fileRoot) {
+        resolve.fileRoot = fileRoot;
+      } else {
+        delete resolve.fileRoot;
+      }
+
+      if (this.entryPath) {
+        resolve.fileBase = this.entryPath;
+      } else {
+        delete resolve.fileBase;
+      }
+    } else {
+      delete resolve.fileRoot;
+      delete resolve.fileBase;
+    }
+
+    return {
+      ...base,
+      ...overrides,
+      resolve,
+    };
   }
 
   /**
