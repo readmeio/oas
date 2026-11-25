@@ -1,5 +1,11 @@
 # @readme/oas-to-har
 
+## 40.0.1
+
+### Patch Changes
+
+- 20623af: Path parameter array values no longer drop falsy items like `0`, `false` or `''`; only `undefined` items are removed.
+
 ## 40.0.0
 
 ### Major Changes
